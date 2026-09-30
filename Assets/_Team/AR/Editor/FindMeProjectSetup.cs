@@ -166,6 +166,19 @@ namespace FindMe.EditorTools
             SetRef(search, "snapshot", snapshot);
             var ghost = GetOrAdd<GhostCamera>(GameObject.Find("GhostCamera"));
 
+            // Phase 5: place cues in 3D
+            var placer = GetOrAdd<SpotPlacer>(systems);
+            SetRef(placer, "raycastManager", origin.GetComponent<ARRaycastManager>());
+            SetRef(placer, "anchorManager", origin.GetComponent<ARAnchorManager>());
+            SetRef(placer, "planeManager", planes);
+            SetRef(placer, "ghost", ghost);
+            SetRef(placer, "cuesRoot", GameObject.Find("Cues").transform);
+            var planeVis = GetOrAdd<PlaneVisibility>(systems);
+            SetRef(planeVis, "planeManager", planes);
+            SetRef(search, "placer", placer);
+            SetRef(search, "planes", planeVis);
+            SetRef(overlay, "placer", placer);
+
             EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
         }
 

@@ -397,6 +397,8 @@ GameObject:
   - component: {fileID: 1088451886}
   - component: {fileID: 1088451887}
   - component: {fileID: 1088451888}
+  - component: {fileID: 1088451889}
+  - component: {fileID: 1088451890}
   m_Layer: 0
   m_Name: Systems
   m_TagString: Untagged
@@ -483,6 +485,8 @@ MonoBehaviour:
   gemini: {fileID: 1088451886}
   readiness: {fileID: 1088451883}
   snapshot: {fileID: 1088451888}
+  placer: {fileID: 1088451889}
+  planes: {fileID: 1088451890}
   ui: {fileID: 1394048369}
   scanWidth: 768
   maxSpotsPerScan: 5
@@ -505,6 +509,42 @@ MonoBehaviour:
   jpgQuality: 70
   flashSeconds: 0.12
   shutterSound: {fileID: 0}
+--- !u!114 &1088451889
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1088451882}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5e068ab8c283ad4d9c9a1bc6b69b944, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: FindMe.AR::FindMe.SpotPlacer
+  raycastManager: {fileID: 1653539576}
+  anchorManager: {fileID: 1653539575}
+  planeManager: {fileID: 1653539574}
+  ghost: {fileID: 630128679}
+  cuesRoot: {fileID: 146762037}
+  cuePrefab: {fileID: 0}
+  popSound: {fileID: 0}
+  mergeDistance: 0.35
+  maxCues: 8
+  spawnInterval: 0.15
+  surfaceOffset: 0.03
+--- !u!114 &1088451890
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1088451882}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea2e4ecfd67b1894ebae2c098c4f9ee7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: FindMe.AR::FindMe.PlaneVisibility
+  planeManager: {fileID: 1653539574}
 --- !u!1 &1266016229
 GameObject:
   m_ObjectHideFlags: 0
@@ -1004,6 +1044,7 @@ MonoBehaviour:
   readiness: {fileID: 1088451883}
   planeManager: {fileID: 1653539574}
   snapshot: {fileID: 1088451888}
+  placer: {fileID: 1088451889}
   visible: 1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:

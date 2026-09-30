@@ -17,6 +17,8 @@ namespace FindMe
         [SerializeField] GeminiServiceProvider gemini;
         [SerializeField] ARReadiness readiness;
         [SerializeField] SnapshotCapture snapshot;
+        [SerializeField] SpotPlacer placer;
+        [SerializeField] PlaneVisibility planes;
         [Tooltip("Any component implementing ISearchUI (UIManager, or DevUI for now). Found automatically if empty.")]
         [SerializeField] MonoBehaviour ui;
 
@@ -65,6 +67,8 @@ namespace FindMe
             if (string.IsNullOrWhiteSpace(text)) return;
             text = text.Trim();
             var ct = NewSearchToken();
+            placer.ClearCues();          // a new search starts from an empty room
+            planes.SetVisible(true);
 
             SetState(SearchState.Profiling);
             UI?.SetScanEnabled(false);
@@ -89,7 +93,7 @@ namespace FindMe
         }
 
         /// <summary>
-        /// Scan tap: snapshot (768 px) → Gemini FindSpots → spots sorted by likelihood.
+        /// Scan tap: snapshot (768 px) → Gemini FindSpots → spots sorted by likelihood → cues placed in 3D.
         /// Allowed when ready, and again while searching ("scan more areas").
         /// </summary>
         public void ScanArea()
@@ -130,7 +134,16 @@ namespace FindMe
 
             spots = SortAndCap(spots, maxSpotsPerScan);
             SetLastScan(snap, spots);   // the pose stays with its spots: it's what the boxes are relative to
-            EndScan(spots.Count);
+
+            int placed;
+            try
+            {
+                // Uses snap.pose, NOT the current camera: the boxes describe what the phone saw back then.
+                placed = await placer.PlaceSpots(spots, snap.pose, cts.Token);
+            }
+            catch (OperationCanceledException) { return; }
+            // Spots found but all merged into existing cues: not the same as "nothing here".
+            EndScan(placed, placed == 0 && spots.Count > 0 ? "Those spots are already marked. Try another area." : null);
         }
 
         /// <summary>Scanning → Searching if we have spots, else back to where we were.</summary>
@@ -183,6 +196,7 @@ namespace FindMe
             if (State == s) return;
             Debug.Log($"[Search] {State} → {s}");
             State = s;
+            if (s == SearchState.Searching) planes.SetVisible(false);   // from now on the cues are the star
             StateChanged?.Invoke(s);
         }
 

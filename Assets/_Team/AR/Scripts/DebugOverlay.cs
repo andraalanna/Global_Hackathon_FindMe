@@ -21,6 +21,7 @@ namespace FindMe
         [SerializeField] ARReadiness readiness;
         [SerializeField] ARPlaneManager planeManager;
         [SerializeField] SnapshotCapture snapshot;
+        [SerializeField] SpotPlacer placer;
         [SerializeField] bool visible = true;
 
         float fps;
@@ -72,6 +73,8 @@ namespace FindMe
                 gemini.SetMock(!gemini.IsMock);
             if (snapshot != null && GUI.Button(new Rect(panel.x + 20 * s + bw, by, bw, bh), "Snap", button))
                 StartCoroutine(snapshot.Capture(768, true, OnTestSnap));
+            if (placer != null && GUI.Button(new Rect(panel.x + 30 * s + 2 * bw, by, bw, bh), "Clear cues", button))
+                placer.ClearCues();
 
             DrawThumbnail(new Rect(panel.xMax + 20 * s, top + 100 * s, Screen.width - panel.xMax - 40 * s, 0f));
         }
@@ -131,6 +134,7 @@ namespace FindMe
                 sb.Append($"planes {planeManager.trackables.count} ({readiness.PlaneArea:0.00} m²)  " +
                           $"moved {readiness.MovedMeters:0.0} m  turned {readiness.RotatedDegrees:0}°  ready {readiness.Progress01 * 100f:0}%\n");
             if (search != null) sb.Append($"state {search.State}\n");
+            if (placer != null) sb.Append($"cues {placer.Cues.Count}\n");
 
             if (gemini != null) sb.Append($"Gemini: {gemini.ModeLabel}   in flight {GeminiLog.InFlight}\n");
             foreach (var e in GeminiLog.Recent)
