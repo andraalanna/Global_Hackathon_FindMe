@@ -19,7 +19,7 @@ namespace FindMe
         [SerializeField] GhostCamera ghost;
         [Tooltip("Parent for cues that couldn't get an anchor.")]
         [SerializeField] Transform cuesRoot;
-        [Tooltip("Phase 6 prefab. Empty = code-built placeholder.")]
+        [Tooltip("Assets/_Team/AR/Prefabs/SpotCue.prefab (built by FindMe/4).")]
         [SerializeField] SpotCue cuePrefab;
         [Tooltip("Optional pop sound; pitch rises 5% per cue.")]
         [SerializeField] AudioSource popSound;
@@ -111,6 +111,27 @@ namespace FindMe
             if (anchorTransform == null || !anchorTransform.TryGetComponent<ARAnchor>(out var anchor)) return;
             if (anchorManager != null && anchorManager.enabled) anchorManager.TryRemoveAnchor(anchor);
             Destroy(anchor.gameObject);
+        }
+
+        /// <summary>
+        /// Which cue to check next (plan Phase 8): the most likely one still open (to check / needs opening),
+        /// ties broken by distance from <paramref name="from"/>. Null when every cue is done.
+        /// </summary>
+        public SpotCue PickNext(Vector3 from)
+        {
+            SpotCue best = null;
+            float bestDist = float.MaxValue;
+            foreach (var c in cues)
+            {
+                if (c == null || !(c.State is SpotState.ToCheck or SpotState.NeedsOpen)) continue;
+                float d = Vector3.Distance(from, c.transform.position);
+                if (best == null || c.Likelihood > best.Likelihood || (c.Likelihood == best.Likelihood && d < bestDist))
+                {
+                    best = c;
+                    bestDist = d;
+                }
+            }
+            return best;
         }
 
         /// <summary>Removes every cue and its anchor.</summary>
@@ -329,7 +350,8 @@ namespace FindMe
 
         SpotCue Spawn(HidingSpot spot, Vector3 position, Transform anchor, int priority, int popIndex)
         {
-            SpotCue cue = cuePrefab != null ? Instantiate(cuePrefab) : SpotCue.CreatePlaceholder();
+            if (cuePrefab == null) Debug.LogError("[SpotPlacer] No cue prefab. Run FindMe/4. Build SpotCue Prefab, then FindMe/3.");
+            SpotCue cue = cuePrefab != null ? Instantiate(cuePrefab) : new GameObject("SpotCue").AddComponent<SpotCue>();
             cue.transform.SetPositionAndRotation(position, Quaternion.identity);
             // Parented under the anchor, the cue moves whenever ARCore refines where that anchor really is.
             cue.transform.SetParent(anchor != null ? anchor : cuesRoot, true);

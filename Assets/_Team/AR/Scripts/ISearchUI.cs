@@ -13,5 +13,7 @@ namespace FindMe
         void HideStatus();
         void SetReadiness(float progress01);
         void SetScanEnabled(bool on);
+        /// <summary>Progress chip: "2 of 5 spots checked".</summary>
+        void SetProgress(int checkedCount, int total);
     }
 }

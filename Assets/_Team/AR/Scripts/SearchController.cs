@@ -20,6 +20,7 @@ namespace FindMe
         [SerializeField] SnapshotCapture snapshot;
         [SerializeField] SpotPlacer placer;
         [SerializeField] PlaneVisibility planes;
+        [SerializeField] OffscreenIndicator offscreen;
         [Tooltip("Any component implementing ISearchUI (UIManager, or DevUI for now). Found automatically if empty.")]
         [SerializeField] MonoBehaviour ui;
 
@@ -70,6 +71,7 @@ namespace FindMe
             var ct = NewSearchToken();
             placer.ClearCues();          // a new search starts from an empty room
             planes.SetVisible(true);
+            RefreshCues();
 
             SetState(SearchState.Profiling);
             UI?.SetScanEnabled(false);
@@ -150,6 +152,7 @@ namespace FindMe
             }
             catch (OperationCanceledException) { return; }
             EndScan(placed.added, ScanMessage(placed));
+            RefreshCues();
         }
 
         /// <summary>Scanning → Searching if we have spots, else back to where we were.</summary>
@@ -195,6 +198,25 @@ namespace FindMe
             if (State == SearchState.WaitingForAR) EnterReadyToScan();
         }
 #endif
+
+        /// <summary>
+        /// After anything changes: pick the "next" cue (highlighted + off-screen arrow) and update the progress chip.
+        /// </summary>
+        void RefreshCues()
+        {
+            Vector3 camPos = Camera.main != null ? Camera.main.transform.position : Vector3.zero;
+            SpotCue next = State == SearchState.Searching ? placer.PickNext(camPos) : null;
+            int done = 0, total = 0;
+            foreach (var c in placer.Cues)
+            {
+                if (c == null) continue;
+                c.SetNext(c == next);
+                total++;
+                if (c.State is SpotState.Checked or SpotState.Found) done++;
+            }
+            if (offscreen != null) offscreen.Target = next;
+            UI?.SetProgress(done, total);
+        }
 
         // ---------- State helpers ----------
 

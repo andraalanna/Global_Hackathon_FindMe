@@ -1,27 +1,62 @@
-using System.Collections;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace FindMe
 {
     /// <summary>
-    /// One hiding-spot cue in the world. PHASE 5 VERSION: data + a placeholder look (pink ball + label)
-    /// built in code. Phase 6 replaces the look with the SpotCue prefab (rings, bubble, states).
+    /// One hiding-spot cue in the world (plan Phase 6). The prefab (FindMe/4. Build SpotCue Prefab) holds the parts:
+    /// a flat ring on the surface, a progress ring, a stem, and a bubble (badge + label + hint) that faces you.
+    /// This script only decides what those parts look like for each <see cref="SpotState"/>.
+    /// Every state has its own colour AND its own badge icon, so colour-blind users can tell them apart.
     /// </summary>
     public class SpotCue : MonoBehaviour
     {
+        [Header("Parts (set by the prefab builder)")]
+        [SerializeField] Image groundRing;
+        [SerializeField] Image progressRing;       // Image.fillAmount 0..1 = dwell progress
+        [SerializeField] LineRenderer stem;
+        [SerializeField] Transform bubble;         // faces the camera, keeps a constant size on screen
+        [SerializeField] CanvasGroup bubbleGroup;  // fades the whole bubble
+        [SerializeField] Image panel;
+        [SerializeField] Image badgeIcon;
+        [SerializeField] TMP_Text badgeText, labelText, hintText;
+        [SerializeField] GameObject nextTag;
+        [SerializeField] ParticleSystem foundFx;
+        [SerializeField] Sprite checkIcon, starIcon;
+
+        [Header("Readability")]
+        [SerializeField] float bubbleBaseScale = 0.0005f;   // canvas px → metres at 1 m away
+        [SerializeField] float hintMaxDistance = 2f;        // hint text only up close
+        [SerializeField] float farDistance = 5f;            // beyond this the cue fades to 40%
+
+        /// <summary>Accessibility: replace pulses/bounces with calm fades. Set from settings.</summary>
+        public static bool ReduceMotion;
+
+        // Design-system colours (plan Phase 6 table)
+        static readonly Color Pink = Hex(0xFF7EB6), Lavender = Hex(0xC3B1FF), Tangerine = Hex(0xFFA77A),
+                              SodaBlue = Hex(0x6CC4FF), Mint = Hex(0x4FE3A8), Grape = Hex(0x3A2E6B);
+
         public string Label { get; private set; }
         public string Hint { get; private set; }
+        public string Tip { get; private set; }             // latest advice from Gemini ("Open the drawer")
         public int Likelihood { get; set; }
-        public int Priority { get; private set; }            // 1 = first to check
-        public SpotState State { get; set; } = SpotState.ToCheck;
+        public int Priority { get; private set; }           // 1 = first to check (its badge number)
+        public SpotState State { get; private set; } = SpotState.ToCheck;
+        public bool IsNext { get; private set; }
 
-        [SerializeField] Transform visual;                    // everything that scales/pops
-        [SerializeField] Transform labelPivot;                // turns to face the camera (yaw only)
-        [SerializeField] TextMeshPro labelText;
+        // Bookkeeping for the automatic check (Phase 8)
+        public int Attempts { get; set; }                   // checks without a clear answer
+        public float CooldownUntil { get; set; }            // no re-check before this Time.time
+        public string Note { get; set; }                    // e.g. "user said a previous match was not the item"
 
-        const float PopSeconds = 0.35f;
         Camera cam;
+        float stateTime;          // seconds in the current state (drives the looping motions)
+        float oneShotTime = -1f;  // seconds into the current one-shot animation, < 0 = none
+        OneShot oneShot;
+        float fade = 1f;          // set by the controller (e.g. others fade to 30% when found)
+
+        enum OneShot { Pop, Wiggle, Squash, Bounce }
 
         public void Init(HidingSpot spot, int priority)
         {
@@ -30,38 +65,188 @@ namespace FindMe
             Likelihood = spot.likelihood;
             Priority = priority;
             name = $"SpotCue {priority}: {Label}";
-            if (labelText != null) labelText.text = $"{priority}. {Label}";
-            StartCoroutine(Pop());
+            Play(OneShot.Pop);
+            ApplyLook();
         }
+
+        /// <summary>Changes state (and the Gemini tip, if given) and plays that state's one-shot animation.</summary>
+        public void SetState(SpotState s, string tip = null)
+        {
+            if (tip != null) Tip = tip;
+            if (s == State) { ApplyLook(); return; }
+            State = s;
+            stateTime = 0f;
+            switch (s)
+            {
+                case SpotState.NeedsOpen: Play(OneShot.Wiggle); break;
+                case SpotState.Checked: Play(OneShot.Squash); break;
+                case SpotState.Candidate: Play(OneShot.Bounce); break;
+                case SpotState.Found:
+                    Play(OneShot.Bounce);
+                    if (foundFx != null) foundFx.Play();
+                    break;
+            }
+            if (s != SpotState.Focused && s != SpotState.Checking) SetDwell(0f);
+            ApplyLook();
+        }
+
+        public void SetNext(bool next)
+        {
+            if (IsNext == next) return;
+            IsNext = next;
+            ApplyLook();
+        }
+
+        /// <summary>Dwell progress 0..1 while the user holds the phone on this cue.</summary>
+        public void SetDwell(float dwell01)
+        {
+            if (progressRing != null) progressRing.fillAmount = dwell01;
+        }
+
+        public void SetFade(float alpha) => fade = alpha;
+
+        /// <summary>Is the cue still something the user has to look at?</summary>
+        public bool IsOpen => State is SpotState.ToCheck or SpotState.Focused or SpotState.Checking or SpotState.NeedsOpen;
+
+        // ---------- look per state ----------
+
+        void ApplyLook()
+        {
+            if (panel == null) return;   // no prefab parts (shouldn't happen in the app)
+
+            Color c = State switch
+            {
+                SpotState.Checking => Lavender,
+                SpotState.NeedsOpen => Tangerine,
+                SpotState.Checked => SodaBlue,
+                SpotState.Candidate or SpotState.Found => Mint,
+                _ => Pink,
+            };
+            panel.color = State == SpotState.Candidate ? Color.white : c;   // Candidate = mint outline look
+            groundRing.color = new Color(c.r, c.g, c.b, IsNext ? 1f : 0.75f);
+            if (stem != null) stem.startColor = stem.endColor = new Color(c.r, c.g, c.b, 0.9f);
+
+            // Badge: number, or an icon. Text is always dark grape on the light bubble (never white on pastel).
+            string badge = null;
+            Sprite icon = null;
+            switch (State)
+            {
+                case SpotState.ToCheck:
+                case SpotState.Focused: badge = Priority.ToString(); break;
+                case SpotState.Checking: badge = "..."; break;
+                case SpotState.NeedsOpen: badge = "!"; break;       // "act on it" (plan: hand icon; "!" until we have art)
+                case SpotState.Checked: icon = checkIcon; break;
+                case SpotState.Candidate: badge = "?"; break;
+                case SpotState.Found: icon = starIcon; break;
+            }
+            badgeText.text = badge ?? "";
+            badgeText.color = Grape;
+            badgeIcon.enabled = icon != null;
+            badgeIcon.sprite = icon;
+            badgeIcon.color = c == Pink ? Grape : Color.Lerp(c, Grape, 0.35f);
+
+            labelText.color = hintText.color = Grape;
+            labelText.text = Capitalize(Label);
+            hintText.text = State switch
+            {
+                SpotState.ToCheck => IsNext ? "Check here next" : Hint,
+                SpotState.Focused => "Hold still…",
+                SpotState.Checking => "Looking…",
+                SpotState.NeedsOpen => string.IsNullOrEmpty(Tip) ? "Open it up" : Tip,
+                SpotState.Checked => "Checked",
+                SpotState.Candidate => "Is this it?",
+                SpotState.Found => "Found it!",
+                _ => "",
+            };
+            if (nextTag != null) nextTag.SetActive(IsNext && (State == SpotState.ToCheck || State == SpotState.NeedsOpen));
+
+            bool ringOn = State is SpotState.Focused or SpotState.Checking;
+            progressRing.enabled = ringOn;
+            progressRing.color = State == SpotState.Checking ? Lavender : Pink;
+            if (State == SpotState.Checking) progressRing.fillAmount = 1f;
+        }
+
+        // ---------- per-frame: facing, size, fading, motion ----------
 
         void LateUpdate()
         {
             if (cam == null) cam = Camera.main;
-            if (cam == null || visual == null || labelPivot == null) return;
+            if (cam == null || bubble == null) return;
+            stateTime += Time.deltaTime;
 
-            // Constant-ish on-screen size: grow with distance (plan Phase 6 rule, clamped 0.5..4 m).
-            float d = Vector3.Distance(cam.transform.position, transform.position);
-            if (!popping) visual.localScale = Vector3.one * Mathf.Clamp(d, 0.5f, 4f);
+            Vector3 camPos = cam.transform.position;
+            float d = Vector3.Distance(camPos, transform.position);
 
-            // Billboard on yaw only so the text stays upright.
-            Vector3 toCam = cam.transform.position - labelPivot.position;
+            // Billboard on yaw only: the bubble turns toward you but stays upright.
+            Vector3 toCam = camPos - bubble.position;
             toCam.y = 0f;
-            if (toCam.sqrMagnitude > 1e-4f) labelPivot.rotation = Quaternion.LookRotation(-toCam, Vector3.up);
+            if (toCam.sqrMagnitude > 1e-4f) bubble.rotation = Quaternion.LookRotation(-toCam, Vector3.up);
+
+            // Motion multipliers: (sx, sy) scale, extra z rotation (wiggle), y offset (bob).
+            Vector2 s = Vector2.one * StateScale();
+            float rotZ = 0f;
+            s = ApplyOneShot(s, ref rotZ);
+            // Constant on-screen size: grow linearly with distance (clamped so it's never tiny or huge).
+            float k = bubbleBaseScale * Mathf.Clamp(d, 0.5f, 4f);
+            bubble.localScale = new Vector3(s.x * k, s.y * k, k);
+            bubble.localRotation *= Quaternion.Euler(0f, 0f, rotZ);
+            bubble.localPosition = new Vector3(0f, 0.18f + Bob(), 0f);
+
+            if (State == SpotState.Checking) progressRing.rectTransform.localRotation = Quaternion.Euler(0f, 0f, -stateTime * 120f);
+
+            float alpha = fade * (d > farDistance ? 0.4f : 1f) * (State == SpotState.Checked ? 0.85f : 1f);
+            if (ReduceMotion && oneShot == OneShot.Pop && oneShotTime >= 0f) alpha *= Mathf.Clamp01(oneShotTime / 0.35f);
+            bubbleGroup.alpha = alpha;
+            groundRing.canvasRenderer.SetAlpha(alpha);
+            hintText.enabled = d <= hintMaxDistance || State != SpotState.ToCheck;   // state text always shows
         }
 
-        bool popping;
-
-        /// <summary>Scale 0 → 1.1 → 1 with an ease-out-back curve.</summary>
-        IEnumerator Pop()
+        float StateScale()
         {
-            popping = true;
-            for (float t = 0f; t < PopSeconds; t += Time.deltaTime)
+            if (ReduceMotion) return State == SpotState.Focused ? 1.15f : 1f;
+            float t = stateTime;
+            return State switch
             {
-                float target = cam != null ? Mathf.Clamp(Vector3.Distance(cam.transform.position, transform.position), 0.5f, 4f) : 1f;
-                visual.localScale = Vector3.one * (target * EaseOutBack(t / PopSeconds));
-                yield return null;
+                // Soft pulse 1.0 → 1.08 every 1.4 s; stronger when it's the next one.
+                SpotState.ToCheck => 1f + (IsNext ? 0.12f : 0.08f) * 0.5f * (1f - Mathf.Cos(t * 2f * Mathf.PI / 1.4f)),
+                SpotState.Focused => 1.15f,
+                SpotState.Candidate => 1.05f + 0.05f * Mathf.Sin(t * 6f),
+                _ => 1f,
+            };
+        }
+
+        float Bob() => !ReduceMotion && IsNext && State == SpotState.ToCheck ? 0.015f * Mathf.Sin(stateTime * 3f) : 0f;
+
+        void Play(OneShot a)
+        {
+            oneShot = a;
+            oneShotTime = 0f;
+        }
+
+        Vector2 ApplyOneShot(Vector2 s, ref float rotZ)
+        {
+            if (oneShotTime < 0f) return s;
+            oneShotTime += Time.deltaTime;
+            float t = oneShotTime;
+            switch (oneShot)
+            {
+                case OneShot.Pop:                                   // 0 → 1.1 → 1 over 0.35 s (ease-out-back)
+                    if (t >= 0.35f) break;
+                    return s * (ReduceMotion ? 1f : EaseOutBack(t / 0.35f));
+                case OneShot.Wiggle:                                // ±6° twice over 0.4 s
+                    if (t >= 0.4f || ReduceMotion) break;
+                    rotZ = 6f * Mathf.Sin(t / 0.4f * 4f * Mathf.PI);
+                    return s;
+                case OneShot.Squash:                                // (1.15, 0.85) → (1, 1) over 0.25 s
+                    if (t >= 0.25f || ReduceMotion) break;
+                    float k = 1f - t / 0.25f;
+                    return new Vector2(s.x * (1f + 0.15f * k), s.y * (1f - 0.15f * k));
+                case OneShot.Bounce:                                // 3 bounces over 0.9 s
+                    if (t >= 0.9f || ReduceMotion) break;
+                    return s * (1f + 0.2f * Mathf.Abs(Mathf.Sin(t / 0.9f * 3f * Mathf.PI)) * (1f - t / 0.9f));
             }
-            popping = false;
+            oneShotTime = -1f;
+            return s;
         }
 
         static float EaseOutBack(float x)
@@ -70,36 +255,8 @@ namespace FindMe
             return 1f + c3 * Mathf.Pow(x - 1f, 3f) + c1 * Mathf.Pow(x - 1f, 2f);
         }
 
-        /// <summary>Builds the placeholder cue in code (used when SpotPlacer has no prefab assigned).</summary>
-        public static SpotCue CreatePlaceholder()
-        {
-            var root = new GameObject("SpotCue");
-            var cue = root.AddComponent<SpotCue>();
+        static string Capitalize(string s) => string.IsNullOrEmpty(s) ? s : char.ToUpper(s[0]) + s.Substring(1);
 
-            cue.visual = new GameObject("Visual").transform;
-            cue.visual.SetParent(root.transform, false);
-
-            // 5 cm pink ball at the spot itself.
-            var ball = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            Object.Destroy(ball.GetComponent<Collider>());
-            ball.transform.SetParent(cue.visual, false);
-            ball.transform.localScale = Vector3.one * 0.05f;
-            ball.GetComponent<Renderer>().material.color = new Color32(0xFF, 0x7E, 0xB6, 0xFF);
-
-            // Label 8 cm above the ball.
-            var labelGo = new GameObject("Label");
-            // Adding TextMeshPro swaps the Transform for a RectTransform, so grab the transform AFTER it.
-            cue.labelText = labelGo.AddComponent<TextMeshPro>();
-            cue.labelPivot = labelGo.transform;
-            cue.labelPivot.SetParent(cue.visual, false);
-            cue.labelPivot.localPosition = new Vector3(0f, 0.08f, 0f);
-            cue.labelText.fontSize = 0.35f;
-            cue.labelText.alignment = TextAlignmentOptions.Center;
-            cue.labelText.color = Color.white;
-            cue.labelText.outlineWidth = 0.25f;
-            cue.labelText.outlineColor = new Color32(0x3A, 0x2E, 0x6B, 0xFF);   // grape
-            cue.labelText.rectTransform.sizeDelta = new Vector2(0.6f, 0.1f);
-            return cue;
-        }
+        static Color Hex(uint rgb) => new Color32((byte)(rgb >> 16), (byte)(rgb >> 8), (byte)rgb, 255);
     }
 }

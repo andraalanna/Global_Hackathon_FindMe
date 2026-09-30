@@ -15,6 +15,7 @@ namespace FindMe.Dev
         string itemCard;
         float readiness = -1f;      // < 0 = hide the meter
         bool scanEnabled;
+        string progress;
         GUIStyle label, button, field;
 
         void Awake()
@@ -27,6 +28,9 @@ namespace FindMe.Dev
         public void ShowStatus(string message) => status = message;
         public void HideStatus() => status = null;
         public void SetReadiness(float p01) => readiness = p01;
+        public void SetProgress(int checkedCount, int total) =>
+            progress = total > 0 ? $"{checkedCount} of {total} spots checked" : null;
+
         public void SetScanEnabled(bool on)
         {
             scanEnabled = on;
@@ -44,6 +48,7 @@ namespace FindMe.Dev
             // --- Top: status, readiness meter, item card ---
             float x = 40 * s, w = Screen.width - 80 * s, y = DevGui.SafeTop + 30 * s;
             string top = status;
+            if (!string.IsNullOrEmpty(progress)) top = string.IsNullOrEmpty(top) ? progress : $"{progress}\n{top}";
             if (!string.IsNullOrEmpty(itemCard)) top = string.IsNullOrEmpty(top) ? itemCard : $"{top}\n{itemCard}";
             if (!string.IsNullOrEmpty(top))
             {

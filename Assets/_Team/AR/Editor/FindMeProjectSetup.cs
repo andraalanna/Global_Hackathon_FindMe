@@ -179,6 +179,15 @@ namespace FindMe.EditorTools
             SetRef(search, "planes", planeVis);
             SetRef(overlay, "placer", placer);
 
+            // Phase 6: cue prefab + off-screen arrow
+            var cuePrefab = AssetDatabase.LoadAssetAtPath<SpotCue>(SpotCuePrefabBuilder.PrefabPath);
+            if (cuePrefab == null) cuePrefab = SpotCuePrefabBuilder.Build();
+            SetRef(placer, "cuePrefab", cuePrefab);
+            var offscreen = GetOrAdd<OffscreenIndicator>(overlayGo);
+            SetRef(offscreen, "arCamera", origin.Camera);
+            SetRef(offscreen, "arrowSprite", CueArtBaker.Arrow);
+            SetRef(search, "offscreen", offscreen);
+
             EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
         }
 
