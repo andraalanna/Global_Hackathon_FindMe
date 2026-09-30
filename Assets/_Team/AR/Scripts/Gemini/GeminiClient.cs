@@ -58,7 +58,13 @@ namespace FindMe
                 "For each place:\n" +
                 "  seen: what you actually see in that part of the photo (max 8 words),\n" +
                 "  label: 1-3 words, box_2d: [ymin, xmin, ymax, xmax] normalized 0-1000,\n" +
-                "  likelihood: 1-3 (3 = most likely), hint: max 8 words, friendly.";
+                "  likelihood: 1-3 (3 = most likely), hint: max 8 words, friendly." +
+                // Typical places from Call 1 steer the RANKING only. We don't exclude "unusual" places:
+                // lost things are, almost by definition, somewhere unusual.
+                (item.likelyPlaces is { Count: > 0 }
+                    ? $"\nWhere a {item.name} usually ends up: {string.Join(", ", item.likelyPlaces)}. " +
+                      "If you see such a place, give it a higher likelihood."
+                    : "");
             var schema = Arr(Obj(("seen", Str()), ("label", Str()), ("box_2d", Arr(Int())), ("likelihood", Int()), ("hint", Str())));
 
             string json = await Generate("spots", cfg.spots, true, prompt, jpg, schema, cfg.spotsTimeoutSec, ct);

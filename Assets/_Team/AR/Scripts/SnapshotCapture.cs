@@ -59,6 +59,8 @@ namespace FindMe
                 projection = arCamera.projectionMatrix,   // ARCameraManager sets this from ARCore every frame
                 screenWidth = Screen.width,
                 screenHeight = Screen.height,
+                // Held sideways? Then Gemini gets an upright copy (people and models read rooms ceiling-up).
+                up = ImageOrientation.Detect(arCamera.transform),
                 time = Time.time,
             };
             Texture2D full = ScreenCapture.CaptureScreenshotAsTexture();
@@ -73,6 +75,8 @@ namespace FindMe
 
             Texture2D small = Downscale(full, targetWidth);
             Destroy(full);
+            Texture2D upright = ImageOrientation.MakeUpright(small, pose.up);
+            if (upright != small) { Destroy(small); small = upright; }
             byte[] jpg = small.EncodeToJPG(jpgQuality);
 
             IsBusy = false;

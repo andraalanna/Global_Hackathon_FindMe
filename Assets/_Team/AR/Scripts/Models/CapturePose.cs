@@ -13,6 +13,7 @@ namespace FindMe
         public Matrix4x4 projection;   // ARCore's per-frame projection (FOV + aspect + crop)
         public int screenWidth, screenHeight;
         public float time;
+        public ImageUp up;             // how the phone was held; Gemini's boxes are relative to the UPRIGHT image
     }
 
     /// <summary>One captured frame: the JPEG we send, the pose it was taken from, and a small texture for debug.</summary>
@@ -20,6 +21,6 @@ namespace FindMe
     {
         public byte[] jpg;
         public CapturePose pose;
-        public Texture2D texture;      // owned by whoever keeps the Snapshot; Destroy() it when replaced
+        public Texture2D texture;      // the UPRIGHT image Gemini saw; owned by whoever keeps the Snapshot, Destroy() it when replaced
     }
 }

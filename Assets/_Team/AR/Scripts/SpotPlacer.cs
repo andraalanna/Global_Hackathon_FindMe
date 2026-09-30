@@ -217,9 +217,12 @@ namespace FindMe
         /// </summary>
         public static Vector2 BoxPointToScreen(int[] b, float u, float v, CapturePose p)
         {
-            float x01 = Mathf.Lerp(b[1], b[3], u) / 1000f;
-            float y01 = Mathf.Lerp(b[0], b[2], v) / 1000f;
-            return new Vector2(x01 * p.screenWidth, (1f - y01) * p.screenHeight);   // 1 - y: flip Y
+            // Point in the UPRIGHT image Gemini saw (0..1, top-left origin)...
+            var upright = new Vector2(Mathf.Lerp(b[1], b[3], u) / 1000f, Mathf.Lerp(b[0], b[2], v) / 1000f);
+            // ...back into the screen image (no-op when the phone was held upright)...
+            Vector2 s = ImageOrientation.UprightToScreen(upright, p.up);
+            // ...then into Unity pixels. 1 - y: flip Y (top-left origin → bottom-left origin).
+            return new Vector2(s.x * p.screenWidth, (1f - s.y) * p.screenHeight);
         }
 
         // ---------- merge ----------
@@ -242,7 +245,7 @@ namespace FindMe
                 if (dist <= mergeDistance) return cue;
 
                 Vector3 vp = ghost.WorldToViewport(pose, p);
-                if (dist <= reprojectMergeDistance && vp.z > 0f && BoxContainsViewportPoint(spot.box_2d, vp, boxMargin))
+                if (dist <= reprojectMergeDistance && vp.z > 0f && BoxContainsViewportPoint(spot.box_2d, vp, boxMargin, pose.up))
                     return cue;
             }
             return null;
@@ -251,11 +254,14 @@ namespace FindMe
         /// <summary>
         /// Is a viewport point (0..1, origin BOTTOM-left) inside a Gemini box (0..1000, origin TOP-left)?
         /// The box is grown by <paramref name="margin"/> × its size on every side.
+        /// <paramref name="up"/>: how the phone was held for the photo the box belongs to.
         /// </summary>
-        public static bool BoxContainsViewportPoint(int[] b, Vector2 vp, float margin)
+        public static bool BoxContainsViewportPoint(int[] b, Vector2 vp, float margin, ImageUp up = ImageUp.Top)
         {
-            float x = vp.x * 1000f;
-            float y = (1f - vp.y) * 1000f;   // flip Y into Gemini's top-left space
+            // Viewport (bottom-left) → screen image (top-left) → upright image, where the box lives.
+            Vector2 u = ImageOrientation.ScreenToUpright(new Vector2(vp.x, 1f - vp.y), up);
+            float x = u.x * 1000f;
+            float y = u.y * 1000f;
             float mx = (b[3] - b[1]) * margin, my = (b[2] - b[0]) * margin;
             return x >= b[1] - mx && x <= b[3] + mx && y >= b[0] - my && y <= b[2] + my;
         }
