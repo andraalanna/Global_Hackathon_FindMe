@@ -321,7 +321,8 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 1394048370}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1088451882
@@ -335,6 +336,8 @@ GameObject:
   - component: {fileID: 1088451885}
   - component: {fileID: 1088451884}
   - component: {fileID: 1088451883}
+  - component: {fileID: 1088451886}
+  - component: {fileID: 1088451887}
   m_Layer: 0
   m_Name: Systems
   m_TagString: Untagged
@@ -363,6 +366,7 @@ MonoBehaviour:
   moveStep: 0.01
   rotateStep: 1
   maxJumpMeters: 0.5
+  maxJumpDegrees: 30
 --- !u!114 &1088451884
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -391,6 +395,35 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1088451886
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1088451882}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 34d8fd0b0decbca49a534340d5542b75, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: FindMe.AR::FindMe.GeminiServiceProvider
+  config: {fileID: 11400000, guid: 36206409a75703e45927d971777b1334, type: 2}
+  useMock: 0
+--- !u!114 &1088451887
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1088451882}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b4c7391abbcf09429ce6dcf04cd644e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: FindMe.AR::FindMe.SearchController
+  gemini: {fileID: 1088451886}
+  readiness: {fileID: 1088451883}
+  ui: {fileID: 1394048369}
 --- !u!1 &1266016229
 GameObject:
   m_ObjectHideFlags: 0
@@ -567,8 +600,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4966719baa26e4b0e8231a24d9bd491a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.XR.ARFoundation::UnityEngine.XR.ARFoundation.ARCameraManager
-  m_FocusMode: 1
-  m_LightEstimationMode: 0
+  m_FocusMode: -1
+  m_LightEstimationMode: -1
   m_AutoFocus: 1
   m_ImageStabilization: 0
   m_LightEstimation: 0
@@ -664,6 +697,51 @@ Transform:
   m_Children:
   - {fileID: 1266016230}
   m_Father: {fileID: 1653539573}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1394048368
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1394048370}
+  - component: {fileID: 1394048369}
+  m_Layer: 0
+  m_Name: DevUI
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1394048369
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1394048368}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 43a0d7c92e68e1d44b0e82efbcdea54c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: FindMe.AR::FindMe.Dev.DevUI
+  search: {fileID: 1088451887}
+--- !u!4 &1394048370
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1394048368}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 835637553}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1653539572
 GameObject:
@@ -792,6 +870,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1757032013}
   - component: {fileID: 1757032012}
+  - component: {fileID: 1757032014}
   m_Layer: 9
   m_Name: DebugOverlay
   m_TagString: Untagged
@@ -806,7 +885,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1757032011}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e6d6042397f486f4796b8b2b2cd9455e, type: 3}
   m_Name: 
@@ -827,6 +906,23 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1757032014
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1757032011}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3c40378e501a43040963b5658fa24657, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: FindMe.AR::FindMe.DebugOverlay
+  search: {fileID: 1088451887}
+  gemini: {fileID: 1088451886}
+  readiness: {fileID: 1088451883}
+  planeManager: {fileID: 1653539574}
+  visible: 1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

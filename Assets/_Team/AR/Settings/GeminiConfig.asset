@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 972b21a9d97f5ae489666170dcd2b614, type: 3}
+  m_Name: GeminiConfig
+  m_EditorClassIdentifier: FindMe.AR::FindMe.GeminiConfig
+  profileModel: gemini-2.5-flash
+  spotsModel: gemini-2.5-flash
+  checkModel: gemini-2.5-flash-lite
+  endpointFormat: https://generativelanguage.googleapis.com/v1beta/models/{0}:generateContent
+  profileTimeoutSec: 8
+  spotsTimeoutSec: 8
+  checkTimeoutSec: 5
+  temperature: 0.2
+  keyResource: gemini_key

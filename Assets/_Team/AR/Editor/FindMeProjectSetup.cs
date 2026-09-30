@@ -5,6 +5,7 @@ using UnityEditor.Build;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.Rendering;
+using UnityEngine.SceneManagement;
 using UnityEngine.XR.ARFoundation;
 using UnityEngine.XR.ARSubsystems;
 using FindMe.Dev;
@@ -15,6 +16,7 @@ namespace FindMe.EditorTools
     /// Phase 0 in code, so the setup is readable and can be re-run.
     ///   FindMe/1. Apply Project Settings: Android player settings + Cues/Overlay layers
     ///   FindMe/2. Build Main Scene: creates the Main scene hierarchy from the plan
+    ///   FindMe/3. Add Search Systems: adds/wires the Phase 2+ components into the open Main scene
     /// </summary>
     public static class FindMeProjectSetup
     {
@@ -23,6 +25,7 @@ namespace FindMe.EditorTools
         const string MaterialPath = Root + "/Materials/PlaneDots.mat";
         const string PlanePrefabPath = Root + "/Prefabs/ARPlaneDots.prefab";
         const string PlaneShader = "FindMe/PlaneDots";
+        const string GeminiConfigPath = Root + "/Settings/GeminiConfig.asset";
         public const string CuesLayer = "Cues";
         public const string OverlayLayer = "Overlay";
 
@@ -101,10 +104,72 @@ namespace FindMe.EditorTools
             var overlay = new GameObject("DebugOverlay") { layer = LayerMask.NameToLayer(OverlayLayer) };
             SetRef(overlay.AddComponent<ReadinessMeterDev>(), "readiness", readiness);
 
+            AddSearchSystems();
             EditorSceneManager.SaveScene(scene, ScenePath);
             // Main is the only build scene. SampleScene stays in the project, just not in the build.
             EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(ScenePath, true) };
             Debug.Log($"[FindMe] Built {ScenePath}");
+        }
+
+        [MenuItem("FindMe/3. Add Search Systems (Phases 2-5)")]
+        public static void AddSearchSystemsMenu()
+        {
+            if (SceneManager.GetActiveScene().path != ScenePath)
+            {
+                EditorUtility.DisplayDialog("Open Main first", $"Open {ScenePath}, then run this again.", "OK");
+                return;
+            }
+            AddSearchSystems();
+            EditorSceneManager.SaveScene(SceneManager.GetActiveScene());
+            Debug.Log("[FindMe] Search systems added to Main.");
+        }
+
+        /// <summary>
+        /// Idempotent: safe to run again after pulling new scripts. Adds missing components to the
+        /// existing objects and (re)wires their references. Never deletes anything.
+        /// </summary>
+        public static void AddSearchSystems()
+        {
+            var origin = Object.FindAnyObjectByType<XROrigin>();
+            var planes = origin.GetComponent<ARPlaneManager>();
+            var systems = GameObject.Find("Systems");
+            var readiness = systems.GetComponent<ARReadiness>();
+
+            // Phase 2: Gemini provider, search brain, dev UI, debug overlay
+            var gemini = GetOrAdd<GeminiServiceProvider>(systems);
+            SetRef(gemini, "config", EnsureGeminiConfig());
+
+            var search = GetOrAdd<SearchController>(systems);
+            SetRef(search, "gemini", gemini);
+            SetRef(search, "readiness", readiness);
+
+            var uiRoot = GameObject.Find("UI");
+            var devUiGo = GameObject.Find("DevUI") ?? new GameObject("DevUI");
+            devUiGo.transform.SetParent(uiRoot.transform, false);
+            var devUi = GetOrAdd<DevUI>(devUiGo);
+            SetRef(devUi, "search", search);
+            SetRef(search, "ui", devUi);
+
+            var overlayGo = GameObject.Find("DebugOverlay");
+            var overlay = GetOrAdd<DebugOverlay>(overlayGo);
+            SetRef(overlay, "search", search);
+            SetRef(overlay, "gemini", gemini);
+            SetRef(overlay, "readiness", readiness);
+            SetRef(overlay, "planeManager", planes);
+            // DevUI now draws the readiness meter and DebugOverlay the numbers; the Phase 1 meter would overlap.
+            if (overlayGo.TryGetComponent<ReadinessMeterDev>(out var oldMeter)) oldMeter.enabled = false;
+
+            EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
+        }
+
+        static GeminiConfig EnsureGeminiConfig()
+        {
+            var cfg = AssetDatabase.LoadAssetAtPath<GeminiConfig>(GeminiConfigPath);
+            if (cfg != null) return cfg;
+            Directory.CreateDirectory(Path.GetDirectoryName(GeminiConfigPath));
+            cfg = ScriptableObject.CreateInstance<GeminiConfig>();
+            AssetDatabase.CreateAsset(cfg, GeminiConfigPath);
+            return cfg;
         }
 
         static GameObject EnsurePlanePrefab()
