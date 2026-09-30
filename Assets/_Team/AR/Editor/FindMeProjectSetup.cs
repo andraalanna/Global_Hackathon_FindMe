@@ -1,0 +1,166 @@
+using System.IO;
+using Unity.XR.CoreUtils;
+using UnityEditor;
+using UnityEditor.Build;
+using UnityEditor.SceneManagement;
+using UnityEngine;
+using UnityEngine.Rendering;
+using UnityEngine.XR.ARFoundation;
+using UnityEngine.XR.ARSubsystems;
+using FindMe.Dev;
+
+namespace FindMe.EditorTools
+{
+    /// <summary>
+    /// Phase 0 in code, so the setup is readable and can be re-run.
+    ///   FindMe/1. Apply Project Settings: Android player settings + Cues/Overlay layers
+    ///   FindMe/2. Build Main Scene: creates the Main scene hierarchy from the plan
+    /// </summary>
+    public static class FindMeProjectSetup
+    {
+        const string Root = "Assets/_Team/AR";
+        const string ScenePath = Root + "/Scenes/Main.unity";
+        const string MaterialPath = Root + "/Materials/PlaneDots.mat";
+        const string PlanePrefabPath = Root + "/Prefabs/ARPlaneDots.prefab";
+        const string PlaneShader = "FindMe/PlaneDots";
+        public const string CuesLayer = "Cues";
+        public const string OverlayLayer = "Overlay";
+
+        [MenuItem("FindMe/1. Apply Project Settings")]
+        public static void ApplyProjectSettings()
+        {
+            var android = NamedBuildTarget.Android;
+            PlayerSettings.SetApplicationIdentifier(android, "com.aislaves.findme");
+            // Plan says 24+, but Unity 6.5's floor is 26. The A80 runs Android 11 (API 30),
+            // so the template's 34 would block install; 26 is the lowest Unity allows.
+            PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel26;
+            PlayerSettings.SetScriptingBackend(android, ScriptingImplementation.IL2CPP);
+            PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64;
+            PlayerSettings.SetUseDefaultGraphicsAPIs(BuildTarget.Android, false);
+            PlayerSettings.SetGraphicsAPIs(BuildTarget.Android, new[] { GraphicsDeviceType.OpenGLES3 });
+            PlayerSettings.Android.forceInternetPermission = true;  // "Internet Access: Require"
+
+            // Portrait locked: stored screen size/projection must match between snapshot and raycast.
+            PlayerSettings.defaultInterfaceOrientation = UIOrientation.Portrait;
+            PlayerSettings.allowedAutorotateToPortraitUpsideDown = false;
+            PlayerSettings.allowedAutorotateToLandscapeLeft = false;
+            PlayerSettings.allowedAutorotateToLandscapeRight = false;
+
+            EnsureLayer(CuesLayer);
+            EnsureLayer(OverlayLayer);
+            AssetDatabase.SaveAssets();
+            Debug.Log("[FindMe] Project settings applied.");
+        }
+
+        [MenuItem("FindMe/2. Build Main Scene")]
+        public static void BuildMainSceneMenu()
+        {
+            if (File.Exists(ScenePath) &&
+                !EditorUtility.DisplayDialog("Rebuild Main scene?",
+                    "Main.unity already exists. Rebuilding replaces it (manual edits are lost).", "Rebuild", "Cancel"))
+                return;
+            if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
+            BuildMainScene();
+        }
+
+        public static void BuildMainScene()
+        {
+            foreach (var dir in new[] { "Scenes", "Materials", "Prefabs" })
+                Directory.CreateDirectory($"{Root}/{dir}");
+            AssetDatabase.Refresh();
+
+            var planePrefab = EnsurePlanePrefab();
+            var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+
+            // Let AR Foundation build these two: it wires the camera, background and TrackedPoseDriver correctly.
+            Selection.activeObject = null;  // menu items create under the selection otherwise
+            EditorApplication.ExecuteMenuItem("GameObject/XR/AR Session");
+            EditorApplication.ExecuteMenuItem("GameObject/XR/XR Origin (Mobile AR)");
+            var origin = Object.FindAnyObjectByType<XROrigin>();
+
+            var planes = GetOrAdd<ARPlaneManager>(origin.gameObject);
+            planes.planePrefab = planePrefab;
+            // "Everything" for ARCore = horizontal + vertical (it has no other plane types).
+            planes.requestedDetectionMode = PlaneDetectionMode.Horizontal | PlaneDetectionMode.Vertical;
+            GetOrAdd<ARRaycastManager>(origin.gameObject);
+            GetOrAdd<ARAnchorManager>(origin.gameObject);
+
+            // Phase 3 moves this to the snapshot pose to cast rays. It never renders, so the Camera is off.
+            var ghost = new GameObject("GhostCamera");
+            ghost.AddComponent<Camera>().enabled = false;
+
+            var systems = new GameObject("Systems");
+            systems.AddComponent<AppBootstrap>();
+            var readiness = systems.AddComponent<ARReadiness>();
+            SetRef(readiness, "planeManager", planes);
+            SetRef(readiness, "cameraTransform", origin.Camera.transform);
+
+            new GameObject("Cues").layer = LayerMask.NameToLayer(CuesLayer);
+            new GameObject("UI");  // the UI lead's prefab goes here
+
+            var overlay = new GameObject("DebugOverlay") { layer = LayerMask.NameToLayer(OverlayLayer) };
+            SetRef(overlay.AddComponent<ReadinessMeterDev>(), "readiness", readiness);
+
+            EditorSceneManager.SaveScene(scene, ScenePath);
+            // Main is the only build scene. SampleScene stays in the project, just not in the build.
+            EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(ScenePath, true) };
+            Debug.Log($"[FindMe] Built {ScenePath}");
+        }
+
+        static GameObject EnsurePlanePrefab()
+        {
+            var mat = AssetDatabase.LoadAssetAtPath<Material>(MaterialPath);
+            if (mat == null)
+            {
+                mat = new Material(Shader.Find(PlaneShader));
+                AssetDatabase.CreateAsset(mat, MaterialPath);
+            }
+
+            var existing = AssetDatabase.LoadAssetAtPath<GameObject>(PlanePrefabPath);
+            if (existing != null) return existing;
+
+            var go = new GameObject("ARPlaneDots");
+            GetOrAdd<MeshFilter>(go);
+            GetOrAdd<ARPlane>(go);
+            GetOrAdd<ARPlaneMeshVisualizer>(go);  // turns the plane boundary into a mesh each update
+            var r = GetOrAdd<MeshRenderer>(go);
+            r.sharedMaterial = mat;
+            r.shadowCastingMode = ShadowCastingMode.Off;
+            r.receiveShadows = false;
+
+            var prefab = PrefabUtility.SaveAsPrefabAsset(go, PlanePrefabPath);
+            Object.DestroyImmediate(go);
+            return prefab;
+        }
+
+        /// <summary>Writes a name into the first free user layer slot (8-31) if it isn't there yet.</summary>
+        static void EnsureLayer(string name)
+        {
+            var tagManager = new SerializedObject(AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/TagManager.asset")[0]);
+            var layers = tagManager.FindProperty("layers");
+            for (int i = 0; i < layers.arraySize; i++)
+                if (layers.GetArrayElementAtIndex(i).stringValue == name) return;
+
+            for (int i = 8; i < layers.arraySize; i++)
+            {
+                var slot = layers.GetArrayElementAtIndex(i);
+                if (!string.IsNullOrEmpty(slot.stringValue)) continue;
+                slot.stringValue = name;
+                tagManager.ApplyModifiedPropertiesWithoutUndo();
+                return;
+            }
+            Debug.LogError($"[FindMe] No free layer slot for '{name}'.");
+        }
+
+        // Sets a private [SerializeField] from the editor, so runtime scripts don't need public setters.
+        static void SetRef(Object target, string field, Object value)
+        {
+            var so = new SerializedObject(target);
+            so.FindProperty(field).objectReferenceValue = value;
+            so.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        static T GetOrAdd<T>(GameObject go) where T : Component =>
+            go.TryGetComponent<T>(out var c) ? c : go.AddComponent<T>();
+    }
+}

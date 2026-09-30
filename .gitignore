@@ -107,3 +107,11 @@ InitTestScene*.unity*
 
 # Auto-generated cache in Assets folder
 /[Aa]ssets/[Ss]ceneDependencyCache*
+
+# FIND ME: Gemini API key. Never commit.
+/[Aa]ssets/_Team/AI/Secrets/
+/[Aa]ssets/_Team/AI/Secrets.meta
+
+# Android build by-products (IL2CPP backup, Burst debug info)
+/*_BurstDebugInformation_DoNotShip/
+/*_BackUpThisFolder_ButDontShipItWithYourGame/
