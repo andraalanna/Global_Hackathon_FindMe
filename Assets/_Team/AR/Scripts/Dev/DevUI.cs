@@ -67,6 +67,11 @@ namespace FindMe.Dev
             found = $"Found it! In the {label}.";
         }
 
+        public void ShowSummary(SearchSession session)
+        {
+            if (found != null) found += "\n" + session.Summary(Time.time);
+        }
+
         static string Cap(string s) => string.IsNullOrEmpty(s) ? s : char.ToUpper(s[0]) + s.Substring(1);
 
         public void SetScanEnabled(bool on)
@@ -125,7 +130,7 @@ namespace FindMe.Dev
             // Found: celebration + Done (back to the start).
             if (found != null)
             {
-                var fr = new Rect(x, Screen.height * 0.35f, w, rowH * 2.4f);
+                var fr = new Rect(x, Screen.height * 0.35f, w, rowH * 2.8f);
                 DevGui.Fill(fr, new Color(0.31f, 0.89f, 0.66f, 0.9f));   // mint
                 GUI.Label(new Rect(fr.x + 15 * s, fr.y + 10 * s, fr.width - 30 * s, rowH * 1.2f), found, label);
                 if (GUI.Button(new Rect(fr.x + gap, fr.yMax - rowH - gap, w - gap * 2, rowH), "Done", button)) { found = null; search.StopSearch(); }

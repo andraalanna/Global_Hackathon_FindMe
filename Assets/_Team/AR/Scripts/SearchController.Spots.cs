@@ -139,6 +139,20 @@ namespace FindMe
             RefreshCues();
             UI?.ShowStatus($"You found your {Profile.name}!");
             UI?.ShowFound(cue.Label);
+            RecordSession(cue);
+            UI?.ShowSummary(Session);
+        }
+
+        /// <summary>Freeze the session at the moment of finding: which spots, what state, when.</summary>
+        void RecordSession(SpotCue found)
+        {
+            if (Session == null) return;
+            Session.foundLabel = found.Label;
+            Session.foundTime = Time.time;
+            Session.spots.Clear();
+            foreach (var c in placer.Cues)
+                if (c != null)
+                    Session.spots.Add(new SearchSession.SpotRecord { label = c.Label, state = c.State, checkedAt = c.CheckedAt });
         }
 
         /// <summary>Dev: check the cue being looked at right now, without the 2 s hold.</summary>

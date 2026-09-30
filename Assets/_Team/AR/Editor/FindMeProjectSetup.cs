@@ -201,6 +201,9 @@ namespace FindMe.EditorTools
             SetRef(checker, "gemini", gemini);
             SetRef(search, "checker", checker);
 
+            // Phase 9: scanning sweep
+            SetRef(GetOrAdd<ScanSweep>(overlayGo), "search", search);
+
             EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
         }
 

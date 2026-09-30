@@ -31,6 +31,8 @@ namespace FindMe
 
         public SearchState State { get; private set; } = SearchState.Idle;
         public ItemProfile Profile { get; private set; }
+        /// <summary>This search's history, for the summary ("Found in 2m 41s · 4 spots checked").</summary>
+        public SearchSession Session { get; private set; }
         public event Action<SearchState> StateChanged;
 
         /// <summary>Last scan's snapshot (image + pose) and the spots Gemini found in it. For DebugOverlay.</summary>
@@ -101,6 +103,7 @@ namespace FindMe
             text = text.Trim();
             var ct = NewSearchToken();
             ResetSpots();                // a new search starts from an empty room
+            Session = new SearchSession { item = text, startTime = Time.time };
             planes.SetVisible(true);
             RefreshCues();
 
@@ -143,6 +146,7 @@ namespace FindMe
             }
 
             stateBeforeScan = State;
+            if (Session != null) Session.scans++;
             SetState(SearchState.Scanning);
             UI?.SetScanEnabled(false);
             UI?.ShowStatus("Looking for hiding spots…");
@@ -267,6 +271,7 @@ namespace FindMe
             ResetSpots();
             planes.SetVisible(true);
             Profile = null;
+            Session = null;
             SetState(SearchState.Idle);
             RefreshCues();
             UI?.SetScanEnabled(false);

@@ -27,5 +27,7 @@ namespace FindMe
         void ShowMatch(string label);
         /// <summary>Celebration: the item was found at this spot.</summary>
         void ShowFound(string label);
+        /// <summary>After Found: session.Summary(Time.time) → "Found in 2m 41s · 4 spots checked".</summary>
+        void ShowSummary(SearchSession session);
     }
 }

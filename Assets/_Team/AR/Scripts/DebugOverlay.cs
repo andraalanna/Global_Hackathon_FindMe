@@ -153,7 +153,8 @@ namespace FindMe
             if (planeManager != null && readiness != null)
                 sb.Append($"planes {planeManager.trackables.count} ({readiness.PlaneArea:0.00} m²)  " +
                           $"moved {readiness.MovedMeters:0.0} m  turned {readiness.RotatedDegrees:0}°  ready {readiness.Progress01 * 100f:0}%\n");
-            if (search != null) sb.Append($"state {search.State}\n");
+            if (search != null) sb.Append($"state {search.State}" +
+                (search.Session != null ? $"   session {search.Session.DurationSeconds(Time.time):0}s, {search.Session.scans} scans" : "") + "\n");
             if (placer != null) sb.Append($"cues {placer.Cues.Count}\n");
             if (focus != null)
                 sb.Append($"focus {(focus.Focused != null ? focus.Focused.Label : "-")}  dwell {focus.Dwell01 * 100f:0}%  " +
