@@ -56,7 +56,7 @@ namespace FindMe
             finally { GeminiLog.End(t, "spots", Model, jpg?.Length ?? 0, ok, ok ? JsonConvert.SerializeObject(spots) : "cancelled"); }
         }
 
-        public async Task<SpotCheckResult> CheckSpot(byte[] jpg, ItemProfile item, string spotLabel, CancellationToken ct)
+        public async Task<SpotCheckResult> CheckSpot(byte[] jpg, ItemProfile item, string spotLabel, string note, CancellationToken ct)
         {
             long t = GeminiLog.Begin();
             bool ok = false;

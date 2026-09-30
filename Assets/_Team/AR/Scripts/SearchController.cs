@@ -47,6 +47,7 @@ namespace FindMe
             if (ui == null) ui = FindSearchUI();
             focus.enabled = false;                      // only runs while Searching
             focus.DwellCompleted += OnDwellCompleted;
+            AwakeSpots();
         }
 
         void OnDestroy()
@@ -68,18 +69,27 @@ namespace FindMe
             }
         }
 
-        /// <summary>The spot panel follows whatever cue the user is holding the phone on.</summary>
+        /// <summary>
+        /// The spot panel follows the cue being checked or looked at. Manual buttons appear for a cue whose
+        /// check failed or stayed unclear, so the user is never stuck waiting on the AI.
+        /// </summary>
         void UpdateSpotPanel()
         {
+            if (checker.Busy)
+            {
+                UI?.ShowSpotPanel(checker.Current.Label, "Looking…", 1f, false);
+                return;
+            }
             SpotCue c = focus.Focused;
-            if (c != null) UI?.ShowSpotPanel(c.Label, c.State == SpotState.NeedsOpen ? c.Tip : "Hold still…", focus.Dwell01, false);
-            else UI?.HideSpotPanel();
-        }
-
-        /// <summary>The user held the phone steady on a cue for 2 s.</summary>
-        void OnDwellCompleted(SpotCue cue)
-        {
-            Debug.Log($"[Search] Dwell complete on {cue.Label}");
+            if (c != null)
+            {
+                bool manual = c == manualCue || c.Attempts >= maxUnclearAttempts;
+                UI?.ShowSpotPanel(c.Label, c.State == SpotState.NeedsOpen ? c.Tip : "Hold still…", focus.Dwell01, manual);
+            }
+            else if (manualCue != null && manualCue.IsOpen)
+                UI?.ShowSpotPanel(manualCue.Label, "Checked it yourself?", 0f, true);
+            else
+                UI?.HideSpotPanel();
         }
 
         // ---------- Called by UI ----------
@@ -90,7 +100,7 @@ namespace FindMe
             if (string.IsNullOrWhiteSpace(text)) return;
             text = text.Trim();
             var ct = NewSearchToken();
-            placer.ClearCues();          // a new search starts from an empty room
+            ResetSpots();                // a new search starts from an empty room
             planes.SetVisible(true);
             RefreshCues();
 
@@ -123,6 +133,7 @@ namespace FindMe
         public void ScanArea()
         {
             if (State != SearchState.ReadyToScan && State != SearchState.Searching) return;
+            CancelCheck();               // a scan takes priority over a running spot check
             if (snapshot.IsBusy) return;
             // Without tracking the camera pose is stale, so every cue from this scan would land in the wrong place.
             if (ARSession.state != ARSessionState.SessionTracking)
@@ -237,6 +248,29 @@ namespace FindMe
             }
             if (offscreen != null) offscreen.Target = next;
             UI?.SetProgress(done, total);
+
+            // Every spot looked at and still not found: nudge toward scanning somewhere else.
+            if (State == SearchState.Searching && total > 0 && next == null && !checker.Busy && !AnyOpen())
+                UI?.ShowStatus("All spots checked. Scan another area?");
+        }
+
+        bool AnyOpen()
+        {
+            foreach (var c in placer.Cues) if (c != null && c.IsOpen) return true;
+            return false;
+        }
+
+        /// <summary>"Stop" button: cancel everything and go back to the start.</summary>
+        public void StopSearch()
+        {
+            NewSearchToken();            // cancels Gemini requests of this search
+            ResetSpots();
+            planes.SetVisible(true);
+            Profile = null;
+            SetState(SearchState.Idle);
+            RefreshCues();
+            UI?.SetScanEnabled(false);
+            UI?.ShowStatus("Type what you lost");
         }
 
         // ---------- State helpers ----------
@@ -256,6 +290,7 @@ namespace FindMe
             State = s;
             if (s == SearchState.Searching) planes.SetVisible(false);   // from now on the cues are the star
             focus.enabled = s == SearchState.Searching;                 // no focusing while scanning / confirming
+            UI?.SetScanEnabled(s is SearchState.ReadyToScan or SearchState.Searching);   // no Scan behind the "Is this it?" sheet
             if (s != SearchState.Searching) UI?.HideSpotPanel();
             StateChanged?.Invoke(s);
         }

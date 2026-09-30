@@ -72,7 +72,7 @@ namespace FindMe
         }
 
         // ---------- Call 3: spot check (512 px frame) ----------
-        public async Task<SpotCheckResult> CheckSpot(byte[] jpg, ItemProfile item, string spotLabel, CancellationToken ct)
+        public async Task<SpotCheckResult> CheckSpot(byte[] jpg, ItemProfile item, string spotLabel, string note, CancellationToken ct)
         {
             string prompt =
                 $"We are looking for a lost {Describe(item)}.\n" +
@@ -80,7 +80,8 @@ namespace FindMe
                 $"itemVisible: true only if the {item.name} itself is clearly visible. If true, give itemBox [ymin, xmin, ymax, xmax] 0-1000.\n" +
                 "spotFullyVisible: true only if the inside or underneath of the spot is clearly visible\n" +
                 "(drawer open, blanket lifted, bag open). A closed drawer or covered pile is false.\n" +
-                "tip: max 6 words telling the user what to do next (e.g. \"Open the drawer\", \"Lift the top shirt\").";
+                "tip: max 6 words telling the user what to do next (e.g. \"Open the drawer\", \"Lift the top shirt\")." +
+                (string.IsNullOrWhiteSpace(note) ? "" : $"\nImportant: {note}");
             var itemBox = Arr(Int());
             itemBox["nullable"] = true;
             var schema = Obj(("itemVisible", Bool()), ("itemBox", itemBox), ("spotFullyVisible", Bool()), ("tip", Str()));

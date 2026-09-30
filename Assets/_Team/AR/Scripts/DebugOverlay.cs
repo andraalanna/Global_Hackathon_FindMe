@@ -64,7 +64,7 @@ namespace FindMe
             float y = panel.y + 10 * s;
 
             string info = BuildText();
-            panel.height = text.CalcHeight(new GUIContent(info), panel.width - 20 * s) + 20 * s + 90 * s;
+            panel.height = text.CalcHeight(new GUIContent(info), panel.width - 20 * s) + 20 * s + 180 * s;   // + 2 button rows
             DevGui.Fill(panel, DevGui.Shade);
             GUI.Label(new Rect(panel.x + 10 * s, y, panel.width - 20 * s, panel.height), info, text);
 
@@ -74,8 +74,10 @@ namespace FindMe
                 gemini.SetMock(!gemini.IsMock);
             if (snapshot != null && GUI.Button(new Rect(panel.x + 20 * s + bw, by, bw, bh), "Snap", button))
                 StartCoroutine(snapshot.Capture(768, true, OnTestSnap));
-            if (placer != null && GUI.Button(new Rect(panel.x + 30 * s + 2 * bw, by, bw, bh), "Clear cues", button))
-                placer.ClearCues();
+            if (search != null && GUI.Button(new Rect(panel.x + 30 * s + 2 * bw, by, bw, bh), "Reset", button))
+                search.StopSearch();
+            if (search != null && GUI.Button(new Rect(panel.x + 10 * s, by - bh - 10 * s, bw * 1.5f, bh), "Force check", button))
+                search.DevForceCheck();
 
             DrawThumbnail(new Rect(panel.xMax + 20 * s, top + 100 * s, Screen.width - panel.xMax - 40 * s, 0f));
         }
@@ -94,10 +96,12 @@ namespace FindMe
         /// </summary>
         void DrawThumbnail(Rect area)
         {
+            // Show the newest of: last scan (with spot boxes), last check (with the item box), test snap.
             Snapshot scan = search != null ? search.LastScan : null;
-            bool showScan = scan != null && scan.texture != null && (testSnap == null || scan.pose.time >= testSnap.pose.time);
-            Snapshot snap = showScan ? scan : testSnap;
+            Snapshot check = search != null ? search.LastCheck : null;
+            Snapshot snap = Newest(Newest(scan, check), testSnap);
             if (snap == null || snap.texture == null) return;
+            bool showScan = snap == scan;
 
             float s = DevGui.Scale;
             var tex = snap.texture;
@@ -105,11 +109,26 @@ namespace FindMe
             DevGui.Fill(new Rect(r.x - 4 * s, r.y - 4 * s, r.width + 8 * s, r.height + 8 * s), Color.white);
             GUI.DrawTexture(r, tex, ScaleMode.StretchToFill);
             if (showScan) DrawBoxes(r, search.LastSpots);
+            if (snap == check && search.LastCheckResult is { HasItemBox: true } cr)
+                DrawBoxes(r, new[] { new HidingSpot { label = "item", box_2d = cr.itemBox, likelihood = 3 } }, DevGui.Mint);
+            if (snap == check && search.LastCheckResult != null)
+            {
+                var res = search.LastCheckResult;
+                GUI.Label(new Rect(r.x, r.yMax + 40 * s, r.width, 120 * s),
+                          $"check: item {(res.itemVisible ? "YES" : "no")}, inside {(res.spotFullyVisible ? "yes" : "no")}, tip \"{res.tip}\"", small);
+            }
             GUI.Label(new Rect(r.x, r.yMax + 6 * s, r.width, 60 * s),
                       $"{tex.width}×{tex.height}  {snap.jpg.Length / 1024}KB  {Time.time - snap.pose.time:0}s ago", small);
         }
 
-        void DrawBoxes(Rect img, IReadOnlyList<HidingSpot> spots)
+        static Snapshot Newest(Snapshot a, Snapshot b)
+        {
+            if (a == null || a.texture == null) return b;
+            if (b == null || b.texture == null) return a;
+            return a.pose.time >= b.pose.time ? a : b;
+        }
+
+        void DrawBoxes(Rect img, IReadOnlyList<HidingSpot> spots, Color? forceColor = null)
         {
             float s = DevGui.Scale;
             tagStyle ??= DevGui.Style(GUI.skin.label, 18, Color.black);
@@ -119,7 +138,7 @@ namespace FindMe
                 // IMGUI's origin is top-left, same as Gemini's, so NO Y flip here (unlike Unity screen space).
                 var box = new Rect(img.x + b[1] / 1000f * img.width, img.y + b[0] / 1000f * img.height,
                                    (b[3] - b[1]) / 1000f * img.width, (b[2] - b[0]) / 1000f * img.height);
-                Color c = spots[i].likelihood >= 3 ? DevGui.Pink : spots[i].likelihood == 2 ? DevGui.Lemon : DevGui.Blue;
+                Color c = forceColor ?? (spots[i].likelihood >= 3 ? DevGui.Pink : spots[i].likelihood == 2 ? DevGui.Lemon : DevGui.Blue);
                 DevGui.Outline(box, c, 3f * s);
                 var tag = new Rect(box.x, box.y, box.width, 30 * s);
                 DevGui.Fill(tag, c);

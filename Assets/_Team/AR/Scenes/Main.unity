@@ -400,6 +400,7 @@ GameObject:
   - component: {fileID: 1088451889}
   - component: {fileID: 1088451890}
   - component: {fileID: 1088451891}
+  - component: {fileID: 1088451892}
   m_Layer: 0
   m_Name: Systems
   m_TagString: Untagged
@@ -483,6 +484,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9b4c7391abbcf09429ce6dcf04cd644e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: FindMe.AR::FindMe.SearchController
+  checker: {fileID: 1088451892}
+  maxUnclearAttempts: 3
   gemini: {fileID: 1088451886}
   readiness: {fileID: 1088451883}
   snapshot: {fileID: 1088451888}
@@ -535,6 +538,7 @@ MonoBehaviour:
   reprojectMergeDistance: 1.5
   boxMargin: 0.1
   maxCues: 8
+  maxTotalCues: 16
   spawnInterval: 0.15
   surfaceOffset: 0.03
 --- !u!114 &1088451890
@@ -572,6 +576,22 @@ MonoBehaviour:
   maxLinearSpeed: 0.25
   window: 0.5
   dwellSeconds: 2
+--- !u!114 &1088451892
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1088451882}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 57aa5107c8115674abba0341d87221a0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: FindMe.AR::FindMe.SpotChecker
+  snapshot: {fileID: 1088451888}
+  gemini: {fileID: 1088451886}
+  checkWidth: 512
+  cooldownSeconds: 1.5
 --- !u!1 &1266016229
 GameObject:
   m_ObjectHideFlags: 0

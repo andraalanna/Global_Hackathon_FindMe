@@ -195,6 +195,12 @@ namespace FindMe.EditorTools
             SetRef(search, "focus", focus);
             SetRef(overlay, "focus", focus);
 
+            // Phase 8: automatic check
+            var checker = GetOrAdd<SpotChecker>(systems);
+            SetRef(checker, "snapshot", snapshot);
+            SetRef(checker, "gemini", gemini);
+            SetRef(search, "checker", checker);
+
             EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
         }
 

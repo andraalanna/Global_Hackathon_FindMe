@@ -29,7 +29,10 @@ namespace FindMe
         [SerializeField] float reprojectMergeDistance = 1.5f;
         [Tooltip("Grow each box by this fraction on every side for the 'old cue inside new box' test.")]
         [SerializeField] float boxMargin = 0.1f;
+        [Tooltip("At most this many cues still to check. Checked cues don't count, so a thorough search never gets stuck.")]
         [SerializeField] int maxCues = 8;
+        [Tooltip("Hard limit on all cues (checked ones included), to keep the phone fast.")]
+        [SerializeField] int maxTotalCues = 16;
         [SerializeField] float spawnInterval = 0.15f;
         [Tooltip("Pull the cue this far back toward the camera so it floats in front of the surface.")]
         [SerializeField] float surfaceOffset = 0.03f;
@@ -87,7 +90,7 @@ namespace FindMe
                     result.merged++;
                     continue;
                 }
-                if (cues.Count >= maxCues)
+                if (OpenCount() >= maxCues || cues.Count >= maxTotalCues)
                 {
                     result.overCap++;
                     continue;   // keep counting, so the UI can say why nothing new appeared
@@ -132,6 +135,35 @@ namespace FindMe
                 }
             }
             return best;
+        }
+
+        int OpenCount()
+        {
+            int n = 0;
+            foreach (var c in cues) if (c != null && c.IsOpen) n++;
+            return n;
+        }
+
+        /// <summary>
+        /// Small mint marker where Gemini saw the item (centre of itemBox in a check photo).
+        /// No plane hit: use the same depth as the spot's cue, since the item is at that spot.
+        /// </summary>
+        public GameObject PlaceMarker(int[] itemBox, CapturePose pose, Vector3 spotPosition)
+        {
+            Ray ray = ghost.ScreenRay(pose, BoxPointToScreen(itemBox, 0.5f, 0.5f, pose));
+            Vector3 pos = raycastManager.Raycast(ray, hits, HitTypes)
+                ? hits[0].pose.position
+                : ray.GetPoint(Vector3.Distance(pose.position, spotPosition));
+
+            var marker = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            marker.name = "ItemMarker";
+            Destroy(marker.GetComponent<Collider>());
+            marker.transform.SetParent(cuesRoot, false);
+            marker.transform.position = pos;
+            marker.transform.localScale = Vector3.one * 0.04f;
+            marker.GetComponent<Renderer>().material.color = new Color32(0x4F, 0xE3, 0xA8, 0xFF);   // mint
+            SetLayer(marker, LayerMask.NameToLayer("Cues"));
+            return marker;
         }
 
         /// <summary>Removes every cue and its anchor.</summary>

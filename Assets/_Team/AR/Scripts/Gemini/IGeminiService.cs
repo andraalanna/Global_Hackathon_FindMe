@@ -12,6 +12,7 @@ namespace FindMe
     {
         Task<ItemProfile> GetItemProfile(string userText, CancellationToken ct);
         Task<List<HidingSpot>> FindSpots(byte[] jpg, ItemProfile item, CancellationToken ct);
-        Task<SpotCheckResult> CheckSpot(byte[] jpg, ItemProfile item, string spotLabel, CancellationToken ct);
+        /// <param name="note">Extra context for this spot, e.g. "the user said a previous match was not their wallet". May be null.</param>
+        Task<SpotCheckResult> CheckSpot(byte[] jpg, ItemProfile item, string spotLabel, string note, CancellationToken ct);
     }
 }

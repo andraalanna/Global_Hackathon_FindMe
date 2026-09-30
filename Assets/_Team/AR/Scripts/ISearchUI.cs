@@ -21,5 +21,11 @@ namespace FindMe
         /// </summary>
         void ShowSpotPanel(string label, string tip, float dwell01, bool manualButtons);
         void HideSpotPanel();
+        /// <summary>"Drawer checked ✓" toast with an Undo button (about 4 s) that calls UndoChecked().</summary>
+        void ShowCheckedToast(string label);
+        /// <summary>"Is this your wallet?" sheet: Yes → ConfirmMatch(true), Not it → ConfirmMatch(false).</summary>
+        void ShowMatch(string label);
+        /// <summary>Celebration: the item was found at this spot.</summary>
+        void ShowFound(string label);
     }
 }

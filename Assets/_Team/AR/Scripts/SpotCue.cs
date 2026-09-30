@@ -49,6 +49,8 @@ namespace FindMe
         public int Attempts { get; set; }                   // checks without a clear answer
         public float CooldownUntil { get; set; }            // no re-check before this Time.time
         public string Note { get; set; }                    // e.g. "user said a previous match was not the item"
+        public SpotState StateBeforeCheck { get; set; }     // restored if a check fails or is cancelled
+        public float CheckedAt { get; set; } = -1f;         // Time.time when it became Checked/Found (session summary)
 
         Camera cam;
         float stateTime;          // seconds in the current state (drives the looping motions)

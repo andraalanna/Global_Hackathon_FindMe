@@ -19,6 +19,10 @@ namespace FindMe.Dev
         string panelLabel, panelTip;
         float panelDwell;
         bool panelManual, panelOn;
+        string toast;               // "Drawer checked" + Undo
+        float toastUntil;
+        string match;               // "Is this your wallet?" sheet
+        string found;               // celebration text
         GUIStyle label, button, field;
 
         void Awake()
@@ -27,7 +31,11 @@ namespace FindMe.Dev
         }
 
         // ---------- ISearchUI ----------
-        public void ShowItemCard(ItemProfile p) => itemCard = "Looking for: " + p.Summary;
+        public void ShowItemCard(ItemProfile p)
+        {
+            itemCard = "Looking for: " + p.Summary;
+            match = found = toast = null;          // a new search clears old sheets
+        }
         public void ShowStatus(string message) => status = message;
         public void HideStatus() => status = null;
         public void SetReadiness(float p01) => readiness = p01;
@@ -44,6 +52,22 @@ namespace FindMe.Dev
         }
 
         public void HideSpotPanel() => panelOn = false;
+
+        public void ShowCheckedToast(string label)
+        {
+            toast = $"{Cap(label)} checked ✓";
+            toastUntil = Time.time + 4f;       // Undo window
+        }
+
+        public void ShowMatch(string label) => match = $"Is this your {search.Profile?.name ?? "item"}? ({label})";
+
+        public void ShowFound(string label)
+        {
+            match = null;
+            found = $"Found it! In the {label}.";
+        }
+
+        static string Cap(string s) => string.IsNullOrEmpty(s) ? s : char.ToUpper(s[0]) + s.Substring(1);
 
         public void SetScanEnabled(bool on)
         {
@@ -86,6 +110,39 @@ namespace FindMe.Dev
             input = GUI.TextField(new Rect(findRow.x, findRow.y, findRow.width * 0.68f, rowH), input, field);
             if (GUI.Button(new Rect(findRow.x + findRow.width * 0.7f, findRow.y, findRow.width * 0.3f, rowH), "Find", button))
                 search.StartSearch(input);
+
+            // "Is this your wallet?" sheet: big Yes / Not it buttons, above everything else.
+            if (match != null)
+            {
+                var mr = new Rect(x, Screen.height * 0.4f, w, rowH * 2.4f);
+                DevGui.Fill(mr, DevGui.Shade);
+                GUI.Label(new Rect(mr.x + 15 * s, mr.y + 10 * s, mr.width - 30 * s, rowH), match, label);
+                float bw3 = (w - gap * 3) / 2f;
+                if (GUI.Button(new Rect(mr.x + gap, mr.yMax - rowH - gap, bw3, rowH), "Yes!", button)) { match = null; search.ConfirmMatch(true); }
+                if (GUI.Button(new Rect(mr.x + gap * 2 + bw3, mr.yMax - rowH - gap, bw3, rowH), "Not it", button)) { match = null; search.ConfirmMatch(false); }
+            }
+
+            // Found: celebration + Done (back to the start).
+            if (found != null)
+            {
+                var fr = new Rect(x, Screen.height * 0.35f, w, rowH * 2.4f);
+                DevGui.Fill(fr, new Color(0.31f, 0.89f, 0.66f, 0.9f));   // mint
+                GUI.Label(new Rect(fr.x + 15 * s, fr.y + 10 * s, fr.width - 30 * s, rowH * 1.2f), found, label);
+                if (GUI.Button(new Rect(fr.x + gap, fr.yMax - rowH - gap, w - gap * 2, rowH), "Done", button)) { found = null; search.StopSearch(); }
+            }
+
+            // Checked toast with Undo (4 s).
+            if (toast != null && Time.time < toastUntil)
+            {
+                var tr = new Rect(x, findRow.y - rowH * 5.6f - gap * 5, w, rowH);
+                DevGui.Fill(tr, DevGui.Blue);
+                GUI.Label(new Rect(tr.x + 15 * s, tr.y + 20 * s, tr.width * 0.6f, rowH), toast, label);
+                if (GUI.Button(new Rect(tr.xMax - w * 0.3f, tr.y + 8 * s, w * 0.3f - 8 * s, rowH - 16 * s), "Undo", button))
+                {
+                    toastUntil = 0f;
+                    search.UndoChecked();
+                }
+            }
 
             // Spot panel: the cue being looked at, with its dwell bar (and manual buttons when asked).
             if (panelOn)
