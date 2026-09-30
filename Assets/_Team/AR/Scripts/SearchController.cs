@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using UnityEngine;
 
@@ -14,22 +16,37 @@ namespace FindMe
     {
         [SerializeField] GeminiServiceProvider gemini;
         [SerializeField] ARReadiness readiness;
+        [SerializeField] SnapshotCapture snapshot;
         [Tooltip("Any component implementing ISearchUI (UIManager, or DevUI for now). Found automatically if empty.")]
         [SerializeField] MonoBehaviour ui;
+
+        [Header("Scan")]
+        [SerializeField] int scanWidth = 768;          // px sent to Gemini Call 2
+        [SerializeField] int maxSpotsPerScan = 5;
 
         public SearchState State { get; private set; } = SearchState.Idle;
         public ItemProfile Profile { get; private set; }
         public event Action<SearchState> StateChanged;
 
+        /// <summary>Last scan's snapshot (image + pose) and the spots Gemini found in it. For DebugOverlay.</summary>
+        public Snapshot LastScan { get; private set; }
+        public IReadOnlyList<HidingSpot> LastSpots => lastSpots;
+
         ISearchUI UI => ui as ISearchUI;
         CancellationTokenSource cts;   // cancels whatever Gemini request belongs to the current search
+        List<HidingSpot> lastSpots = new();
+        SearchState stateBeforeScan;
 
         void Awake()
         {
             if (ui == null) ui = FindSearchUI();
         }
 
-        void OnDestroy() => cts?.Cancel();
+        void OnDestroy()
+        {
+            cts?.Cancel();
+            if (LastScan != null) Destroy(LastScan.texture);
+        }
 
         void Update()
         {
@@ -70,6 +87,86 @@ namespace FindMe
             SetState(SearchState.WaitingForAR);
             UI?.ShowStatus("Move your phone slowly around the room");
         }
+
+        /// <summary>
+        /// Scan tap: snapshot (768 px) → Gemini FindSpots → spots sorted by likelihood.
+        /// Allowed when ready, and again while searching ("scan more areas").
+        /// </summary>
+        public void ScanArea()
+        {
+            if (State != SearchState.ReadyToScan && State != SearchState.Searching) return;
+            if (snapshot.IsBusy) return;
+
+            stateBeforeScan = State;
+            SetState(SearchState.Scanning);
+            UI?.SetScanEnabled(false);
+            UI?.ShowStatus("Looking for hiding spots…");
+            StartCoroutine(snapshot.Capture(scanWidth, true, OnScanCaptured));
+        }
+
+        async void OnScanCaptured(Snapshot snap)
+        {
+            // A new search may have started while the frame was being captured.
+            if (snap == null || State != SearchState.Scanning)
+            {
+                if (snap != null) Destroy(snap.texture);
+                if (State == SearchState.Scanning) EndScan(0);
+                return;
+            }
+            SetLastScan(snap, new List<HidingSpot>());
+
+            List<HidingSpot> spots;
+            try
+            {
+                spots = await gemini.Service.FindSpots(snap.jpg, Profile, cts.Token);
+            }
+            catch (OperationCanceledException) { return; }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[Search] FindSpots failed: {e.Message}");
+                EndScan(0, "Hmm, I couldn't see clearly. Try again.");
+                return;
+            }
+
+            spots = SortAndCap(spots, maxSpotsPerScan);
+            SetLastScan(snap, spots);   // the pose stays with its spots: it's what the boxes are relative to
+            EndScan(spots.Count);
+        }
+
+        /// <summary>Scanning → Searching if we have spots, else back to where we were.</summary>
+        void EndScan(int newSpots, string failMessage = null)
+        {
+            bool haveSpots = newSpots > 0 || stateBeforeScan == SearchState.Searching;
+            SetState(haveSpots ? SearchState.Searching : stateBeforeScan);
+            UI?.SetScanEnabled(true);
+            UI?.ShowStatus(failMessage ?? (newSpots > 0
+                ? $"Found {newSpots} places to check"
+                : "No hiding spots here. Try another part of the room."));
+        }
+
+        void SetLastScan(Snapshot snap, List<HidingSpot> spots)
+        {
+            if (LastScan != null && LastScan != snap) Destroy(LastScan.texture);
+            LastScan = snap;
+            lastSpots = spots;
+        }
+
+        /// <summary>Drops broken spots, sorts by likelihood (3 first; ties keep Gemini's order), keeps the top N.</summary>
+        public static List<HidingSpot> SortAndCap(IEnumerable<HidingSpot> spots, int max) =>
+            (spots ?? Enumerable.Empty<HidingSpot>())
+                .Where(s => s != null && s.Sanitize())
+                .OrderByDescending(s => s.likelihood)   // OrderBy is stable, so equal likelihoods keep their order
+                .Take(max)
+                .ToList();
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        /// <summary>Dev only: jump from WaitingForAR to ReadyToScan without walking around (Inspector ⋮ menu).</summary>
+        [ContextMenu("Dev: Skip AR readiness")]
+        public void DevSkipReadiness()
+        {
+            if (State == SearchState.WaitingForAR) EnterReadyToScan();
+        }
+#endif
 
         // ---------- State helpers ----------
 

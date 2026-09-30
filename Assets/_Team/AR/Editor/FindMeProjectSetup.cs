@@ -163,6 +163,7 @@ namespace FindMe.EditorTools
             var snapshot = GetOrAdd<SnapshotCapture>(systems);
             SetRef(snapshot, "arCamera", origin.Camera);
             SetRef(overlay, "snapshot", snapshot);
+            SetRef(search, "snapshot", snapshot);
             var ghost = GetOrAdd<GhostCamera>(GameObject.Find("GhostCamera"));
 
             EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Text;
 using Newtonsoft.Json;
 using UnityEngine;
@@ -25,7 +26,7 @@ namespace FindMe
         float fps;
         bool threeFingersDown;
         readonly StringBuilder sb = new();
-        GUIStyle text, button, small;
+        GUIStyle text, button, small, tagStyle;
         Snapshot testSnap;     // from the "Snap" button; owned (and destroyed) by this overlay
 
         void OnEnable() => EnhancedTouchSupport.Enable();
@@ -82,10 +83,16 @@ namespace FindMe
             testSnap = snap;
         }
 
-        /// <summary>Last snapshot, scaled to the given width, with its size + age underneath.</summary>
+        /// <summary>
+        /// Newest snapshot (scan or test) scaled to the given width, with Gemini's boxes on top when it's a scan.
+        /// Fastest way to tell who's wrong: if boxes miss the furniture HERE, it's Gemini; if they're right
+        /// here but the 3D cues are off, it's our box → ray → anchor math.
+        /// </summary>
         void DrawThumbnail(Rect area)
         {
-            Snapshot snap = testSnap;
+            Snapshot scan = search != null ? search.LastScan : null;
+            bool showScan = scan != null && scan.texture != null && (testSnap == null || scan.pose.time >= testSnap.pose.time);
+            Snapshot snap = showScan ? scan : testSnap;
             if (snap == null || snap.texture == null) return;
 
             float s = DevGui.Scale;
@@ -93,8 +100,27 @@ namespace FindMe
             var r = new Rect(area.x, area.y, area.width, area.width * tex.height / tex.width);
             DevGui.Fill(new Rect(r.x - 4 * s, r.y - 4 * s, r.width + 8 * s, r.height + 8 * s), Color.white);
             GUI.DrawTexture(r, tex, ScaleMode.StretchToFill);
+            if (showScan) DrawBoxes(r, search.LastSpots);
             GUI.Label(new Rect(r.x, r.yMax + 6 * s, r.width, 60 * s),
                       $"{tex.width}×{tex.height}  {snap.jpg.Length / 1024}KB  {Time.time - snap.pose.time:0}s ago", small);
+        }
+
+        void DrawBoxes(Rect img, IReadOnlyList<HidingSpot> spots)
+        {
+            float s = DevGui.Scale;
+            tagStyle ??= DevGui.Style(GUI.skin.label, 18, Color.black);
+            for (int i = 0; i < spots.Count; i++)
+            {
+                int[] b = spots[i].box_2d;   // [ymin, xmin, ymax, xmax], 0..1000
+                // IMGUI's origin is top-left, same as Gemini's, so NO Y flip here (unlike Unity screen space).
+                var box = new Rect(img.x + b[1] / 1000f * img.width, img.y + b[0] / 1000f * img.height,
+                                   (b[3] - b[1]) / 1000f * img.width, (b[2] - b[0]) / 1000f * img.height);
+                Color c = spots[i].likelihood >= 3 ? DevGui.Pink : spots[i].likelihood == 2 ? DevGui.Lemon : DevGui.Blue;
+                DevGui.Outline(box, c, 3f * s);
+                var tag = new Rect(box.x, box.y, box.width, 30 * s);
+                DevGui.Fill(tag, c);
+                GUI.Label(tag, $" {i + 1}. {spots[i].label} ({spots[i].likelihood})", tagStyle);
+            }
         }
 
         string BuildText()

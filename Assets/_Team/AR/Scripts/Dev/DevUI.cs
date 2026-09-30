@@ -68,6 +68,10 @@ namespace FindMe.Dev
             if (GUI.Button(new Rect(findRow.x + findRow.width * 0.7f, findRow.y, findRow.width * 0.3f, rowH), "Find", button))
                 search.StartSearch(input);
 
+            // Scan button, only while scanning is allowed.
+            if (scanEnabled && GUI.Button(new Rect(x, findRow.y - rowH * 2.2f - gap * 2, w, rowH * 1.2f), "Scan this area", button))
+                search.ScanArea();
+
             // Presets: typing on a phone through IMGUI is clumsy; one tap is faster for testing.
             string[] presets = { "black wallet", "keys", "glasses" };
             float pw = (w - gap * (presets.Length - 1)) / presets.Length;
