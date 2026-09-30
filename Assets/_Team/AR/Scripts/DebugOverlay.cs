@@ -22,6 +22,7 @@ namespace FindMe
         [SerializeField] ARPlaneManager planeManager;
         [SerializeField] SnapshotCapture snapshot;
         [SerializeField] SpotPlacer placer;
+        [SerializeField] SpotFocus focus;
         [SerializeField] bool visible = true;
 
         float fps;
@@ -135,6 +136,9 @@ namespace FindMe
                           $"moved {readiness.MovedMeters:0.0} m  turned {readiness.RotatedDegrees:0}°  ready {readiness.Progress01 * 100f:0}%\n");
             if (search != null) sb.Append($"state {search.State}\n");
             if (placer != null) sb.Append($"cues {placer.Cues.Count}\n");
+            if (focus != null)
+                sb.Append($"focus {(focus.Focused != null ? focus.Focused.Label : "-")}  dwell {focus.Dwell01 * 100f:0}%  " +
+                          $"{(focus.IsSteady ? "steady" : "MOVING")} {focus.AngularSpeed:0}°/s {focus.LinearSpeed:0.00}m/s\n");
 
             if (gemini != null) sb.Append($"Gemini: {gemini.ModeLabel}   in flight {GeminiLog.InFlight}\n");
             foreach (var e in GeminiLog.Recent)

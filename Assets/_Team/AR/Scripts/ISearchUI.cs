@@ -15,5 +15,11 @@ namespace FindMe
         void SetScanEnabled(bool on);
         /// <summary>Progress chip: "2 of 5 spots checked".</summary>
         void SetProgress(int checkedCount, int total);
+        /// <summary>
+        /// Panel for the cue being looked at: its label, Gemini's tip, dwell progress 0..1.
+        /// manualButtons: also show "✓ Checked" / "Found it" (after a failed or unclear automatic check).
+        /// </summary>
+        void ShowSpotPanel(string label, string tip, float dwell01, bool manualButtons);
+        void HideSpotPanel();
     }
 }

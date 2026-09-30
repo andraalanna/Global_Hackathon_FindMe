@@ -45,7 +45,7 @@ namespace FindMe
             arrow.localRotation = Quaternion.Euler(0f, 0f, angle);
             // Label sits on the inner side of the arrow so it never goes off-screen.
             Vector2 inward = -new Vector2(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle * Mathf.Deg2Rad));
-            ((RectTransform)labelBack.transform).anchoredPosition = inward * 110f;
+            ((RectTransform)labelBack.transform).anchoredPosition = inward * 160f;
             label.text = Target.Label;
         }
 
@@ -101,7 +101,7 @@ namespace FindMe
 
             labelBack = new GameObject("Label", typeof(RectTransform)).AddComponent<Image>();
             labelBack.transform.SetParent(root, false);
-            labelBack.rectTransform.sizeDelta = new Vector2(220f, 64f);
+            labelBack.rectTransform.sizeDelta = new Vector2(320f, 64f);
             labelBack.color = new Color(1f, 1f, 1f, 0.92f);
             labelBack.raycastTarget = false;
 
@@ -111,6 +111,9 @@ namespace FindMe
             label.rectTransform.anchorMax = Vector2.one;
             label.rectTransform.offsetMin = label.rectTransform.offsetMax = Vector2.zero;
             label.fontSize = 36f;
+            label.enableAutoSizing = true;       // long labels shrink instead of "pile of clo…"
+            label.fontSizeMin = 24f;
+            label.fontSizeMax = 36f;
             label.fontStyle = FontStyles.Bold;
             label.alignment = TextAlignmentOptions.Center;
             label.color = Grape;

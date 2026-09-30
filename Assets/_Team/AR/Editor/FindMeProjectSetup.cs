@@ -188,6 +188,13 @@ namespace FindMe.EditorTools
             SetRef(offscreen, "arrowSprite", CueArtBaker.Arrow);
             SetRef(search, "offscreen", offscreen);
 
+            // Phase 7: focus + steadiness + dwell
+            var focus = GetOrAdd<SpotFocus>(systems);
+            SetRef(focus, "placer", placer);
+            SetRef(focus, "arCamera", origin.Camera);
+            SetRef(search, "focus", focus);
+            SetRef(overlay, "focus", focus);
+
             EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
         }
 

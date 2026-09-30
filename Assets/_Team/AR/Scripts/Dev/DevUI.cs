@@ -16,6 +16,9 @@ namespace FindMe.Dev
         float readiness = -1f;      // < 0 = hide the meter
         bool scanEnabled;
         string progress;
+        string panelLabel, panelTip;
+        float panelDwell;
+        bool panelManual, panelOn;
         GUIStyle label, button, field;
 
         void Awake()
@@ -30,6 +33,17 @@ namespace FindMe.Dev
         public void SetReadiness(float p01) => readiness = p01;
         public void SetProgress(int checkedCount, int total) =>
             progress = total > 0 ? $"{checkedCount} of {total} spots checked" : null;
+
+        public void ShowSpotPanel(string label, string tip, float dwell01, bool manualButtons)
+        {
+            panelOn = true;
+            panelLabel = label;
+            panelTip = tip;
+            panelDwell = dwell01;
+            panelManual = manualButtons;
+        }
+
+        public void HideSpotPanel() => panelOn = false;
 
         public void SetScanEnabled(bool on)
         {
@@ -72,6 +86,22 @@ namespace FindMe.Dev
             input = GUI.TextField(new Rect(findRow.x, findRow.y, findRow.width * 0.68f, rowH), input, field);
             if (GUI.Button(new Rect(findRow.x + findRow.width * 0.7f, findRow.y, findRow.width * 0.3f, rowH), "Find", button))
                 search.StartSearch(input);
+
+            // Spot panel: the cue being looked at, with its dwell bar (and manual buttons when asked).
+            if (panelOn)
+            {
+                var pr = new Rect(x, findRow.y - rowH * 4.4f - gap * 4, w, rowH * 1.1f);
+                DevGui.Fill(pr, DevGui.Shade);
+                GUI.Label(new Rect(pr.x + 15 * s, pr.y + 5 * s, pr.width, pr.height * 0.6f), $"{panelLabel}  ·  {panelTip}", label);
+                DevGui.Fill(new Rect(pr.x, pr.yMax - 14 * s, pr.width * panelDwell, 14 * s), DevGui.Pink);
+                if (panelManual)
+                {
+                    float bw2 = (w - gap) / 2f;
+                    var br = new Rect(x, pr.y - rowH - gap, bw2, rowH);
+                    if (GUI.Button(br, "✓ Checked", button)) search.MarkChecked();
+                    if (GUI.Button(new Rect(br.xMax + gap, br.y, bw2, rowH), "Found it", button)) search.MarkFound();
+                }
+            }
 
             // Scan button, only while scanning is allowed.
             if (scanEnabled && GUI.Button(new Rect(x, findRow.y - rowH * 2.2f - gap * 2, w, rowH * 1.2f), "Scan this area", button))

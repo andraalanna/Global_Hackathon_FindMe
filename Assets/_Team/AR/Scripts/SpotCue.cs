@@ -100,7 +100,10 @@ namespace FindMe
         /// <summary>Dwell progress 0..1 while the user holds the phone on this cue.</summary>
         public void SetDwell(float dwell01)
         {
-            if (progressRing != null) progressRing.fillAmount = dwell01;
+            if (progressRing == null) return;
+            progressRing.fillAmount = dwell01;
+            // Also visible on a "needs opening" cue the user is holding on (it keeps its own look).
+            progressRing.enabled = dwell01 > 0f || State is SpotState.Focused or SpotState.Checking;
         }
 
         public void SetFade(float alpha) => fade = alpha;
@@ -161,8 +164,8 @@ namespace FindMe
             if (nextTag != null) nextTag.SetActive(IsNext && (State == SpotState.ToCheck || State == SpotState.NeedsOpen));
 
             bool ringOn = State is SpotState.Focused or SpotState.Checking;
-            progressRing.enabled = ringOn;
-            progressRing.color = State == SpotState.Checking ? Lavender : Pink;
+            progressRing.enabled = ringOn || progressRing.fillAmount > 0f;
+            progressRing.color = State == SpotState.Checking ? Lavender : State == SpotState.NeedsOpen ? Tangerine : Pink;
             if (State == SpotState.Checking) progressRing.fillAmount = 1f;
         }
 

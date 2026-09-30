@@ -399,6 +399,7 @@ GameObject:
   - component: {fileID: 1088451888}
   - component: {fileID: 1088451889}
   - component: {fileID: 1088451890}
+  - component: {fileID: 1088451891}
   m_Layer: 0
   m_Name: Systems
   m_TagString: Untagged
@@ -488,6 +489,7 @@ MonoBehaviour:
   placer: {fileID: 1088451889}
   planes: {fileID: 1088451890}
   offscreen: {fileID: 1757032015}
+  focus: {fileID: 1088451891}
   ui: {fileID: 1394048369}
   scanWidth: 768
   maxSpotsPerScan: 5
@@ -548,6 +550,28 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: FindMe.AR::FindMe.PlaneVisibility
   planeManager: {fileID: 1653539574}
+--- !u!114 &1088451891
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1088451882}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 72a205731df645a4aaf88a4a18b5a8ac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: FindMe.AR::FindMe.SpotFocus
+  placer: {fileID: 1088451889}
+  arCamera: {fileID: 1266016235}
+  maxDistance: 2.2
+  maxAngle: 14
+  switchMargin: 3
+  loseFocusGrace: 0.3
+  maxAngularSpeed: 25
+  maxLinearSpeed: 0.25
+  window: 0.5
+  dwellSeconds: 2
 --- !u!1 &1266016229
 GameObject:
   m_ObjectHideFlags: 0
@@ -1049,6 +1073,7 @@ MonoBehaviour:
   planeManager: {fileID: 1653539574}
   snapshot: {fileID: 1088451888}
   placer: {fileID: 1088451889}
+  focus: {fileID: 1088451891}
   visible: 1
 --- !u!114 &1757032015
 MonoBehaviour:

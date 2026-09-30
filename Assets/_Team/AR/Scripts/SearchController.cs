@@ -13,7 +13,7 @@ namespace FindMe
     /// The brain (plan Section 2): owns the search state machine and connects Gemini, AR and UI.
     /// UI buttons call the public methods; this class calls back into the UI through <see cref="ISearchUI"/>.
     /// </summary>
-    public class SearchController : MonoBehaviour
+    public partial class SearchController : MonoBehaviour
     {
         [SerializeField] GeminiServiceProvider gemini;
         [SerializeField] ARReadiness readiness;
@@ -21,6 +21,7 @@ namespace FindMe
         [SerializeField] SpotPlacer placer;
         [SerializeField] PlaneVisibility planes;
         [SerializeField] OffscreenIndicator offscreen;
+        [SerializeField] SpotFocus focus;
         [Tooltip("Any component implementing ISearchUI (UIManager, or DevUI for now). Found automatically if empty.")]
         [SerializeField] MonoBehaviour ui;
 
@@ -44,6 +45,8 @@ namespace FindMe
         void Awake()
         {
             if (ui == null) ui = FindSearchUI();
+            focus.enabled = false;                      // only runs while Searching
+            focus.DwellCompleted += OnDwellCompleted;
         }
 
         void OnDestroy()
@@ -59,6 +62,24 @@ namespace FindMe
                 UI?.SetReadiness(readiness.Progress01);
                 if (readiness.IsReady) EnterReadyToScan();  // IsReady already includes the "for 1 s" hold
             }
+            else if (State == SearchState.Searching)
+            {
+                UpdateSpotPanel();
+            }
+        }
+
+        /// <summary>The spot panel follows whatever cue the user is holding the phone on.</summary>
+        void UpdateSpotPanel()
+        {
+            SpotCue c = focus.Focused;
+            if (c != null) UI?.ShowSpotPanel(c.Label, c.State == SpotState.NeedsOpen ? c.Tip : "Hold still…", focus.Dwell01, false);
+            else UI?.HideSpotPanel();
+        }
+
+        /// <summary>The user held the phone steady on a cue for 2 s.</summary>
+        void OnDwellCompleted(SpotCue cue)
+        {
+            Debug.Log($"[Search] Dwell complete on {cue.Label}");
         }
 
         // ---------- Called by UI ----------
@@ -234,6 +255,8 @@ namespace FindMe
             Debug.Log($"[Search] {State} → {s}");
             State = s;
             if (s == SearchState.Searching) planes.SetVisible(false);   // from now on the cues are the star
+            focus.enabled = s == SearchState.Searching;                 // no focusing while scanning / confirming
+            if (s != SearchState.Searching) UI?.HideSpotPanel();
             StateChanged?.Invoke(s);
         }
 
