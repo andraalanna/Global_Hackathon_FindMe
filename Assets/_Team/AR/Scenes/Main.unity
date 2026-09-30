@@ -220,6 +220,7 @@ GameObject:
   m_Component:
   - component: {fileID: 630128678}
   - component: {fileID: 630128677}
+  - component: {fileID: 630128679}
   m_Layer: 0
   m_Name: GhostCamera
   m_TagString: Untagged
@@ -293,6 +294,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &630128679
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 630128676}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91327976e660934419dce7b393e54212, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: FindMe.AR::FindMe.GhostCamera
 --- !u!1 &835637552
 GameObject:
   m_ObjectHideFlags: 0
@@ -338,6 +351,7 @@ GameObject:
   - component: {fileID: 1088451883}
   - component: {fileID: 1088451886}
   - component: {fileID: 1088451887}
+  - component: {fileID: 1088451888}
   m_Layer: 0
   m_Name: Systems
   m_TagString: Untagged
@@ -424,6 +438,25 @@ MonoBehaviour:
   gemini: {fileID: 1088451886}
   readiness: {fileID: 1088451883}
   ui: {fileID: 1394048369}
+--- !u!114 &1088451888
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1088451882}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8753b12294535f349a47698e53e5d35c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: FindMe.AR::FindMe.SnapshotCapture
+  arCamera: {fileID: 1266016235}
+  hiddenLayers:
+  - Cues
+  - Overlay
+  jpgQuality: 70
+  flashSeconds: 0.12
+  shutterSound: {fileID: 0}
 --- !u!1 &1266016229
 GameObject:
   m_ObjectHideFlags: 0
@@ -922,6 +955,7 @@ MonoBehaviour:
   gemini: {fileID: 1088451886}
   readiness: {fileID: 1088451883}
   planeManager: {fileID: 1653539574}
+  snapshot: {fileID: 1088451888}
   visible: 1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:

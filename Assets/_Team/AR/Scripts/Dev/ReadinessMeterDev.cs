@@ -22,6 +22,7 @@ namespace FindMe.Dev
 
         void OnGUI()
         {
+            if (SnapshotCapture.IsCapturing) return;   // keep dev UI out of the snapshot
             if (readiness == null) return;
 
             // Design at 1080 px wide (the A80's width) and scale, so it also looks sane in the editor.

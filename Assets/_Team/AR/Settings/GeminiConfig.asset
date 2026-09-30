@@ -12,9 +12,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 972b21a9d97f5ae489666170dcd2b614, type: 3}
   m_Name: GeminiConfig
   m_EditorClassIdentifier: FindMe.AR::FindMe.GeminiConfig
-  profileModel: gemini-2.5-flash
-  spotsModel: gemini-2.5-flash
-  checkModel: gemini-2.5-flash-lite
+  profile:
+    model: gemini-3.5-flash-lite
+    thinkingJson: '{"thinkingLevel":"minimal"}'
+  spots:
+    model: gemini-3.8-flash
+    thinkingJson: '{"thinkingLevel":"low"}'
+  check:
+    model: gemini-3.5-flash-lite
+    thinkingJson: '{"thinkingLevel":"minimal"}'
+  fallback:
+    model: gemini-3.5-flash-lite
+    thinkingJson: '{"thinkingLevel":"minimal"}'
   endpointFormat: https://generativelanguage.googleapis.com/v1beta/models/{0}:generateContent
   profileTimeoutSec: 8
   spotsTimeoutSec: 8

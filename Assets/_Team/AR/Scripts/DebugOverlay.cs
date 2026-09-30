@@ -10,7 +10,8 @@ namespace FindMe
 {
     /// <summary>
     /// Debug overlay (plan Section 9). IMGUI panel toggled by the "DBG" button or a 3-finger tap.
-    /// Shows FPS, AR/tracking, search state, Gemini mode + recent calls, and the parsed profile.
+    /// Shows FPS, AR/tracking, search state, Gemini mode + recent calls, the parsed profile,
+    /// and the last snapshot thumbnail (what Gemini actually saw).
     /// </summary>
     public class DebugOverlay : MonoBehaviour
     {
@@ -18,14 +19,21 @@ namespace FindMe
         [SerializeField] GeminiServiceProvider gemini;
         [SerializeField] ARReadiness readiness;
         [SerializeField] ARPlaneManager planeManager;
+        [SerializeField] SnapshotCapture snapshot;
         [SerializeField] bool visible = true;
 
         float fps;
         bool threeFingersDown;
         readonly StringBuilder sb = new();
-        GUIStyle text, button;
+        GUIStyle text, button, small;
+        Snapshot testSnap;     // from the "Snap" button; owned (and destroyed) by this overlay
 
         void OnEnable() => EnhancedTouchSupport.Enable();
+
+        void OnDestroy()
+        {
+            if (testSnap != null) Destroy(testSnap.texture);
+        }
 
         void Update()
         {
@@ -39,9 +47,11 @@ namespace FindMe
 
         void OnGUI()
         {
+            if (SnapshotCapture.IsCapturing) return;   // the overlay must never end up in a snapshot
             float s = DevGui.Scale;
             text ??= DevGui.Style(GUI.skin.label, 26, Color.white);
             button ??= DevGui.Style(GUI.skin.button, 28);
+            small ??= DevGui.Style(GUI.skin.label, 22, Color.white);
 
             float top = DevGui.SafeTop + 380 * s;
             if (GUI.Button(new Rect(Screen.width - 150 * s, top, 120 * s, 80 * s), "DBG", button)) visible = !visible;
@@ -59,6 +69,32 @@ namespace FindMe
             float by = panel.yMax - 85 * s, bw = 200 * s, bh = 75 * s;
             if (gemini != null && GUI.Button(new Rect(panel.x + 10 * s, by, bw, bh), gemini.IsMock ? "Mock: ON" : "Mock: OFF", button))
                 gemini.SetMock(!gemini.IsMock);
+            if (snapshot != null && GUI.Button(new Rect(panel.x + 20 * s + bw, by, bw, bh), "Snap", button))
+                StartCoroutine(snapshot.Capture(768, true, OnTestSnap));
+
+            DrawThumbnail(new Rect(panel.xMax + 20 * s, top + 100 * s, Screen.width - panel.xMax - 40 * s, 0f));
+        }
+
+        void OnTestSnap(Snapshot snap)
+        {
+            if (snap == null) return;
+            if (testSnap != null) Destroy(testSnap.texture);
+            testSnap = snap;
+        }
+
+        /// <summary>Last snapshot, scaled to the given width, with its size + age underneath.</summary>
+        void DrawThumbnail(Rect area)
+        {
+            Snapshot snap = testSnap;
+            if (snap == null || snap.texture == null) return;
+
+            float s = DevGui.Scale;
+            var tex = snap.texture;
+            var r = new Rect(area.x, area.y, area.width, area.width * tex.height / tex.width);
+            DevGui.Fill(new Rect(r.x - 4 * s, r.y - 4 * s, r.width + 8 * s, r.height + 8 * s), Color.white);
+            GUI.DrawTexture(r, tex, ScaleMode.StretchToFill);
+            GUI.Label(new Rect(r.x, r.yMax + 6 * s, r.width, 60 * s),
+                      $"{tex.width}×{tex.height}  {snap.jpg.Length / 1024}KB  {Time.time - snap.pose.time:0}s ago", small);
         }
 
         string BuildText()

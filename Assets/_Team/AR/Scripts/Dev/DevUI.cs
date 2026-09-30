@@ -35,6 +35,7 @@ namespace FindMe.Dev
 
         void OnGUI()
         {
+            if (SnapshotCapture.IsCapturing) return;   // keep dev UI out of the snapshot
             float s = DevGui.Scale;
             label ??= DevGui.Style(GUI.skin.label, 38, Color.white);
             button ??= DevGui.Style(GUI.skin.button, 40);

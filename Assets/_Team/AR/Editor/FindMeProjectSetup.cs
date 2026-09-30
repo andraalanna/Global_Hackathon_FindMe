@@ -159,13 +159,24 @@ namespace FindMe.EditorTools
             // DevUI now draws the readiness meter and DebugOverlay the numbers; the Phase 1 meter would overlap.
             if (overlayGo.TryGetComponent<ReadinessMeterDev>(out var oldMeter)) oldMeter.enabled = false;
 
+            // Phase 3: snapshot + ghost camera
+            var snapshot = GetOrAdd<SnapshotCapture>(systems);
+            SetRef(snapshot, "arCamera", origin.Camera);
+            SetRef(overlay, "snapshot", snapshot);
+            var ghost = GetOrAdd<GhostCamera>(GameObject.Find("GhostCamera"));
+
             EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
         }
 
         static GeminiConfig EnsureGeminiConfig()
         {
             var cfg = AssetDatabase.LoadAssetAtPath<GeminiConfig>(GeminiConfigPath);
-            if (cfg != null) return cfg;
+            if (cfg != null)
+            {
+                // Rewrite the file with the current fields (drops renamed/removed ones).
+                AssetDatabase.ForceReserializeAssets(new[] { GeminiConfigPath });
+                return cfg;
+            }
             Directory.CreateDirectory(Path.GetDirectoryName(GeminiConfigPath));
             cfg = ScriptableObject.CreateInstance<GeminiConfig>();
             AssetDatabase.CreateAsset(cfg, GeminiConfigPath);
