@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using UnityEngine;
+using UnityEngine.XR.ARFoundation;
 
 namespace FindMe
 {
@@ -100,6 +101,12 @@ namespace FindMe
         {
             if (State != SearchState.ReadyToScan && State != SearchState.Searching) return;
             if (snapshot.IsBusy) return;
+            // Without tracking the camera pose is stale, so every cue from this scan would land in the wrong place.
+            if (ARSession.state != ARSessionState.SessionTracking)
+            {
+                UI?.ShowStatus("I lost track of the room. Move your phone slowly, then try again.");
+                return;
+            }
 
             stateBeforeScan = State;
             SetState(SearchState.Scanning);
@@ -135,15 +142,14 @@ namespace FindMe
             spots = SortAndCap(spots, maxSpotsPerScan);
             SetLastScan(snap, spots);   // the pose stays with its spots: it's what the boxes are relative to
 
-            int placed;
+            SpotPlacer.PlaceResult placed;
             try
             {
                 // Uses snap.pose, NOT the current camera: the boxes describe what the phone saw back then.
                 placed = await placer.PlaceSpots(spots, snap.pose, cts.Token);
             }
             catch (OperationCanceledException) { return; }
-            // Spots found but all merged into existing cues: not the same as "nothing here".
-            EndScan(placed, placed == 0 && spots.Count > 0 ? "Those spots are already marked. Try another area." : null);
+            EndScan(placed.added, ScanMessage(placed));
         }
 
         /// <summary>Scanning → Searching if we have spots, else back to where we were.</summary>
@@ -155,6 +161,15 @@ namespace FindMe
             UI?.ShowStatus(failMessage ?? (newSpots > 0
                 ? $"Found {newSpots} places to check"
                 : "No hiding spots here. Try another part of the room."));
+        }
+
+        /// <summary>Status text for scans that found spots but added none (null = use the default text).</summary>
+        static string ScanMessage(SpotPlacer.PlaceResult r)
+        {
+            if (r.added > 0) return r.overCap > 0 ? $"Found {r.added} more places. That's the most I can show at once." : null;
+            if (r.overCap > 0) return "You have plenty of spots to check. Check some before scanning more.";
+            if (r.merged > 0) return "I already marked these spots. Try another part of the room.";
+            return null;
         }
 
         void SetLastScan(Snapshot snap, List<HidingSpot> spots)

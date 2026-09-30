@@ -58,6 +58,33 @@ namespace FindMe.Tests
         }
     }
 
+    public class BoxContainsViewportPointTests
+    {
+        // A box in the TOP-left quarter of the photo: y 0..500, x 0..500 (Gemini, top-left origin).
+        static readonly int[] TopLeftBox = { 0, 0, 500, 500 };
+
+        [Test]
+        public void ViewportTopLeft_IsInsideTopLeftBox()
+        {
+            // Viewport origin is BOTTOM-left, so the photo's top-left quarter is viewport y 0.5..1.
+            Assert.IsTrue(SpotPlacer.BoxContainsViewportPoint(TopLeftBox, new Vector2(0.25f, 0.75f), 0f));
+        }
+
+        [Test]
+        public void ViewportBottomLeft_IsNotInsideTopLeftBox()
+        {
+            Assert.IsFalse(SpotPlacer.BoxContainsViewportPoint(TopLeftBox, new Vector2(0.25f, 0.25f), 0f));
+        }
+
+        [Test]
+        public void Margin_GrowsTheBox()
+        {
+            var justOutside = new Vector2(0.52f, 0.75f);   // x = 520, box ends at 500
+            Assert.IsFalse(SpotPlacer.BoxContainsViewportPoint(TopLeftBox, justOutside, 0f));
+            Assert.IsTrue(SpotPlacer.BoxContainsViewportPoint(TopLeftBox, justOutside, 0.1f));   // +50 each side
+        }
+    }
+
     public class LabelsSimilarTests
     {
         [TestCase("drawer", "drawer", true)]
@@ -68,6 +95,10 @@ namespace FindMe.Tests
         [TestCase("top shelf", "top drawer", false)]        // "top" is filler, not a match
         [TestCase("under the bed", "under the desk", false)]
         [TestCase("", "bag", false)]
+        [TestCase("backpack", "bag", true)]                 // synonyms
+        [TestCase("couch", "sofa cushions", true)]
+        [TestCase("laundry pile", "pile of clothes", true)]
+        [TestCase("backpack", "shelf", false)]
         public void LabelsSimilar(string a, string b, bool expected)
         {
             Assert.AreEqual(expected, SpotPlacer.LabelsSimilar(a, b));

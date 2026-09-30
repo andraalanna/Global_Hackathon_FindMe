@@ -40,13 +40,15 @@ namespace FindMe
             try
             {
                 await Awaitable.WaitForSecondsAsync(1.2f, ct);
-                // Boxes spread over the screen, [ymin, xmin, ymax, xmax] with 0,0 = top-left.
+                // Canned boxes at FIXED screen positions, [ymin, xmin, ymax, xmax] with 0,0 = top-left.
+                // They don't look at the image: in mock mode a "shelf" appears even on a bare wall. That's the
+                // mock, not Gemini. Turn Mock OFF to test what real Gemini sees.
                 spots = new List<HidingSpot>
                 {
-                    new() { label = "pile of clothes", box_2d = new[] { 380, 30, 620, 330 },  likelihood = 3, hint = "Wallets slide under clothes" },
-                    new() { label = "drawer",          box_2d = new[] { 650, 350, 850, 650 }, likelihood = 2, hint = "Check inside" },
-                    new() { label = "bag",             box_2d = new[] { 380, 690, 620, 960 }, likelihood = 2, hint = "Look in the pockets" },
-                    new() { label = "shelf",           box_2d = new[] { 80, 300, 230, 700 },  likelihood = 1, hint = "Scan the top" },
+                    new() { label = "pile of clothes", box_2d = new[] { 380, 30, 620, 330 },  likelihood = 3, hint = "Wallets slide under clothes", seen = "MOCK: fake clothes pile" },
+                    new() { label = "drawer",          box_2d = new[] { 650, 350, 850, 650 }, likelihood = 2, hint = "Check inside", seen = "MOCK: fake drawer" },
+                    new() { label = "bag",             box_2d = new[] { 380, 690, 620, 960 }, likelihood = 2, hint = "Look in the pockets", seen = "MOCK: fake bag" },
+                    new() { label = "shelf",           box_2d = new[] { 80, 300, 230, 700 },  likelihood = 1, hint = "Scan the top", seen = "MOCK: fake shelf" },
                 };
                 ok = true;
                 return spots;

@@ -41,14 +41,25 @@ namespace FindMe
         // ---------- Call 2: find hiding spots (768 px snapshot) ----------
         public async Task<List<HidingSpot>> FindSpots(byte[] jpg, ItemProfile item, CancellationToken ct)
         {
+            // Anti-hallucination (tested on an empty room: the plan's prompt invented a shelf/cabinet/drawer
+            // in 4 of 6 runs on flash-lite, this one in 0 of 5):
+            //  - no fixed menu of furniture to pick from (examples only, "e.g.")
+            //  - an empty list is explicitly a valid answer
+            //  - "seen" comes FIRST in each item, so the model describes what's really there before naming it
             string prompt =
                 $"We are looking for a lost {Describe(item)}.\n" +
-                "In this photo of a room, find up to 5 VISIBLE places where it could be hidden:\n" +
-                "drawer, cabinet, under the bed, bag, pile of clothes, sofa cushions, shelf, desk surface, coat.\n" +
-                "Only include places big enough to hold it. Prefer containers and piles over open empty surfaces.\n" +
-                "For each: label (1-3 words), box_2d [ymin, xmin, ymax, xmax] normalized 0-1000,\n" +
-                "likelihood 1-3 (3 = most likely), hint (max 8 words, friendly).";
-            var schema = Arr(Obj(("label", Str()), ("box_2d", Arr(Int())), ("likelihood", Int()), ("hint", Str())));
+                "List up to 5 places IN THIS PHOTO where it could be hidden.\n" +
+                "Rules:\n" +
+                "- Only list objects you can actually see in this photo. Never invent furniture that is not there.\n" +
+                "- A bare wall, empty floor, ceiling, window, door or empty flat surface is NOT a hiding place.\n" +
+                "- Fewer than 5 is fine. If you see no real hiding place, return an empty list [].\n" +
+                "- Only include places big enough to hold it. Prefer containers and piles\n" +
+                "  (e.g. drawer, cabinet, bag, pile of clothes, sofa cushions, under the bed, coat) over open surfaces.\n" +
+                "For each place:\n" +
+                "  seen: what you actually see in that part of the photo (max 8 words),\n" +
+                "  label: 1-3 words, box_2d: [ymin, xmin, ymax, xmax] normalized 0-1000,\n" +
+                "  likelihood: 1-3 (3 = most likely), hint: max 8 words, friendly.";
+            var schema = Arr(Obj(("seen", Str()), ("label", Str()), ("box_2d", Arr(Int())), ("likelihood", Int()), ("hint", Str())));
 
             string json = await Generate("spots", cfg.spots, true, prompt, jpg, schema, cfg.spotsTimeoutSec, ct);
             return JsonConvert.DeserializeObject<List<HidingSpot>>(json) ?? new List<HidingSpot>();
@@ -183,17 +194,25 @@ namespace FindMe
         static JObject Bool() => new() { ["type"] = "BOOLEAN" };
         static JObject Arr(JObject items) => new() { ["type"] = "ARRAY", ["items"] = items };
 
-        /// <summary>Object schema. Every property is required unless its schema says "nullable".</summary>
+        /// <summary>
+        /// Object schema. Every property is required unless its schema says "nullable".
+        /// propertyOrdering makes the model write the fields in THIS order (e.g. "seen" before "label").
+        /// </summary>
         static JObject Obj(params (string name, JObject schema)[] props)
         {
             var properties = new JObject();
             var required = new JArray();
+            var ordering = new JArray();
             foreach (var (name, schema) in props)
             {
                 properties[name] = schema;
+                ordering.Add(name);
                 if (schema["nullable"]?.Value<bool>() != true) required.Add(name);
             }
-            return new JObject { ["type"] = "OBJECT", ["properties"] = properties, ["required"] = required };
+            return new JObject
+            {
+                ["type"] = "OBJECT", ["properties"] = properties, ["required"] = required, ["propertyOrdering"] = ordering,
+            };
         }
     }
 }

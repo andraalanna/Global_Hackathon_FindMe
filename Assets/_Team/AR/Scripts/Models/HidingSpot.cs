@@ -11,6 +11,7 @@ namespace FindMe
         public int[] box_2d;       // [ymin, xmin, ymax, xmax], 0..1000, origin TOP-left of the image
         public int likelihood;     // 1..3 (3 = most likely)
         public string hint;        // "Wallets slide under clothes"
+        public string seen;        // what Gemini says is really there, e.g. "grey backpack on chair" (grounding + debug)
 
         /// <summary>
         /// Cleans up what the model sent. Returns false if the spot is unusable (no label or no box),
@@ -23,9 +24,12 @@ namespace FindMe
             // Models occasionally swap min/max; a flipped box would still sample fine but looks wrong in debug.
             if (box_2d[0] > box_2d[2]) (box_2d[0], box_2d[2]) = (box_2d[2], box_2d[0]);
             if (box_2d[1] > box_2d[3]) (box_2d[1], box_2d[3]) = (box_2d[3], box_2d[1]);
+            // A box under 1% of the image in width or height isn't a real hiding place (and can't be raycast well).
+            if (box_2d[2] - box_2d[0] < 10 || box_2d[3] - box_2d[1] < 10) return false;
             label = label.Trim();
             likelihood = Mathf.Clamp(likelihood, 1, 3);
             hint ??= "";
+            seen ??= "";
             return true;
         }
     }

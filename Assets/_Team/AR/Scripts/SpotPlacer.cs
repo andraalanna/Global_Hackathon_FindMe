@@ -25,6 +25,10 @@ namespace FindMe
         [SerializeField] AudioSource popSound;
 
         [SerializeField] float mergeDistance = 0.35f;   // m: closer than this + similar label = same spot
+        [Tooltip("Old cue lands inside the new box + similar label = same spot, if also within this distance (m).")]
+        [SerializeField] float reprojectMergeDistance = 1.5f;
+        [Tooltip("Grow each box by this fraction on every side for the 'old cue inside new box' test.")]
+        [SerializeField] float boxMargin = 0.1f;
         [SerializeField] int maxCues = 8;
         [SerializeField] float spawnInterval = 0.15f;
         [Tooltip("Pull the cue this far back toward the camera so it floats in front of the surface.")]
@@ -56,35 +60,57 @@ namespace FindMe
 
         enum Preference { None, Vertical, Horizontal }
 
+        /// <summary>What one scan did: new cues, spots that matched an existing cue, spots dropped by the cap.</summary>
+        public struct PlaceResult
+        {
+            public int added, merged, overCap;
+        }
+
         /// <summary>
         /// Places cues for spots from ONE snapshot (already sorted, highest likelihood first), 150 ms apart.
-        /// Returns how many NEW cues were spawned (merged duplicates don't count).
+        /// Spots that match an existing cue are merged into it, so that cue keeps its state (e.g. Checked).
         /// </summary>
-        public async Task<int> PlaceSpots(IReadOnlyList<HidingSpot> spots, CapturePose pose, CancellationToken ct)
+        public async Task<PlaceResult> PlaceSpots(IReadOnlyList<HidingSpot> spots, CapturePose pose, CancellationToken ct)
         {
-            cues.RemoveAll(c => c == null);
-            int spawned = 0;
+            cues.RemoveAll(c => c == null);   // ARCore can drop an anchor (and its cue) at any time
+            var result = new PlaceResult();
             foreach (var spot in spots)
             {
                 ct.ThrowIfCancellationRequested();
                 var (position, plane) = FindPosition(spot, pose);
 
                 // Same spot seen again (e.g. a second scan): keep the old cue AND its state.
-                var existing = FindDuplicate(spot.label, position);
+                var existing = FindDuplicate(spot, position, pose);
                 if (existing != null)
                 {
                     existing.Likelihood = Mathf.Max(existing.Likelihood, spot.likelihood);
+                    result.merged++;
                     continue;
                 }
-                if (cues.Count >= maxCues) break;
+                if (cues.Count >= maxCues)
+                {
+                    result.overCap++;
+                    continue;   // keep counting, so the UI can say why nothing new appeared
+                }
 
                 Transform parent = await CreateAnchor(position, plane);
-                ct.ThrowIfCancellationRequested();
-                cues.Add(Spawn(spot, position, parent, cues.Count + 1, spawned));
-                spawned++;
+                if (ct.IsCancellationRequested)
+                {
+                    RemoveAnchorOf(parent);   // the search was reset while the anchor was being made
+                    ct.ThrowIfCancellationRequested();
+                }
+                cues.Add(Spawn(spot, position, parent, cues.Count + 1, result.added));
+                result.added++;
                 await Awaitable.WaitForSecondsAsync(spawnInterval, ct);   // stagger: one pop at a time
             }
-            return spawned;
+            return result;
+        }
+
+        void RemoveAnchorOf(Transform anchorTransform)
+        {
+            if (anchorTransform == null || !anchorTransform.TryGetComponent<ARAnchor>(out var anchor)) return;
+            if (anchorManager != null && anchorManager.enabled) anchorManager.TryRemoveAnchor(anchor);
+            Destroy(anchor.gameObject);
         }
 
         /// <summary>Removes every cue and its anchor.</summary>
@@ -198,17 +224,62 @@ namespace FindMe
 
         // ---------- merge ----------
 
-        SpotCue FindDuplicate(string label, Vector3 position)
+        /// <summary>
+        /// An existing cue is the same spot if the labels are similar AND either
+        ///   (a) it's within mergeDistance of the new 3D estimate, or
+        ///   (b) seen from the NEW photo's camera, it sits inside the new box.
+        /// (b) matters because depth from one photo is a guess (no plane hit = fixed guess along the ray),
+        /// so the same drawer scanned from two spots can get 3D estimates half a metre apart.
+        /// Where it appears in the photo doesn't depend on that guess.
+        /// </summary>
+        SpotCue FindDuplicate(HidingSpot spot, Vector3 position, CapturePose pose)
         {
             foreach (var cue in cues)
-                if (Vector3.Distance(cue.transform.position, position) <= mergeDistance && LabelsSimilar(cue.Label, label))
+            {
+                if (!LabelsSimilar(cue.Label, spot.label)) continue;
+                Vector3 p = cue.transform.position;
+                float dist = Vector3.Distance(p, position);
+                if (dist <= mergeDistance) return cue;
+
+                Vector3 vp = ghost.WorldToViewport(pose, p);
+                if (dist <= reprojectMergeDistance && vp.z > 0f && BoxContainsViewportPoint(spot.box_2d, vp, boxMargin))
                     return cue;
+            }
             return null;
+        }
+
+        /// <summary>
+        /// Is a viewport point (0..1, origin BOTTOM-left) inside a Gemini box (0..1000, origin TOP-left)?
+        /// The box is grown by <paramref name="margin"/> × its size on every side.
+        /// </summary>
+        public static bool BoxContainsViewportPoint(int[] b, Vector2 vp, float margin)
+        {
+            float x = vp.x * 1000f;
+            float y = (1f - vp.y) * 1000f;   // flip Y into Gemini's top-left space
+            float mx = (b[3] - b[1]) * margin, my = (b[2] - b[0]) * margin;
+            return x >= b[1] - mx && x <= b[3] + mx && y >= b[0] - my && y <= b[2] + my;
         }
 
         static readonly string[] Filler = { "the", "of", "on", "in", "a", "an", "top", "under", "side" };
 
-        /// <summary>"drawer" ≈ "top drawer" (one contains the other); "pile of clothes" ≈ "clothes pile" (shared word).</summary>
+        // Gemini words the same thing differently between scans ("bag" / "backpack"). Map each word to one family.
+        static readonly Dictionary<string, string> Synonyms = new()
+        {
+            { "backpack", "bag" }, { "handbag", "bag" }, { "purse", "bag" }, { "tote", "bag" }, { "rucksack", "bag" },
+            { "couch", "sofa" }, { "cushion", "sofa" }, { "cushions", "sofa" },
+            { "laundry", "clothes" }, { "clothing", "clothes" }, { "shirts", "clothes" }, { "shirt", "clothes" },
+            { "drawers", "drawer" }, { "dresser", "drawer" },
+            { "shelves", "shelf" }, { "bookshelf", "shelf" }, { "bookcase", "shelf" },
+            { "jacket", "coat" }, { "hoodie", "coat" },
+            { "cupboard", "cabinet" }, { "wardrobe", "cabinet" }, { "closet", "cabinet" },
+        };
+
+        static string Family(string word) => Synonyms.TryGetValue(word, out var f) ? f : word;
+
+        /// <summary>
+        /// "drawer" ≈ "top drawer" (one contains the other); "pile of clothes" ≈ "clothes pile" (shared word);
+        /// "backpack" ≈ "bag" (same synonym family).
+        /// </summary>
         public static bool LabelsSimilar(string a, string b)
         {
             a = (a ?? "").Trim().ToLowerInvariant();
@@ -220,7 +291,7 @@ namespace FindMe
             {
                 if (wa.Length < 3 || System.Array.IndexOf(Filler, wa) >= 0) continue;
                 foreach (var wb in b.Split(' '))
-                    if (wa == wb) return true;
+                    if (Family(wa) == Family(wb)) return true;
             }
             return false;
         }
