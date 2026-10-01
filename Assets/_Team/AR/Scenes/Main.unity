@@ -488,6 +488,7 @@ MonoBehaviour:
   maxUnclearAttempts: 3
   gemini: {fileID: 1088451886}
   readiness: {fileID: 1088451883}
+  arSession: {fileID: 285876570}
   snapshot: {fileID: 1088451888}
   placer: {fileID: 1088451889}
   planes: {fileID: 1088451890}
@@ -531,6 +532,7 @@ MonoBehaviour:
   anchorManager: {fileID: 1653539575}
   planeManager: {fileID: 1653539574}
   ghost: {fileID: 630128679}
+  arCamera: {fileID: 1266016235}
   cuesRoot: {fileID: 146762037}
   cuePrefab: {fileID: 4539843216185586742, guid: 010028a8090789c47897cdedd3f135d4, type: 3}
   popSound: {fileID: 0}
@@ -541,6 +543,7 @@ MonoBehaviour:
   maxTotalCues: 16
   spawnInterval: 0.15
   surfaceOffset: 0.03
+  refineInterval: 0.4
 --- !u!114 &1088451890
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -606,6 +609,7 @@ GameObject:
   - component: {fileID: 1266016233}
   - component: {fileID: 1266016232}
   - component: {fileID: 1266016231}
+  - component: {fileID: 1266016236}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -834,6 +838,23 @@ Camera:
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
+--- !u!114 &1266016236
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1266016229}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b15f82cc229284894964d2d30806969d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.XR.ARFoundation::UnityEngine.XR.ARFoundation.AROcclusionManager
+  m_HumanSegmentationStencilMode: 0
+  m_HumanSegmentationDepthMode: 0
+  m_EnvironmentDepthMode: 1
+  m_EnvironmentDepthTemporalSmoothing: 1
+  m_OcclusionPreferenceMode: 2
 --- !u!1 &1350763155
 GameObject:
   m_ObjectHideFlags: 0

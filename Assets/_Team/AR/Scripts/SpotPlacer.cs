@@ -9,14 +9,16 @@ namespace FindMe
 {
     /// <summary>
     /// Turns Gemini's 2D boxes into 3D cues anchored next to the real furniture (plan Phase 5):
-    /// box → screen pixels → ray from the capture-time camera → AR raycast → median hit → anchor → cue.
+    /// box → screen pixels → ray from the capture-time camera → <see cref="SpotLocator"/> → anchor → cue.
+    /// Cues placed on a weak guess keep re-locating themselves as ARCore learns the room (see Update).
     /// </summary>
-    public class SpotPlacer : MonoBehaviour
+    public partial class SpotPlacer : MonoBehaviour
     {
         [SerializeField] ARRaycastManager raycastManager;
         [SerializeField] ARAnchorManager anchorManager;
         [SerializeField] ARPlaneManager planeManager;
         [SerializeField] GhostCamera ghost;
+        [SerializeField] Camera arCamera;
         [Tooltip("Parent for cues that couldn't get an anchor.")]
         [SerializeField] Transform cuesRoot;
         [Tooltip("Assets/_Team/AR/Prefabs/SpotCue.prefab (built by FindMe/4).")]
@@ -36,32 +38,19 @@ namespace FindMe
         [SerializeField] float spawnInterval = 0.15f;
         [Tooltip("Pull the cue this far back toward the camera so it floats in front of the surface.")]
         [SerializeField] float surfaceOffset = 0.03f;
+        [Tooltip("How often (s) one weakly-placed cue re-tries its rays. One cue per tick keeps it cheap.")]
+        [SerializeField] float refineInterval = 0.4f;
 
         public IReadOnlyList<SpotCue> Cues => cues;
 
-        const TrackableType HitTypes = TrackableType.PlaneWithinPolygon | TrackableType.PlaneEstimated;
-
-        // (u, v) inside the box, 0..1, v = 0 at the TOP of the box (Gemini's y goes down).
-        static readonly Vector2[] SamplePoints =
-            { new(0.5f, 0.5f), new(0.3f, 0.4f), new(0.7f, 0.4f), new(0.3f, 0.7f), new(0.7f, 0.7f) };
-        // "under the bed": the hiding place is the bottom of the box.
-        static readonly Vector2[] UnderPoints =
-            { new(0.5f, 0.8f), new(0.3f, 0.7f), new(0.7f, 0.7f), new(0.3f, 0.9f), new(0.7f, 0.9f) };
-
         readonly List<SpotCue> cues = new();
-        readonly List<ARRaycastHit> hits = new();
-        readonly List<Candidate> candidates = new();
-        readonly List<float> planeDistances = new();
+        readonly HashSet<SpotCue> moving = new();   // cues whose new anchor is being created
+        SpotLocator locator;
+        float refineTimer;
+        int refineIndex;
 
-        struct Candidate
-        {
-            public Vector3 position;
-            public float distance;
-            public ARPlane plane;
-            public bool preferred;
-        }
-
-        enum Preference { None, Vertical, Horizontal }
+        SpotLocator Locator => locator ??= new SpotLocator(raycastManager, planeManager, ghost,
+                                                            arCamera != null ? arCamera : Camera.main, surfaceOffset);
 
         /// <summary>What one scan did: new cues, spots that matched an existing cue, spots dropped by the cap.</summary>
         public struct PlaceResult
@@ -80,13 +69,16 @@ namespace FindMe
             foreach (var spot in spots)
             {
                 ct.ThrowIfCancellationRequested();
-                var (position, plane) = FindPosition(spot, pose);
+                Placement placement = Locator.Locate(spot.label, spot.box_2d, pose);
+                Vector3 position = placement.position;
 
-                // Same spot seen again (e.g. a second scan): keep the old cue AND its state.
+                // Same spot seen again (e.g. a second scan): keep the old cue AND its state...
                 var existing = FindDuplicate(spot, position, pose);
                 if (existing != null)
                 {
                     existing.Likelihood = Mathf.Max(existing.Likelihood, spot.likelihood);
+                    // ...but if this view measured it better (e.g. scanned from closer), move it there.
+                    if (placement.quality > existing.Quality) MoveCue(existing, placement, pose, spot.box_2d);
                     result.merged++;
                     continue;
                 }
@@ -96,13 +88,15 @@ namespace FindMe
                     continue;   // keep counting, so the UI can say why nothing new appeared
                 }
 
-                Transform parent = await CreateAnchor(position, plane);
+                Transform parent = await CreateAnchor(position, placement.plane);
                 if (ct.IsCancellationRequested)
                 {
                     RemoveAnchorOf(parent);   // the search was reset while the anchor was being made
                     ct.ThrowIfCancellationRequested();
                 }
-                cues.Add(Spawn(spot, position, parent, cues.Count + 1, result.added));
+                var cue = Spawn(spot, position, parent, cues.Count + 1, result.added);
+                Remember(cue, placement, pose, spot.box_2d);
+                cues.Add(cue);
                 result.added++;
                 await Awaitable.WaitForSecondsAsync(spawnInterval, ct);   // stagger: one pop at a time
             }
@@ -150,10 +144,14 @@ namespace FindMe
         /// </summary>
         public GameObject PlaceMarker(int[] itemBox, CapturePose pose, Vector3 spotPosition)
         {
-            Ray ray = ghost.ScreenRay(pose, BoxPointToScreen(itemBox, 0.5f, 0.5f, pose));
-            Vector3 pos = raycastManager.Raycast(ray, hits, HitTypes)
-                ? hits[0].pose.position
-                : ray.GetPoint(Vector3.Distance(pose.position, spotPosition));
+            Placement p = Locator.Locate("item", itemBox, pose);
+            Vector3 pos = p.position;
+            if (p.quality <= PlacementQuality.Support)
+            {
+                // No real surface measured: the item is at the spot, so use the spot's distance along the ray.
+                Ray ray = ghost.ScreenRay(pose, BoxPointToScreen(itemBox, 0.5f, 0.5f, pose));
+                pos = ray.GetPoint(Vector3.Distance(pose.position, spotPosition));
+            }
 
             var marker = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             marker.name = "ItemMarker";
@@ -179,90 +177,102 @@ namespace FindMe
             cues.Clear();
         }
 
-        // ---------- box → world position ----------
+        // ---------- re-locating cues ----------
 
-        /// <summary>Where in the world a spot's box is: median of up to 5 raycast hits, or a guess along the center ray.</summary>
-        (Vector3 position, ARPlane plane) FindPosition(HidingSpot spot, CapturePose pose)
+        /// <summary>
+        /// One weakly-placed cue per tick re-casts its original rays. When the room is scanned at the start,
+        /// ARCore often hasn't seen the floor near a far bag yet; as the user walks, planes/points/depth appear
+        /// there and the cue snaps from its guess onto the real surface.
+        /// </summary>
+        void Update()
         {
-            string label = spot.label.ToLowerInvariant();
-            var points = label.Contains("under") ? UnderPoints : SamplePoints;
-            var preference = PreferenceFor(label);
+            if ((refineTimer += Time.deltaTime) < refineInterval || cues.Count == 0) return;
+            refineTimer = 0f;
+            refineIndex = (refineIndex + 1) % cues.Count;
+            var cue = cues[refineIndex];
+            if (cue == null || cue.SourceBox == null || moving.Contains(cue)) return;
+            if (cue.Quality >= PlacementQuality.Plane) return;                       // already measured well
+            if (cue.State is SpotState.Checking or SpotState.Candidate or SpotState.Found) return;   // don't jump mid-check
 
-            candidates.Clear();
-            Ray centerRay = default;
-            for (int i = 0; i < points.Length; i++)
-            {
-                Vector2 px = BoxPointToScreen(spot.box_2d, points[i].x, points[i].y, pose);
-                Ray ray = ghost.ScreenRay(pose, px);   // from where the phone WAS, not where it is now
-                if (i == 0) centerRay = ray;
-
-                // Raycast against the planes as tracked NOW (they may have grown since the snapshot).
-                if (!raycastManager.Raycast(ray, hits, HitTypes)) continue;
-                candidates.Add(PickHit(ray, preference));
-            }
-
-            if (candidates.Count == 0)
-                return (centerRay.GetPoint(FallbackDistance(pose)), null);
-
-            // If any ray hit the preferred kind of plane (e.g. vertical for a drawer front), trust only those.
-            bool anyPreferred = candidates.Exists(c => c.preferred);
-            if (anyPreferred) candidates.RemoveAll(c => !c.preferred);
-
-            // Median by distance: one stray ray that slipped past the furniture onto the far wall can't drag the cue.
-            candidates.Sort((a, b) => a.distance.CompareTo(b.distance));
-            var median = candidates[candidates.Count / 2];
-            return (median.position, median.plane);
+            Placement p = Locator.Locate(cue.Label, cue.SourceBox, cue.SourcePose);
+            if (p.quality > cue.Quality) MoveCue(cue, p, cue.SourcePose, cue.SourceBox);
         }
 
-        /// <summary>From one ray's hits (closest first), take the closest preferred-alignment hit, else the closest.</summary>
-        Candidate PickHit(Ray ray, Preference preference)
+        /// <summary>
+        /// "Check here": the user points the phone at the real spot. If something is measured in the middle
+        /// of the screen, the cue moves there: the user's aim beats our first guess.
+        /// </summary>
+        public bool TryRelocateToScreenCenter(SpotCue cue)
         {
-            ARRaycastHit chosen = hits[0];
-            bool preferred = false;
-            foreach (var h in hits)
+            if (cue == null || !Locator.TryLocateScreenCenter(out Placement p)) return false;
+            Camera cam = arCamera != null ? arCamera : Camera.main;
+            var pose = new CapturePose
             {
-                if (h.trackable is ARPlane p && Matches(p.alignment, preference))
-                {
-                    chosen = h;
-                    preferred = true;
-                    break;
-                }
-            }
-            return new Candidate
-            {
-                position = chosen.pose.position - ray.direction * surfaceOffset,
-                distance = chosen.distance,
-                plane = chosen.trackable as ARPlane,
-                preferred = preferred,
+                position = cam.transform.position,
+                rotation = cam.transform.rotation,
+                projection = cam.projectionMatrix,
+                screenWidth = Screen.width,
+                screenHeight = Screen.height,
+                time = Time.time,
             };
+            // A small box around the screen centre, so later re-locating re-uses what the user aimed at.
+            MoveCue(cue, p, pose, new[] { 450, 450, 550, 550 });
+            return true;
         }
 
-        static Preference PreferenceFor(string label)
+        /// <summary>What's in the middle of the screen right now, in the world (for picking the cue the user means).</summary>
+        public bool TryScreenCenterPoint(out Vector3 point)
         {
-            if (label.Contains("drawer") || label.Contains("cabinet") || label.Contains("wardrobe") || label.Contains("door"))
-                return Preference.Vertical;
-            if (label.Contains("bed") || label.Contains("desk") || label.Contains("pile") || label.Contains("table") || label.Contains("floor"))
-                return Preference.Horizontal;
-            return Preference.None;
+            point = default;
+            if (!Locator.TryLocateScreenCenter(out Placement p)) return false;
+            point = p.position;
+            return true;
         }
 
-        static bool Matches(PlaneAlignment a, Preference p) =>
-            (p == Preference.Vertical && a.IsVertical()) || (p == Preference.Horizontal && a.IsHorizontal());
-
-        /// <summary>No hit: guess the depth from how far the planes the camera could see were (median, 0.6–3.5 m).</summary>
-        float FallbackDistance(CapturePose pose)
+        /// <summary>Moves a cue (keeping its state) onto a new anchor at a better position.</summary>
+        async void MoveCue(SpotCue cue, Placement p, CapturePose pose, int[] box)
         {
-            planeDistances.Clear();
-            foreach (var plane in planeManager.trackables)
+            if (cue == null || !moving.Add(cue)) return;
+            try
             {
-                Vector3 vp = ghost.WorldToViewport(pose, plane.center);
-                if (vp.z > 0f && vp.x is >= 0f and <= 1f && vp.y is >= 0f and <= 1f)
-                    planeDistances.Add(Vector3.Distance(pose.position, plane.center));
+                var oldAnchor = cue.GetComponentInParent<ARAnchor>();
+                Transform parent = await CreateAnchor(p.position, p.plane);
+                if (cue == null) { RemoveAnchorOf(parent); return; }   // cleared while waiting
+                cue.transform.SetParent(null, true);
+                cue.transform.SetPositionAndRotation(p.position, Quaternion.identity);
+                cue.transform.SetParent(parent != null ? parent : cuesRoot, true);
+                if (oldAnchor != null && oldAnchor.transform != parent) RemoveAnchorOf(oldAnchor.transform);
+                Debug.Log($"[SpotPlacer] {cue.Label}: {cue.Quality} → {p.quality}");
+                Remember(cue, p, pose, box);
             }
-            if (planeDistances.Count == 0) return 1.5f;
-            planeDistances.Sort();
-            return Mathf.Clamp(planeDistances[planeDistances.Count / 2], 0.6f, 3.5f);
+            finally
+            {
+                moving.Remove(cue);
+            }
         }
+
+        static void Remember(SpotCue cue, Placement p, CapturePose pose, int[] box)
+        {
+            cue.Quality = p.quality;
+            cue.SourcePose = pose;
+            cue.SourceBox = box;
+        }
+
+        /// <summary>How many cues are placed at each quality (DebugOverlay).</summary>
+        public string QualitySummary()
+        {
+            int guess = 0, surface = 0, measured = 0;
+            foreach (var c in cues)
+            {
+                if (c == null) continue;
+                if (c.Quality <= PlacementQuality.Guess) guess++;
+                else if (c.Quality == PlacementQuality.Support) surface++;
+                else measured++;
+            }
+            return $"{measured} measured, {surface} on floor/table height, {guess} guessed";
+        }
+
+        // ---------- box → screen ----------
 
         /// <summary>
         /// Gemini box point → Unity screen pixel. Gemini: [ymin, xmin, ymax, xmax] in 0..1000, origin TOP-left.
@@ -276,83 +286,6 @@ namespace FindMe
             Vector2 s = ImageOrientation.UprightToScreen(upright, p.up);
             // ...then into Unity pixels. 1 - y: flip Y (top-left origin → bottom-left origin).
             return new Vector2(s.x * p.screenWidth, (1f - s.y) * p.screenHeight);
-        }
-
-        // ---------- merge ----------
-
-        /// <summary>
-        /// An existing cue is the same spot if the labels are similar AND either
-        ///   (a) it's within mergeDistance of the new 3D estimate, or
-        ///   (b) seen from the NEW photo's camera, it sits inside the new box.
-        /// (b) matters because depth from one photo is a guess (no plane hit = fixed guess along the ray),
-        /// so the same drawer scanned from two spots can get 3D estimates half a metre apart.
-        /// Where it appears in the photo doesn't depend on that guess.
-        /// </summary>
-        SpotCue FindDuplicate(HidingSpot spot, Vector3 position, CapturePose pose)
-        {
-            foreach (var cue in cues)
-            {
-                if (!LabelsSimilar(cue.Label, spot.label)) continue;
-                Vector3 p = cue.transform.position;
-                float dist = Vector3.Distance(p, position);
-                if (dist <= mergeDistance) return cue;
-
-                Vector3 vp = ghost.WorldToViewport(pose, p);
-                if (dist <= reprojectMergeDistance && vp.z > 0f && BoxContainsViewportPoint(spot.box_2d, vp, boxMargin, pose.up))
-                    return cue;
-            }
-            return null;
-        }
-
-        /// <summary>
-        /// Is a viewport point (0..1, origin BOTTOM-left) inside a Gemini box (0..1000, origin TOP-left)?
-        /// The box is grown by <paramref name="margin"/> × its size on every side.
-        /// <paramref name="up"/>: how the phone was held for the photo the box belongs to.
-        /// </summary>
-        public static bool BoxContainsViewportPoint(int[] b, Vector2 vp, float margin, ImageUp up = ImageUp.Top)
-        {
-            // Viewport (bottom-left) → screen image (top-left) → upright image, where the box lives.
-            Vector2 u = ImageOrientation.ScreenToUpright(new Vector2(vp.x, 1f - vp.y), up);
-            float x = u.x * 1000f;
-            float y = u.y * 1000f;
-            float mx = (b[3] - b[1]) * margin, my = (b[2] - b[0]) * margin;
-            return x >= b[1] - mx && x <= b[3] + mx && y >= b[0] - my && y <= b[2] + my;
-        }
-
-        static readonly string[] Filler = { "the", "of", "on", "in", "a", "an", "top", "under", "side" };
-
-        // Gemini words the same thing differently between scans ("bag" / "backpack"). Map each word to one family.
-        static readonly Dictionary<string, string> Synonyms = new()
-        {
-            { "backpack", "bag" }, { "handbag", "bag" }, { "purse", "bag" }, { "tote", "bag" }, { "rucksack", "bag" },
-            { "couch", "sofa" }, { "cushion", "sofa" }, { "cushions", "sofa" },
-            { "laundry", "clothes" }, { "clothing", "clothes" }, { "shirts", "clothes" }, { "shirt", "clothes" },
-            { "drawers", "drawer" }, { "dresser", "drawer" },
-            { "shelves", "shelf" }, { "bookshelf", "shelf" }, { "bookcase", "shelf" },
-            { "jacket", "coat" }, { "hoodie", "coat" },
-            { "cupboard", "cabinet" }, { "wardrobe", "cabinet" }, { "closet", "cabinet" },
-        };
-
-        static string Family(string word) => Synonyms.TryGetValue(word, out var f) ? f : word;
-
-        /// <summary>
-        /// "drawer" ≈ "top drawer" (one contains the other); "pile of clothes" ≈ "clothes pile" (shared word);
-        /// "backpack" ≈ "bag" (same synonym family).
-        /// </summary>
-        public static bool LabelsSimilar(string a, string b)
-        {
-            a = (a ?? "").Trim().ToLowerInvariant();
-            b = (b ?? "").Trim().ToLowerInvariant();
-            if (a.Length == 0 || b.Length == 0) return false;
-            if (a.Contains(b) || b.Contains(a)) return true;
-
-            foreach (var wa in a.Split(' '))
-            {
-                if (wa.Length < 3 || System.Array.IndexOf(Filler, wa) >= 0) continue;
-                foreach (var wb in b.Split(' '))
-                    if (Family(wa) == Family(wb)) return true;
-            }
-            return false;
         }
 
         // ---------- anchor + spawn ----------

@@ -163,6 +163,43 @@ namespace FindMe
 
         // ---------- buttons ----------
 
+        /// <summary>
+        /// "Check here" button: the user points the phone at the real hiding place and taps. Faster than holding
+        /// still on a cue, and it works even if the cue drifted: the cue moves to what's in the middle of the
+        /// screen (the user's aim beats our estimate), then gets checked right away.
+        /// </summary>
+        public void CheckHere()
+        {
+            if (State != SearchState.Searching || checker.Busy) return;
+            SpotCue cue = focus.Focused != null ? focus.Focused : CueNearAim();
+            if (cue == null)
+            {
+                UI?.ShowStatus("Point at one of the marked spots, then tap Check here.");
+                return;
+            }
+            placer.TryRelocateToScreenCenter(cue);
+            cue.CooldownUntil = 0f;
+            OnDwellCompleted(cue);
+        }
+
+        /// <summary>The open cue closest to what the user is pointing at (or, if nothing is measured there, by angle).</summary>
+        SpotCue CueNearAim()
+        {
+            Transform cam = Camera.main.transform;
+            bool haveAim = placer.TryScreenCenterPoint(out Vector3 aim);
+            SpotCue best = null;
+            float bestScore = float.MaxValue;
+            foreach (var c in placer.Cues)
+            {
+                if (c == null || !c.IsOpen || c.State == SpotState.Checking) continue;
+                float score = haveAim ? Vector3.Distance(aim, c.transform.position)          // metres
+                                      : Vector3.Angle(cam.forward, c.transform.position - cam.position);   // degrees
+                if (score < bestScore) { best = c; bestScore = score; }
+            }
+            // Nothing marked anywhere near the aim: don't guess which spot the user means.
+            return bestScore <= (haveAim ? 2f : 45f) ? best : null;
+        }
+
         /// <summary>The cue a manual button applies to: the one being looked at, else the one whose check failed.</summary>
         SpotCue ManualTarget => focus.Focused != null ? focus.Focused : manualCue;
 

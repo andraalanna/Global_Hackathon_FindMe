@@ -155,7 +155,7 @@ namespace FindMe
                           $"moved {readiness.MovedMeters:0.0} m  turned {readiness.RotatedDegrees:0}°  ready {readiness.Progress01 * 100f:0}%\n");
             if (search != null) sb.Append($"state {search.State}" +
                 (search.Session != null ? $"   session {search.Session.DurationSeconds(Time.time):0}s, {search.Session.scans} scans" : "") + "\n");
-            if (placer != null) sb.Append($"cues {placer.Cues.Count}\n");
+            if (placer != null) sb.Append($"cues {placer.Cues.Count}: {placer.QualitySummary()}\n");
             if (focus != null)
                 sb.Append($"focus {(focus.Focused != null ? focus.Focused.Label : "-")}  dwell {focus.Dwell01 * 100f:0}%  " +
                           $"{(focus.IsSteady ? "steady" : "MOVING")} {focus.AngularSpeed:0}°/s {focus.LinearSpeed:0.00}m/s\n");

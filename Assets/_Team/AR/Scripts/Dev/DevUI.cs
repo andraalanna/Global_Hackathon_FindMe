@@ -166,8 +166,18 @@ namespace FindMe.Dev
             }
 
             // Scan button, only while scanning is allowed.
-            if (scanEnabled && GUI.Button(new Rect(x, findRow.y - rowH * 2.2f - gap * 2, w, rowH * 1.2f), "Scan this area", button))
-                search.ScanArea();
+            if (scanEnabled)
+            {
+                var sr = new Rect(x, findRow.y - rowH * 2.2f - gap * 2, w, rowH * 1.2f);
+                if (search.State == SearchState.Searching)
+                {
+                    // Searching: "Check here" (point at the real spot and tap) next to "Scan this area".
+                    float half = (w - gap) / 2f;
+                    if (GUI.Button(new Rect(sr.x, sr.y, half, sr.height), "Check here", button)) search.CheckHere();
+                    if (GUI.Button(new Rect(sr.x + half + gap, sr.y, half, sr.height), "Scan this area", button)) search.ScanArea();
+                }
+                else if (GUI.Button(sr, "Scan this area", button)) search.ScanArea();
+            }
 
             // Presets: typing on a phone through IMGUI is clumsy; one tap is faster for testing.
             string[] presets = { "black wallet", "keys", "glasses" };

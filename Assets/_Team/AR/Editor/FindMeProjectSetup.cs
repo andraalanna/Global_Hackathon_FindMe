@@ -142,6 +142,7 @@ namespace FindMe.EditorTools
             var search = GetOrAdd<SearchController>(systems);
             SetRef(search, "gemini", gemini);
             SetRef(search, "readiness", readiness);
+            SetRef(search, "arSession", Object.FindAnyObjectByType<ARSession>());
 
             var uiRoot = GameObject.Find("UI");
             var devUiGo = GameObject.Find("DevUI") ?? new GameObject("DevUI");
@@ -172,6 +173,15 @@ namespace FindMe.EditorTools
             SetRef(placer, "anchorManager", origin.GetComponent<ARAnchorManager>());
             SetRef(placer, "planeManager", planes);
             SetRef(placer, "ghost", ghost);
+            SetRef(placer, "arCamera", origin.Camera);
+
+            // Depth (ARCore Depth API): lets raycasts hit the real surface at a pixel, so cues sit ON the bag
+            // instead of floating where a distance was guessed. Occlusion OFF: cues must never hide behind furniture.
+            var occlusion = GetOrAdd<AROcclusionManager>(origin.Camera.gameObject);
+            occlusion.requestedEnvironmentDepthMode = EnvironmentDepthMode.Fastest;   // cheapest; the A80 runs warm
+            occlusion.requestedOcclusionPreferenceMode = OcclusionPreferenceMode.NoOcclusion;
+            occlusion.environmentDepthTemporalSmoothingRequested = true;              // steadier depth = steadier hits
+            EditorUtility.SetDirty(occlusion);
             SetRef(placer, "cuesRoot", GameObject.Find("Cues").transform);
             var planeVis = GetOrAdd<PlaneVisibility>(systems);
             SetRef(planeVis, "planeManager", planes);

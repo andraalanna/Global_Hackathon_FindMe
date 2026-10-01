@@ -17,6 +17,8 @@ namespace FindMe
     {
         [SerializeField] GeminiServiceProvider gemini;
         [SerializeField] ARReadiness readiness;
+        [Tooltip("Reset on every new search, so the readiness meter really starts from zero.")]
+        [SerializeField] ARSession arSession;
         [SerializeField] SnapshotCapture snapshot;
         [SerializeField] SpotPlacer placer;
         [SerializeField] PlaneVisibility planes;
@@ -103,6 +105,7 @@ namespace FindMe
             text = text.Trim();
             var ct = NewSearchToken();
             ResetSpots();                // a new search starts from an empty room
+            RestartAR();
             Session = new SearchSession { item = text, startTime = Time.time };
             planes.SetVisible(true);
             RefreshCues();
@@ -262,6 +265,30 @@ namespace FindMe
         {
             foreach (var c in placer.Cues) if (c != null && c.IsOpen) return true;
             return false;
+        }
+
+        /// <summary>
+        /// Fresh start for the readiness meter: forget the planes ARCore found (ARSession.Reset) and the
+        /// "moved / turned" totals. Otherwise a second search, or reopening the app, starts with a full meter.
+        /// </summary>
+        void RestartAR()
+        {
+            if (arSession != null) arSession.Reset();
+            readiness.ResetReadiness();
+        }
+
+        /// <summary>
+        /// Android "closing" usually only backgrounds the app: on return, everything is still in memory.
+        /// If the user hadn't scanned yet, make them re-check the room from zero (tracking may have drifted too).
+        /// Mid-search we keep the cues: re-scanning everything would cost more than it saves.
+        /// </summary>
+        void OnApplicationPause(bool paused)
+        {
+            if (paused || !(State is SearchState.WaitingForAR or SearchState.ReadyToScan)) return;
+            RestartAR();
+            SetState(SearchState.WaitingForAR);
+            UI?.SetReadiness(0f);
+            UI?.ShowStatus("Move your phone slowly around the room");
         }
 
         /// <summary>"Stop" button: cancel everything and go back to the start.</summary>

@@ -50,6 +50,11 @@ namespace FindMe
         public float CooldownUntil { get; set; }            // no re-check before this Time.time
         public string Note { get; set; }                    // e.g. "user said a previous match was not the item"
         public SpotState StateBeforeCheck { get; set; }     // restored if a check fails or is cancelled
+
+        // Where the cue came from, so SpotPlacer can re-locate it when ARCore knows the room better.
+        public CapturePose SourcePose { get; set; }         // the photo's camera
+        public int[] SourceBox { get; set; }                // the spot's box in that photo
+        public PlacementQuality Quality { get; set; }       // how trustworthy the current position is
         public float CheckedAt { get; set; } = -1f;         // Time.time when it became Checked/Found (session summary)
 
         Camera cam;
