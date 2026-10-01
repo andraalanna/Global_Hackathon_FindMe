@@ -73,7 +73,7 @@ namespace FindMe.UI
             normalButtons = nb.gameObject;
             scanBtn = Small(UIKit.Button(nb.transform, "Scan", ButtonKind.Primary, App.Actions.ScanArea, "scan"));
             checkBtn = Small(UIKit.Button(nb.transform, "Check here", ButtonKind.Outline, App.Actions.CheckHere));
-            Small(UIKit.Button(nb.transform, "Found", ButtonKind.Success, FoundTapped));
+            Small(UIKit.Button(nb.transform, "Found it", ButtonKind.Success, FoundTapped));   // always there: ends the search
 
             // Manual buttons for a spot the AI couldn't decide on: ✓ Checked · Found it
             var mb = UIKit.Row(group.transform, "Manual", 10f);

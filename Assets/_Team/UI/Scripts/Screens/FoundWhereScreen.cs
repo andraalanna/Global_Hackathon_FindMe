@@ -41,7 +41,7 @@ namespace FindMe.UI
             });
 
             var foot = Foot(page.transform);
-            save = UIKit.Button(foot.transform, "Save", ButtonKind.Primary, () => App.FoundManually(picked));
+            save = UIKit.Button(foot.transform, "Save", ButtonKind.Primary, Save);
         }
 
         public override void OnShow()
@@ -63,14 +63,25 @@ namespace FindMe.UI
             save.SetInteractable(false);
         }
 
-        /// <summary>Spots from this search if we have them, else Gemini's likely places, else the thing's usual ones.</summary>
+        /// <summary>
+        /// A marked spot? The search ends ON that cue (backend Found: summary, checked spots, cue burst).
+        /// Somewhere else (typed, or a likely place with no cue)? The UI records it and stops the search.
+        /// </summary>
+        void Save()
+        {
+            foreach (var label in App.Actions.SpotLabels())
+                if (string.Equals(label, picked, System.StringComparison.OrdinalIgnoreCase) && App.Actions.MarkFoundAt(label)) return;
+            App.FoundManually(picked);
+        }
+
+        /// <summary>The spots marked in this search first, then Gemini's likely places, else the thing's usual ones.</summary>
         List<string> Places(Thing t)
         {
             var list = new List<string>();
-            var s = App.Search.session;
-            if (s != null) foreach (var r in s.spots) if (!list.Contains(UIManager.Cap(r.label))) list.Add(UIManager.Cap(r.label));
+            foreach (var label in App.Actions.SpotLabels()) if (!list.Contains(UIManager.Cap(label))) list.Add(UIManager.Cap(label));
             var p = App.Search.profile;
-            if (list.Count == 0 && p?.likelyPlaces != null) foreach (var x in p.likelyPlaces) list.Add(UIManager.Cap(x));
+            if (p?.likelyPlaces != null)
+                foreach (var x in p.likelyPlaces) if (list.Count < 6 && !list.Contains(UIManager.Cap(x))) list.Add(UIManager.Cap(x));
             if (list.Count == 0) foreach (var (place, _) in t.top) list.Add(place);
             if (list.Count == 0) list.AddRange(new[] { "Coat hook", "Sofa cushions", "Side table", "Coffee table" });
             return list.GetRange(0, Mathf.Min(6, list.Count));

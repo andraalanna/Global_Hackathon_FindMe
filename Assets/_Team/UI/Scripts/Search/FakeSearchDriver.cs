@@ -149,6 +149,14 @@ namespace FindMe.UI
             return true;
         }
 
+        public List<string> SpotLabels() => new List<string>(spots);
+
+        public bool MarkFoundAt(string label)
+        {
+            foreach (var s in spots) if (string.Equals(s, label, System.StringComparison.OrdinalIgnoreCase)) { Found(s); return true; }
+            return false;
+        }
+
         public void UndoChecked()
         {
             if (lastChecked == null) return;

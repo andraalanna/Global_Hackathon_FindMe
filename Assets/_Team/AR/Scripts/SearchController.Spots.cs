@@ -196,18 +196,65 @@ namespace FindMe
         {
             if (State != SearchState.Searching || checker.Busy) return;
             SpotCue cue = focus.Focused != null ? focus.Focused : CueNearAim();
+            // Nothing open there? The user may be pointing at a spot that was already checked, after moving things
+            // (lifting papers, opening a bag): that's a deliberate "look again".
+            if (cue == null) cue = CueNearAim(includeChecked: true);
             if (cue == null)
             {
                 UI?.ShowStatus("Point at one of the marked spots, then tap Check here.");
                 return;
             }
+            if (cue.State == SpotState.Checked) Reopen(cue);
             placer.TryRelocateToScreenCenter(cue);
             cue.CooldownUntil = 0f;
             OnDwellCompleted(cue);
         }
 
+        /// <summary>
+        /// "Look again" at a checked spot: back to "to check", with a note so Gemini looks extra carefully
+        /// (things were moved; the item can be half under something, or hard to see like clear glasses).
+        /// </summary>
+        void Reopen(SpotCue cue)
+        {
+            cue.SetState(SpotState.ToCheck);
+            cue.CheckedAt = -1f;
+            if (lastChecked == cue) lastChecked = null;
+            string again = $"The user moved things at this spot and wants a careful second look. The {Profile?.name ?? "item"} " +
+                           "may be partly hidden, under or between other things, or transparent.";
+            cue.Note = string.IsNullOrEmpty(cue.Note) ? again : cue.Note + " " + again;
+            UI?.ShowStatus($"Looking at the {cue.Label} again…");
+            RefreshCues();
+        }
+
+        /// <summary>Labels of all marked spots in this search (for the UI's "Where did you find it?" list).</summary>
+        public System.Collections.Generic.List<string> SpotLabels()
+        {
+            var list = new System.Collections.Generic.List<string>();
+            foreach (var c in placer.Cues) if (c != null && !list.Contains(c.Label)) list.Add(c.Label);
+            return list;
+        }
+
+        /// <summary>
+        /// "I found it" at a marked spot, picked by the user (e.g. under papers the AI had already checked):
+        /// ends the search on that cue exactly like Found it on the cue. False if there is no such spot.
+        /// </summary>
+        public bool MarkFoundAt(string label)
+        {
+            if (!(State is SearchState.Searching or SearchState.FoundConfirm)) return false;
+            foreach (var c in placer.Cues)
+            {
+                if (c == null || !string.Equals(c.Label, label, System.StringComparison.OrdinalIgnoreCase)) continue;
+                if (candidate != null && candidate != c && candidate.State == SpotState.Candidate) candidate.SetState(SpotState.ToCheck);
+                candidate = null;                                   // a pending "Is this it?" is answered by the user's pick
+                if (candidateMarker != null) Destroy(candidateMarker);
+                ConfirmFound(c);
+                return true;
+            }
+            return false;
+        }
+
         /// <summary>The open cue closest to what the user is pointing at (or, if nothing is measured there, by angle).</summary>
-        SpotCue CueNearAim()
+        SpotCue CueNearAim(bool includeChecked = false)
         {
             Transform cam = Camera.main.transform;
             bool haveAim = placer.TryScreenCenterPoint(out Vector3 aim);
@@ -215,7 +262,8 @@ namespace FindMe
             float bestScore = float.MaxValue;
             foreach (var c in placer.Cues)
             {
-                if (c == null || !c.IsOpen || c.State == SpotState.Checking) continue;
+                bool usable = c != null && (c.IsOpen || (includeChecked && c.State == SpotState.Checked));
+                if (!usable || c.State == SpotState.Checking) continue;
                 float score = haveAim ? Vector3.Distance(aim, c.transform.position)          // metres
                                       : Vector3.Angle(cam.forward, c.transform.position - cam.position);   // degrees
                 if (score < bestScore) { best = c; bestScore = score; }

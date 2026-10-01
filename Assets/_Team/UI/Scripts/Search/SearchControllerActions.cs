@@ -12,6 +12,8 @@ namespace FindMe.UI
         public void CheckHere() => search.CheckHere();
         public void MarkChecked() => search.MarkChecked();
         public void UndoChecked() => search.UndoChecked();
+        public System.Collections.Generic.List<string> SpotLabels() => search.SpotLabels();
+        public bool MarkFoundAt(string label) => search.MarkFoundAt(label);
         public void ConfirmMatch(bool yes) => search.ConfirmMatch(yes);
         public void StopSearch() => search.StopSearch();
 

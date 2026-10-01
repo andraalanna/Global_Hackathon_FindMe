@@ -15,6 +15,10 @@ namespace FindMe.UI
         /// <summary>"Found it" on a spot. Returns false when no spot is targeted (the UI then asks "Where was it?").</summary>
         bool MarkFound();
         void UndoChecked();
+        /// <summary>Names of the spots marked in this search ("Where did you find it?" list).</summary>
+        System.Collections.Generic.List<string> SpotLabels();
+        /// <summary>The user found it at this marked spot: end the search there. False if no such spot.</summary>
+        bool MarkFoundAt(string label);
         void ConfirmMatch(bool yes);
         void StopSearch();
     }
