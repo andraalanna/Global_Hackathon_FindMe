@@ -1,216 +1,142 @@
-using System;
+using System.Collections;
+using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace FindMe.UI
 {
     /// <summary>
-    /// The UI lead's side of the contract: implements <see cref="ISearchUI"/> so SearchController can drive the screens,
-    /// and forwards button presses back to SearchController. Lives on the UIRoot prefab.
-    /// All 11 screens are real. Every ISearchUI method is implemented.
+    /// Root of the whole 2D UI (sits on the UIRoot prefab, next to its Canvas).
+    /// On Awake it builds every screen from code and opens the first one.
+    /// The search side (ISearchUI for SearchController) is in UIManager.Search.cs.
     /// </summary>
-    public class UIManager : MonoBehaviour, ISearchUI
+    [RequireComponent(typeof(Canvas))]
+    public partial class UIManager : MonoBehaviour
     {
-        public UITheme theme;
-        public ScreenRouter router;
-        public InputScreen inputScreen;
-        public AnalyzingScreen analyzingScreen;
-        public ItemCardScreen itemCardScreen;
-        public ReadinessScreen readinessScreen;
-        public ScanHudScreen hudScreen;
-        public SpotPanel spotPanel;
-        public MatchSheet matchSheet;
-        public AllCheckedSheet allCheckedSheet;
-        public FoundScreen foundScreen;
-        public SummaryScreen summaryScreen;
-        public UIToast toast;
+        [SerializeField] UITheme theme;
+        [Tooltip("Screen shown at start. 'splash' for the app; other ids help when testing one screen.")]
+        [SerializeField] string startScreen = "splash";
 
-        [Tooltip("Optional. Left empty in UI_Test; in the Main scene it is found automatically.")]
-        public SearchController search;
+        public ScreenRouter Router { get; private set; }
+        /// <summary>Account, things and history shown around the search (sample data for now).</summary>
+        public AppState State { get; } = new AppState();
+        /// <summary>The thing being registered in the "Add a thing" flow.</summary>
+        public ThingDraft Draft { get; set; } = new ThingDraft();
+        /// <summary>Set when the app was opened from a family invite (parent side of the flow).</summary>
+        public bool FromInvite { get; set; }
 
-        // Raised instead of calling SearchController when there is none (UI_Test's FakeSearchDriver listens to these).
-        public event Action<string> StartRequested;
-        public event Action ScanStartRequested, ScanRequested, FoundRequested, StopRequested, CheckedRequested;
-        public event Action<bool> MatchAnswered;
-        public event Action UndoRequested;
+        RectTransform toastLayer;
 
-        ItemProfile profile;
-        bool scanning;        // the user pressed "Start scanning" on the item card
-        bool scanEnabled;     // last SetScanEnabled value from SearchController
-        string lastStatus;
-        bool allCheckedDismissed;     // user tapped "Not now": don't show the sheet again until something changes
-        int lastChecked = -1, lastTotal = -1;
+        void Awake() => Build();
 
-        const string AllCheckedMessage = "All spots checked. Scan another area?";   // SearchController's exact text
-
-        void Start()
+        /// <summary>Builds all screens once. Awake calls it in Play mode; the Editor capture tool calls it directly.</summary>
+        public void Build()
         {
-            if (search == null) search = FindAnyObjectByType<SearchController>();
+            if (Router != null) return;
+            UIKit.Init(theme);
+            Tweens.ReduceMotion = theme.reduceMotion;
+            SetupCanvas();
 
-            inputScreen.onContinue += text =>
-            {
-                if (search != null) search.StartSearch(text);
-                else StartRequested?.Invoke(text);
-            };
-            itemCardScreen.onBack += GoHome;
-            itemCardScreen.onStart += () =>
-            {
-                scanning = true;
-                ScanStartRequested?.Invoke();
-                // Already ready (AR was quick)? Go straight to the HUD; otherwise show the "move your phone" card.
-                if (scanEnabled) ShowHud(); else router.Show("Readiness");
-            };
-            readinessScreen.onCancel += Stop;
+            var screens = UIKit.Stretch(UIKit.Rect(transform, "Screens"));
+            Router = screens.gameObject.AddComponent<ScreenRouter>();
+            foreach (var id in new[] { "find", "history", "things", "family", "settings" }) Router.Roots.Add(id);
 
-            hudScreen.onScan += RequestScan;
-            hudScreen.onFound += () => { if (search != null) search.MarkFound(); else FoundRequested?.Invoke(); };
-            hudScreen.onStop += Stop;
-            hudScreen.onCantFind += CantFind;
+            // Onboarding
+            Add<SplashScreen>("splash");
+            Add<WelcomeScreen>("welcome");
+            Add<SignUpScreen>("signup");
+            Add<LoginScreen>("login");
+            Add<ProfileScreen>("profile");
+            Add<PermissionsScreen>("perms");
+            Add<CameraOffScreen>("camoff");
+            Add<AskRegisterScreen>("askreg");
+            // Registering things
+            Add<RegisterPhotoScreen>("reg1");
+            Add<RegisterSpotScreen>("reg2");
+            Add<RegisterDoneScreen>("reg3");
+            // Tabs
+            Add<FindHomeScreen>("find");
+            Add<HistoryScreen>("history");
+            Add<ThingsScreen>("things");
+            Add<FamilyScreen>("family");
+            Add<SettingsScreen>("settings");
+            Add<PaywallScreen>("paywall");
+            Add<ItemScreen>("item");
+            // Starting a search + the search itself (UIManager.Search.cs)
+            Add<WhatScreen>("what");
+            SetupSearch();
 
-            // Spot panel's manual buttons and the match sheet go straight to SearchController (or the test driver).
-            spotPanel.onChecked += () => { if (search != null) search.MarkChecked(); else CheckedRequested?.Invoke(); };
-            spotPanel.onFound += () => { if (search != null) search.MarkFound(); else FoundRequested?.Invoke(); };
-            matchSheet.onAnswer += yes => { if (search != null) search.ConfirmMatch(yes); else MatchAnswered?.Invoke(yes); };
+            // Toasts float above every screen.
+            toastLayer = UIKit.Stretch(UIKit.Rect(transform, "Toasts"));
+        }
 
-            allCheckedSheet.onScan += RequestScan;
-            allCheckedSheet.onNotNow += () => allCheckedDismissed = true;
-            foundScreen.onDone += () => router.Show("Summary");
-            summaryScreen.onHome += Stop;
+        void Start() => Router.Go(startScreen);
 
-            router.Show("Input");
+        TScreen Add<TScreen>(string id) where TScreen : UIScreen
+        {
+            var s = UIScreen.Create<TScreen>(this, Router.transform, id);
+            Router.Add(s);
+            return s;
+        }
+
+        // ---------- small flows shared by several screens ----------
+
+        /// <summary>After logging in: the invite flow continues to "Join family", otherwise home.</summary>
+        public void AfterLogin() => Router.Go(FromInvite ? "joinFam" : "find");
+
+        /// <summary>End of onboarding ("Later" / "Done").</summary>
+        public void AfterOnboarding() => Router.Go(FromInvite ? "joinFam" : "find");
+
+        /// <summary>
+        /// .toast: grape pill near the bottom, fades in, stays ~2 s, fades out (prototype toast(), 2.4 s total).
+        /// </summary>
+        public void Toast(string message)
+        {
+            var row = UIKit.Row(toastLayer, "Toast", 0f, UIKit.Pad(18, 12, 18, 12), TextAnchor.MiddleCenter);
+            var rt = (RectTransform)row.transform;
+            rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0f);
+            rt.pivot = new Vector2(0.5f, 0f);
+            rt.anchoredPosition = new Vector2(0f, 110f);
+            row.gameObject.AddComponent<ContentSizeFitter>().horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
+            row.GetComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+            UIKit.Backdrop(row.transform, theme.grape, 99f);
+            var t = UIKit.Text(row.transform, message, TextStyle.Label, theme.white);
+            t.fontSize = 14.5f;
+            t.textWrappingMode = TextWrappingModes.NoWrap;
+            var g = row.gameObject.AddComponent<CanvasGroup>();
+            g.blocksRaycasts = false;
+            StartCoroutine(ToastLife(row.gameObject, g, rt));
+        }
+
+        IEnumerator ToastLife(GameObject go, CanvasGroup g, RectTransform rt)
+        {
+            g.alpha = 0f;
+            StartCoroutine(Tweens.SlideIn(rt, new Vector2(0f, -10f), 0.24f));
+            yield return Tweens.Fade(g, 1f, 0.24f);
+            yield return new WaitForSecondsRealtime(1.8f);
+            yield return Tweens.Fade(g, 0f, 0.36f);
+            Destroy(go);
         }
 
         /// <summary>
-        /// "Can't find it": the sorry screen with things to buy (FindMe.Onboarding.LostScreen, drawn above this UI).
-        /// Back home stops the search; Keep looking returns to the HUD with the search still running.
+        /// The canvas uses the prototype's own frame, 390 × 844 design px (iPhone 13 points), so every size
+        /// can be copied straight from the CSS. Scale With Screen Size stretches it to any phone; match 0.5
+        /// splits the difference between width and height on phones with other shapes (e.g. the Galaxy A80).
         /// </summary>
-        void CantFind()
+        void SetupCanvas()
         {
-            spotPanel.Hide(); matchSheet.Hide(); allCheckedSheet.Hide();
-            var extras = FindAnyObjectByType<FindMe.Onboarding.OnboardingManager>(FindObjectsInactive.Include);
-            if (extras == null) { Stop(); return; }
-            extras.ShowLost(profile?.name ?? "item", profile?.appearance, profile?.category, Stop, null);
-        }
+            var canvas = GetComponent<Canvas>();
+            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            canvas.sortingOrder = 10;                      // above any dev/debug canvases
 
-        void RequestScan()
-        {
-            allCheckedSheet.Hide();
-            if (search != null) search.ScanArea(); else ScanRequested?.Invoke();
-        }
+            if (!TryGetComponent(out CanvasScaler scaler)) scaler = gameObject.AddComponent<CanvasScaler>();
+            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            scaler.referenceResolution = new Vector2(390f, 844f);
+            scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
+            scaler.matchWidthOrHeight = 0.5f;
+            scaler.referencePixelsPerUnit = 100f;
 
-        // ---------- navigation helpers ----------
-        // Stop the search and return to the start screen (HUD stop button, readiness cancel).
-        void Stop()
-        {
-            StopRequested?.Invoke();
-            if (search != null) search.StopSearch();
-            GoHome();
-        }
-
-        void GoHome()
-        {
-            spotPanel.Hide();
-            matchSheet.Hide();
-            allCheckedSheet.Hide();
-            allCheckedDismissed = false;
-            lastChecked = lastTotal = -1;
-            if (search != null && !scanning) search.StopSearch();   // Back on the item card also ends the search
-            scanning = false;
-            lastStatus = null;
-            hudScreen.ResetHud();
-            inputScreen.ResetScreen();
-            router.Show("Input");
-        }
-
-        void ShowHud()
-        {
-            hudScreen.SetItem(profile);
-            hudScreen.SetStatus(lastStatus);
-            router.Show("Hud");
-        }
-
-        // ---------- ISearchUI: screens 1-3 ----------
-        public void ShowStatus(string message)
-        {
-            // SearchController says "Getting to know your {item}…" while Gemini profiles the item: that's the Analyzing screen.
-            if (message != null && message.StartsWith("Getting to know"))
-            {
-                router.Show("Analyzing");        // show first: a screen must be active before it can run its animation
-                analyzingScreen.Begin(message);
-                return;
-            }
-            lastStatus = message;
-            hudScreen.SetStatus(message);
-            // Every spot looked at and not found: offer to scan elsewhere (once, until the numbers change).
-            if (message == AllCheckedMessage && !allCheckedDismissed && router.CurrentName == "Hud") allCheckedSheet.Show();
-        }
-
-        public void HideStatus()
-        {
-            lastStatus = null;
-            hudScreen.SetStatus(null);
-        }
-
-        public void ShowItemCard(ItemProfile p)
-        {
-            profile = p;
-            analyzingScreen.Finish();
-            itemCardScreen.Show(p);
-            router.Show("ItemCard");
-        }
-
-        // ---------- ISearchUI: screens 4-5 ----------
-        public void SetReadiness(float progress01) => readinessScreen.SetProgress(progress01);
-
-        public void SetScanEnabled(bool on)
-        {
-            scanEnabled = on;
-            hudScreen.SetScanEnabled(on);
-            if (!on) allCheckedSheet.Hide();   // a scan started (or a sheet took over)
-            // AR just became ready while the readiness card is up: hand over to the HUD.
-            if (on && scanning && router.CurrentName == "Readiness") ShowHud();
-        }
-
-        public void SetProgress(int checkedCount, int total)
-        {
-            hudScreen.SetProgress(checkedCount, total);
-            // New numbers (an Undo, a new scan) mean the "all checked" situation is over, so reset the sheet.
-            if (checkedCount != lastChecked || total != lastTotal)
-            {
-                lastChecked = checkedCount; lastTotal = total;
-                allCheckedDismissed = false;
-                allCheckedSheet.Hide();
-            }
-        }
-
-        // ---------- ISearchUI: screens 6-8 ----------
-        public void ShowSpotPanel(string label, string tip, float dwell01, bool manualButtons) =>
-            spotPanel.Show(label, tip, dwell01, manualButtons);
-
-        public void HideSpotPanel() => spotPanel.Hide();
-
-        public void ShowMatch(string label)
-        {
-            spotPanel.Hide();   // the match sheet takes its place
-            matchSheet.Show(profile?.name ?? "item", label);
-        }
-
-        // ---------- ISearchUI: screens 9-10 ----------
-        public void ShowFound(string label)
-        {
-            spotPanel.Hide(); matchSheet.Hide(); allCheckedSheet.Hide();
-            router.Show("Found");               // show first: the confetti and bounce need an active screen
-            foundScreen.Play(profile?.name ?? "item", label);
-        }
-
-        // SearchController calls this right after ShowFound; the summary is shown when the user taps "Nice, done".
-        public void ShowSummary(SearchSession session) => summaryScreen.Set(session, profile?.name ?? "item");
-
-        // The toast already exists in the kit, so this one is real.
-        public void ShowCheckedToast(string label)
-        {
-            string text = string.IsNullOrEmpty(label) ? "Checked" : char.ToUpperInvariant(label[0]) + label.Substring(1) + " checked";
-            toast.Show(text, theme.soda, 4f, "Undo", () => { if (search != null) search.UndoChecked(); else UndoRequested?.Invoke(); },
-                "Tap Undo if you missed it");
+            if (GetComponent<GraphicRaycaster>() == null) gameObject.AddComponent<GraphicRaycaster>();
         }
     }
 }

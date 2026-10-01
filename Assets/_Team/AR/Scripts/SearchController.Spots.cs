@@ -168,6 +168,9 @@ namespace FindMe
             UI?.ShowSummary(Session);
         }
 
+        /// <summary>Is there a cue "I found it" would land on (the one looked at, a failed one, or one pointed at)?</summary>
+        public bool HasFoundTarget => State == SearchState.Searching && (ManualTarget != null || CueNearAim(includeChecked: true) != null);
+
         /// <summary>"I found it" with no marked spot anywhere near: the search still ends as found (place unknown).</summary>
         void FoundWithoutSpot()
         {

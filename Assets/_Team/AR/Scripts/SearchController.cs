@@ -137,6 +137,17 @@ namespace FindMe
             }));
         }
 
+        /// <summary>
+        /// "Photo from gallery": a picture of the item (or one like it) chosen from the phone's photos. Gemini describes
+        /// the item from it ("teal rectangular glasses") and the photo rides along with every scan and check, exactly
+        /// like Use photo. Optional text ("my glasses") helps when the photo shows several things.
+        /// </summary>
+        public void StartSearchWithImage(byte[] jpg, string text)
+        {
+            if (jpg == null || jpg.Length == 0) { StartSearch(text); return; }
+            BeginSearch(string.IsNullOrWhiteSpace(text) ? "" : text.Trim(), jpg);
+        }
+
         async void BeginSearch(string text, byte[] photo)
         {
             var ct = NewSearchToken();

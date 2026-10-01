@@ -1,0 +1,30 @@
+namespace FindMe.UI
+{
+    /// <summary>The real search: forwards every UI button to the AR lead's SearchController.</summary>
+    public class SearchControllerActions : ISearchActions
+    {
+        readonly SearchController search;
+
+        public SearchControllerActions(SearchController search) => this.search = search;
+
+        public void StartSearch(string text) => search.StartSearch(text);
+        public void StartSearchWithImage(byte[] jpg, string text) => search.StartSearchWithImage(jpg, text);
+        public void ScanArea() => search.ScanArea();
+        public void CheckHere() => search.CheckHere();
+        public void MarkChecked() => search.MarkChecked();
+        public void UndoChecked() => search.UndoChecked();
+        public System.Collections.Generic.List<string> SpotLabels() => search.SpotLabels();
+        public bool MarkFoundAt(string label) => search.MarkFoundAt(label);
+        public void ConfirmMatch(bool yes) => search.ConfirmMatch(yes);
+        public void StopSearch() => search.StopSearch();
+
+        public bool MarkFound()
+        {
+            // Nothing targeted or pointed at? Our UI asks "Where did you find it?" instead of ending without a place.
+            if (!search.HasFoundTarget) return false;
+            // MarkFound only works on a targeted cue; it switches the state to Found (and calls ShowFound) when it does.
+            search.MarkFound();
+            return search.State == SearchState.Found;
+        }
+    }
+}
