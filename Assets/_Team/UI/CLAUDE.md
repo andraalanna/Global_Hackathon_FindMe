@@ -26,3 +26,9 @@ The visual source of truth is `Docs/design/screens/*.png` (look at the images) a
 
 ## Style
 Small, commented scripts. After each task: changed files, how to test in `UI_Test`, screenshots description, known issues.
+
+## Design device: iPhone 13 (overrides the 1080×2400 numbers above)
+- Design frames are 390×844 pt = iPhone 13 logical size. Canvas Scaler reference resolution is **1170×2532** (exactly 3×), Scale With Screen Size, match 0.5. 1 design px = 3 Unity px (DESIGN_SPEC's 2.77× becomes 3×).
+- Game view test resolution: 1170×2532.
+- iPhone 13 safe area: top 47 pt (notch), bottom 34 pt (home indicator). Always use the SafeArea panel; never hard-code these.
+- The real test phone (Galaxy A80) is taller (~20:9): anchor to top/bottom, let the middle stretch, keep the middle 60% clear for AR cues.
