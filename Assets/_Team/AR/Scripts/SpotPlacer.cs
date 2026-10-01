@@ -55,17 +55,19 @@ namespace FindMe
         /// <summary>What one scan did: new cues, spots that matched an existing cue, spots dropped by the cap.</summary>
         public struct PlaceResult
         {
-            public int added, merged, overCap;
+            public int added, merged, overCap, moved, removed;
         }
 
         /// <summary>
         /// Places cues for spots from ONE snapshot (already sorted, highest likelihood first), 150 ms apart.
         /// Spots that match an existing cue are merged into it, so that cue keeps its state (e.g. Checked).
         /// </summary>
-        public async Task<PlaceResult> PlaceSpots(IReadOnlyList<HidingSpot> spots, CapturePose pose, SurfaceGrid grid, CancellationToken ct)
+        public async Task<PlaceResult> PlaceSpots(IReadOnlyList<HidingSpot> spots, CapturePose pose, SurfaceGrid grid,
+                                                  CancellationToken ct, bool onlyExisting = false)
         {
             cues.RemoveAll(c => c == null);   // ARCore can drop an anchor (and its cue) at any time
             var result = new PlaceResult();
+            var seen = new HashSet<SpotCue>();
             foreach (var spot in spots)
             {
                 ct.ThrowIfCancellationRequested();
@@ -76,12 +78,27 @@ namespace FindMe
                 var existing = FindDuplicate(spot, position, pose);
                 if (existing != null)
                 {
+                    seen.Add(existing);
+                    existing.Misses = 0;
                     existing.Likelihood = Mathf.Max(existing.Likelihood, spot.likelihood);
                     // ...but if this view measured it better (e.g. scanned from closer), move it there.
                     if (placement.quality > existing.Quality) MoveCue(existing, placement, pose, spot.box_2d);
                     result.merged++;
                     continue;
                 }
+                // The same object somewhere else: the user moved it (picked the bag up and put it down elsewhere).
+                // Its cue goes with it, keeping its state, instead of pointing at the empty old place.
+                var movedCue = FindMoved(spot, pose, seen);
+                if (movedCue != null)
+                {
+                    seen.Add(movedCue);
+                    movedCue.Misses = 0;
+                    Debug.Log($"[SpotPlacer] '{movedCue.Label}' moved {Vector3.Distance(movedCue.transform.position, position):0.00} m");
+                    MoveCue(movedCue, placement, pose, spot.box_2d);
+                    result.moved++;
+                    continue;
+                }
+                if (onlyExisting) continue;               // quiet re-scans only update existing cues
                 if (OpenCount() >= maxCues || cues.Count >= maxTotalCues)
                 {
                     result.overCap++;
@@ -100,7 +117,55 @@ namespace FindMe
                 result.added++;
                 await Awaitable.WaitForSecondsAsync(spawnInterval, ct);   // stagger: one pop at a time
             }
+            result.removed = DropVanished(pose, seen);
             return result;
+        }
+
+        /// <summary>
+        /// A cue whose object this photo shows somewhere else. Same label (or synonym), and either it's the only cue
+        /// with that label, or its old place is in view in this photo (and not inside this box: that's FindDuplicate).
+        /// Cues being checked or confirmed, and found ones, never move.
+        /// </summary>
+        SpotCue FindMoved(HidingSpot spot, CapturePose pose, HashSet<SpotCue> taken)
+        {
+            SpotCue only = null, inView = null;
+            int sameLabel = 0;
+            foreach (var c in cues)
+            {
+                if (c == null || taken.Contains(c) || c.IsSighting || !LabelsSimilar(c.Label, spot.label)) continue;
+                if (c.State is SpotState.Checking or SpotState.Candidate or SpotState.Found) continue;
+                sameLabel++;
+                only = c;
+                if (InView(c.transform.position, pose)) inView = c;
+            }
+            return inView != null ? inView : sameLabel == 1 ? only : null;
+        }
+
+        /// <summary>
+        /// Open cues whose place this photo looked straight at, but no spot in it matched: the object isn't there
+        /// any more. Twice in a row (one scan can simply miss something) → the cue is removed. Checked cues stay
+        /// (they record where the user already looked).
+        /// </summary>
+        int DropVanished(CapturePose pose, HashSet<SpotCue> seen)
+        {
+            int removed = 0;
+            foreach (var c in cues.ToArray())
+            {
+                if (c == null || seen.Contains(c) || !c.IsOpen || c.State is SpotState.Checking) continue;
+                if (!InView(c.transform.position, pose, 0.15f) || Vector3.Distance(pose.position, c.transform.position) > 3.5f) continue;
+                if (++c.Misses < 2) continue;
+                Debug.Log($"[SpotPlacer] '{c.Label}' is no longer where its cue was: removed");
+                RemoveCue(c);
+                removed++;
+            }
+            return removed;
+        }
+
+        /// <summary>Was this world point inside the photo (with a margin from the edges, in front of the camera)?</summary>
+        bool InView(Vector3 world, CapturePose pose, float margin = 0.05f)
+        {
+            Vector3 vp = ghost.WorldToViewport(pose, world);
+            return vp.z > 0.2f && vp.x > margin && vp.x < 1f - margin && vp.y > margin && vp.y < 1f - margin;
         }
 
         void RemoveAnchorOf(Transform anchorTransform)

@@ -78,6 +78,61 @@ namespace FindMe
         public Placement Locate(string label, int[] box, CapturePose pose, SurfaceGrid grid = null)
         {
             label = (label ?? "").ToLowerInvariant();
+            return PullToBase(label, box, pose, LocateRaw(label, box, pose, grid));
+        }
+
+        /// <summary>
+        /// Without a depth sensor (iPhone 13, most Androids) a ray through the middle of a bag can miss it and hit
+        /// the wall or floor BEHIND it: the cue then hangs behind / above the bag. Fix: find where the object stands.
+        /// The ray through the bottom of its box meets the table or floor it rests on: that is its base, and an object
+        /// can't be farther away than its own base. A placement behind it is pulled forward to the base's distance,
+        /// along the centre ray (the front of the object, at its height). It only ever pulls cues CLOSER, so things on
+        /// walls (a coat on a hook, whose base ray lands on the floor beyond the wall) keep their placement.
+        /// </summary>
+        Placement PullToBase(string label, int[] box, CapturePose pose, Placement p)
+        {
+            if (p.quality == PlacementQuality.Depth) return p;                 // a depth hit IS the object's surface
+            if (label.Contains("under") || PreferenceFor(label) == Preference.Vertical) return p;
+            if (!TryBase(box, pose, out Vector3 basePoint, out ARPlane support)) return p;
+
+            float baseDist = Flat(basePoint - pose.position);
+            float placedDist = Flat(p.position - pose.position);
+            bool weak = p.quality <= PlacementQuality.Support;
+            if (!weak && placedDist <= baseDist + 0.15f) return p;            // already at (or in front of) the object
+
+            Ray centre = ghost.ScreenRay(pose, SpotPlacer.BoxPointToScreen(box, 0.5f, 0.5f, pose));
+            float flat = Flat(centre.direction);
+            Vector3 pos = flat < 0.05f
+                ? basePoint + Vector3.up * 0.02f                               // looking straight down: the base is it
+                : centre.GetPoint(baseDist / flat) - centre.direction * surfaceOffset;
+            return new Placement { position = pos, plane = support, quality = PlacementQuality.Plane };
+        }
+
+        static float Flat(Vector3 v) => new Vector2(v.x, v.z).magnitude;
+
+        /// <summary>Where the ray through the bottom-centre of the box first meets a tracked table/floor plane.</summary>
+        bool TryBase(int[] box, CapturePose pose, out Vector3 point, out ARPlane support)
+        {
+            point = default;
+            support = null;
+            Ray ray = ghost.ScreenRay(pose, SpotPlacer.BoxPointToScreen(box, 0.5f, 0.95f, pose));
+            float best = float.MaxValue;
+            foreach (var plane in planeManager.trackables)
+            {
+                if (plane.alignment != PlaneAlignment.HorizontalUp || plane.subsumedBy != null ||
+                    plane.trackingState != TrackingState.Tracking) continue;
+                if (!TryIntersectHorizontal(ray, plane.center.y, 0.2f, 6f, out float t) || t >= best) continue;
+                Vector3 hit = ray.GetPoint(t);
+                if (!NearPlane(plane, hit, 0.15f)) continue;
+                best = t;
+                point = hit;
+                support = plane;
+            }
+            return support != null;
+        }
+
+        Placement LocateRaw(string label, int[] box, CapturePose pose, SurfaceGrid grid)
+        {
             if (grid != null && TryLocateFromGrid(label, box, pose, grid, out var fromGrid)) return fromGrid;
             var points = label.Contains("under") ? UnderPoints : SamplePoints;
             var preference = PreferenceFor(label);

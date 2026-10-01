@@ -3,7 +3,6 @@
     "rootNamespace": "FindMe.Sim",
     "references": [
         "FindMe.AR",
-        "FindMe.UI",
         "Unity.XR.ARFoundation",
         "Unity.XR.ARSubsystems",
         "Unity.XR.CoreUtils",
@@ -19,7 +18,8 @@
     "precompiledReferences": [],
     "autoReferenced": false,
     "defineConstraints": [
-        "UNITY_EDITOR"
+        "UNITY_EDITOR",
+        "FINDME_SIM"
     ],
     "versionDefines": [],
     "noEngineReferences": false

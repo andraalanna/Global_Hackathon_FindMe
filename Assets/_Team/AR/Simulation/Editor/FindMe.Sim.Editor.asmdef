@@ -14,7 +14,9 @@
     "overrideReferences": false,
     "precompiledReferences": [],
     "autoReferenced": false,
-    "defineConstraints": [],
+    "defineConstraints": [
+        "FINDME_SIM"
+    ],
     "versionDefines": [],
     "noEngineReferences": false
 }

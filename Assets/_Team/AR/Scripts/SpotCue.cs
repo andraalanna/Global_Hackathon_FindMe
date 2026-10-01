@@ -27,6 +27,8 @@ namespace FindMe
 
         [Header("Readability")]
         [SerializeField] float bubbleBaseScale = 0.0005f;   // canvas px → metres at 1 m away
+        [Tooltip("Bubble height above the cue point (m). Short, so the bubble reads as sitting ON the object, not floating above it.")]
+        [SerializeField] float stemHeight = 0.08f;
         [SerializeField] float hintMaxDistance = 2f;        // hint text only up close
         [SerializeField] float farDistance = 5f;            // beyond this the cue fades to 40%
 
@@ -48,7 +50,11 @@ namespace FindMe
         // Bookkeeping for the automatic check (Phase 8)
         public int Attempts { get; set; }                   // checks without a clear answer
         public float CooldownUntil { get; set; }            // no re-check before this Time.time
-        public string Note { get; set; }                    // e.g. "user said a previous match was not the item"
+        public string Note { get; set; }
+        /// <summary>What Gemini said it saw ("black wallet on the desk next to the laptop"): the found place for sightings.</summary>
+        public string Seen { get; private set; }
+        /// <summary>Scans in a row that looked right at this cue's spot and didn't find its object there (it was moved away).</summary>
+        public int Misses { get; set; }                    // e.g. "user said a previous match was not the item"
         public SpotState StateBeforeCheck { get; set; }     // restored if a check fails or is cancelled
 
         // Where the cue came from, so SpotPlacer can re-locate it when ARCore knows the room better.
@@ -68,6 +74,8 @@ namespace FindMe
 
         public void Init(HidingSpot spot, int priority)
         {
+            Seen = spot.seen;
+            if (stem != null) stem.SetPosition(1, new Vector3(0f, stemHeight, 0f));
             Label = spot.label;
             Hint = spot.hint;
             Likelihood = spot.likelihood;
@@ -201,7 +209,7 @@ namespace FindMe
             float k = bubbleBaseScale * Mathf.Clamp(d, 0.5f, 4f);
             bubble.localScale = new Vector3(s.x * k, s.y * k, k);
             bubble.localRotation *= Quaternion.Euler(0f, 0f, rotZ);
-            bubble.localPosition = new Vector3(0f, 0.18f + Bob(), 0f);
+            bubble.localPosition = new Vector3(0f, stemHeight + Bob(), 0f);
 
             if (State == SpotState.Checking) progressRing.rectTransform.localRotation = Quaternion.Euler(0f, 0f, -stateTime * 120f);
 

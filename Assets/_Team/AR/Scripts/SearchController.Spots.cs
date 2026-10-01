@@ -161,17 +161,70 @@ namespace FindMe
             foreach (var c in placer.Cues) if (c != null && c != cue) c.SetFade(0.3f);   // the found one stands out
             SetState(SearchState.Found);
             RefreshCues();
+            string place = PlaceOf(cue);
             UI?.ShowStatus($"You found your {Profile.name}!");
-            UI?.ShowFound(cue.Label);
-            RecordSession(cue);
+            UI?.ShowFound(place);
+            RecordSession(place);
             UI?.ShowSummary(Session);
         }
 
+        /// <summary>"I found it" with no marked spot anywhere near: the search still ends as found (place unknown).</summary>
+        void FoundWithoutSpot()
+        {
+            CancelCheck();
+            SetState(SearchState.Found);
+            RefreshCues();
+            UI?.ShowStatus($"You found your {Profile?.name ?? "item"}!");
+            UI?.ShowFound(null);
+            RecordSession(null);
+            UI?.ShowSummary(Session);
+        }
+
+        /// <summary>
+        /// Where the item was, in words, for "Found it!" and the summary. A hiding spot names itself ("drawer").
+        /// The item seen out in the open is labelled with the item's own name ("wallet"), so then the place comes
+        /// from Gemini's evidence ("black wallet on the desk next to the laptop" → "on the desk next to the laptop"),
+        /// else the nearest other marked spot ("near the bag"). Null = unknown.
+        /// </summary>
+        string PlaceOf(SpotCue cue)
+        {
+            string item = (Profile?.name ?? "").ToLowerInvariant().Trim();
+            string label = (cue.Label ?? "").ToLowerInvariant().Replace("maybe ", "").Trim();
+            bool isItem = cue.IsSighting || (item.Length > 0 && label.Length > 0 && (label.Contains(item) || item.Contains(label)));
+            if (!isItem) return cue.Label;
+            string fromEvidence = PlacePhrase(cue.Seen);
+            if (fromEvidence != null) return fromEvidence;
+            SpotCue near = null;
+            float best = 2f;
+            foreach (var c in placer.Cues)
+            {
+                if (c == null || c == cue || c.IsSighting) continue;
+                float d = Vector3.Distance(c.transform.position, cue.transform.position);
+                if (d < best) { best = d; near = c; }
+            }
+            return near != null ? "near the " + near.Label : null;
+        }
+
+        /// <summary>"black wallet on the desk next to the laptop" → "on the desk next to the laptop" (null if no place in it).</summary>
+        public static string PlacePhrase(string evidence)
+        {
+            if (string.IsNullOrWhiteSpace(evidence)) return null;
+            string s = " " + evidence.Trim().TrimEnd('.') + " ";
+            string[] preps = { " on ", " in ", " inside ", " under ", " beneath ", " behind ", " next to ", " beside ", " between ", " near ", " by " };
+            int at = -1;
+            foreach (var p in preps)
+            {
+                int i = s.IndexOf(p, System.StringComparison.OrdinalIgnoreCase);
+                if (i >= 0 && (at < 0 || i < at)) at = i;
+            }
+            return at < 0 ? null : s.Substring(at + 1).Trim();
+        }
+
         /// <summary>Freeze the session at the moment of finding: which spots, what state, when.</summary>
-        void RecordSession(SpotCue found)
+        void RecordSession(string place)
         {
             if (Session == null) return;
-            Session.foundLabel = found.Label;
+            Session.foundLabel = place ?? "";
             Session.foundTime = Time.time;
             Session.spots.Clear();
             foreach (var c in placer.Cues)
@@ -288,8 +341,12 @@ namespace FindMe
         /// <summary>"Found it" button: the user found the item themselves (no confirmation needed).</summary>
         public void MarkFound()
         {
+            if (State != SearchState.Searching) return;
+            // The cue being looked at / whose check failed, else whatever marked spot the phone points at, even an
+            // already-checked one (the user lifted the papers and found the glasses there after all).
             SpotCue cue = ManualTarget;
-            if (State != SearchState.Searching || cue == null) return;
+            if (cue == null) cue = CueNearAim(includeChecked: true);
+            if (cue == null) { FoundWithoutSpot(); return; }
             ConfirmFound(cue);
         }
 

@@ -30,6 +30,12 @@ namespace FindMe
         [Header("Scan")]
         [SerializeField] int scanWidth = 768;          // px sent to Gemini Call 2
         [SerializeField] int maxSpotsPerScan = 5;
+        [Tooltip("While searching, quietly re-scan this often (s) so cues follow things the user moves (a bag put down " +
+                 "elsewhere). Only existing cues move; no new ones appear. 0 = off. Each one is a Gemini call.")]
+        [SerializeField] float quietRescanSeconds = 8f;
+
+        float lastScanTime;
+        bool quietScanRunning;
 
         public SearchState State { get; private set; } = SearchState.Idle;
         public ItemProfile Profile { get; private set; }
@@ -48,6 +54,8 @@ namespace FindMe
 
         void Awake()
         {
+            // Privacy + battery: the camera (AR session) is off until a search starts, and off again when it stops.
+            SetCamera(false);
             if (ui == null) ui = FindSearchUI();
             focus.enabled = false;                      // only runs while Searching
             focus.DwellCompleted += OnDwellCompleted;
@@ -70,6 +78,7 @@ namespace FindMe
             else if (State == SearchState.Searching)
             {
                 UpdateSpotPanel();
+                UpdateQuietRescan();
             }
         }
 
@@ -118,6 +127,7 @@ namespace FindMe
         public void StartSearchWithPhoto(string text)
         {
             if (snapshot.IsBusy) return;
+            SetCamera(true);                       // the photo needs the camera
             UI?.ShowStatus("Hold the item (or its photo) in view…");
             StartCoroutine(snapshot.Capture(384, true, snap =>
             {
@@ -131,6 +141,7 @@ namespace FindMe
         {
             var ct = NewSearchToken();
             ResetSpots();                // a new search starts from an empty room
+            SetCamera(true);             // camera on only from here (it was off on the app's other screens)
             RestartAR();
             Session = new SearchSession { item = text, startTime = Time.time };
             planes.SetVisible(true);
@@ -185,6 +196,7 @@ namespace FindMe
             }
 
             stateBeforeScan = State;
+            lastScanTime = Time.time;
             if (Session != null) Session.scans++;
             SetState(SearchState.Scanning);
             UI?.SetScanEnabled(false);
@@ -241,6 +253,55 @@ namespace FindMe
                 catch (OperationCanceledException) { return; }
                 ShowSighting(cue);
             }
+        }
+
+        /// <summary>
+        /// Every few seconds while searching, if the phone is calm and nothing is being checked: take a silent photo
+        /// (no flash) and ask for the spots again, only to move existing cues whose objects moved (or drop ones whose
+        /// objects are gone). No status noise unless something moved; the item seen in the open still pops "There it is!".
+        /// </summary>
+        void UpdateQuietRescan()
+        {
+            if (quietRescanSeconds <= 0f || quietScanRunning || checker.Busy || snapshot.IsBusy) return;
+            if (Time.time - lastScanTime < quietRescanSeconds) return;
+            if (focus.Focused != null || !focus.IsSteady || ARSession.state != ARSessionState.SessionTracking) return;
+            lastScanTime = Time.time;
+            quietScanRunning = true;
+            var ct = cts.Token;
+            StartCoroutine(snapshot.Capture(scanWidth, false, snap => QuietScan(snap, ct)));
+        }
+
+        async void QuietScan(Snapshot snap, CancellationToken ct)
+        {
+            try
+            {
+                if (snap == null) return;
+                if (State != SearchState.Searching) { Destroy(snap.texture); return; }
+                List<HidingSpot> spots;
+                try { spots = await gemini.Service.FindSpots(snap.jpg, Profile, ct); }
+                catch (OperationCanceledException) { Destroy(snap.texture); return; }
+                catch (Exception e)
+                {
+                    Debug.LogWarning($"[Search] Quiet re-scan failed: {e.Message}");
+                    Destroy(snap.texture);
+                    return;
+                }
+                if (State != SearchState.Searching) { Destroy(snap.texture); return; }
+
+                HidingSpot sighting = spots?.Find(s => s != null && s.isItem && s.Sanitize());
+                spots?.RemoveAll(s => s == null || s.isItem);
+                spots = SortAndCap(spots, maxSpotsPerScan);
+                SetLastScan(snap, spots);
+                var placed = await placer.PlaceSpots(spots, snap.pose, snap.grid, ct, onlyExisting: true);
+                if (placed.moved > 0)
+                    UI?.ShowStatus(placed.moved == 1 ? "Something moved, so its marker moved with it." : $"{placed.moved} things moved; their markers followed.");
+                RefreshCues();
+
+                if (sighting != null && State == SearchState.Searching)
+                    ShowSighting(await placer.PlaceItemSighting(sighting, snap.pose, snap.grid));
+            }
+            catch (OperationCanceledException) { }
+            finally { quietScanRunning = false; }
         }
 
         /// <summary>Scanning → Searching if we have spots, else back to where we were.</summary>
@@ -352,6 +413,16 @@ namespace FindMe
             RefreshCues();
             UI?.SetScanEnabled(false);
             UI?.ShowStatus("Type what you lost");
+            SetCamera(false);            // no search, no camera
+        }
+
+        /// <summary>
+        /// Turns the camera on/off by enabling the AR session: disabled, ARKit/ARCore pause and release the camera
+        /// (the phone's camera-in-use indicator goes off). Enabled, tracking resumes.
+        /// </summary>
+        void SetCamera(bool on)
+        {
+            if (arSession != null && arSession.enabled != on) arSession.enabled = on;
         }
 
         // ---------- State helpers ----------
