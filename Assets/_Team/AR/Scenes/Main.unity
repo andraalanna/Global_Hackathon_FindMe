@@ -401,6 +401,7 @@ GameObject:
   - component: {fileID: 1088451890}
   - component: {fileID: 1088451891}
   - component: {fileID: 1088451892}
+  - component: {fileID: 1088451893}
   m_Layer: 0
   m_Name: Systems
   m_TagString: Untagged
@@ -516,6 +517,7 @@ MonoBehaviour:
   jpgQuality: 70
   flashSeconds: 0.12
   shutterSound: {fileID: 0}
+  surfaceGrid: {fileID: 1088451893}
 --- !u!114 &1088451889
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -578,7 +580,7 @@ MonoBehaviour:
   maxAngularSpeed: 25
   maxLinearSpeed: 0.25
   window: 0.5
-  dwellSeconds: 2
+  dwellSeconds: 1.2
 --- !u!114 &1088451892
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -595,6 +597,21 @@ MonoBehaviour:
   gemini: {fileID: 1088451886}
   checkWidth: 512
   cooldownSeconds: 1.5
+--- !u!114 &1088451893
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1088451882}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f39a83b8c3f12944b077a95962c941e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: FindMe.AR::FindMe.SurfaceGridSampler
+  raycastManager: {fileID: 1653539576}
+  cols: 10
+  rows: 20
 --- !u!1 &1266016229
 GameObject:
   m_ObjectHideFlags: 0

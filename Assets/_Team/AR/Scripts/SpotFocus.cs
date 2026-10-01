@@ -25,7 +25,8 @@ namespace FindMe
         [SerializeField] float window = 0.5f;
 
         [Header("Dwell")]
-        [SerializeField] float dwellSeconds = 2f;
+        [Tooltip("Hold-still time before the automatic check. Plan said 2 s; 1.2 s feels much faster and still filters out passing glances.")]
+        [SerializeField] float dwellSeconds = 1.2f;
 
         public SpotCue Focused { get; private set; }
         public float Dwell01 => Mathf.Clamp01(dwell / dwellSeconds);

@@ -22,6 +22,8 @@ namespace FindMe
         [SerializeField] float flashSeconds = 0.12f;
         [Tooltip("Optional shutter sound. Section 8 (FeedbackFx) will own sounds later.")]
         [SerializeField] AudioSource shutterSound;
+        [Tooltip("Measures surface distances at photo time, so boxes can be placed in 3D exactly.")]
+        [SerializeField] SurfaceGridSampler surfaceGrid;
 
         public bool IsBusy { get; private set; }
 
@@ -64,6 +66,8 @@ namespace FindMe
                 time = Time.time,
             };
             Texture2D full = ScreenCapture.CaptureScreenshotAsTexture();
+            // Same frame as the pixels and the pose: the grid describes exactly this photo.
+            SurfaceGrid grid = surfaceGrid != null ? surfaceGrid.Sample() : null;
             RestoreOverlays();
 
             // Flash + sound only now, after the pixels are safely captured.
@@ -80,7 +84,7 @@ namespace FindMe
             byte[] jpg = small.EncodeToJPG(jpgQuality);
 
             IsBusy = false;
-            onDone?.Invoke(new Snapshot { jpg = jpg, pose = pose, texture = small });
+            onDone?.Invoke(new Snapshot { jpg = jpg, pose = pose, texture = small, grid = grid });
         }
 
         void HideOverlays()

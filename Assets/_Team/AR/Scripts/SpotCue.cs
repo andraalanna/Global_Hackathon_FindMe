@@ -55,6 +55,7 @@ namespace FindMe
         public CapturePose SourcePose { get; set; }         // the photo's camera
         public int[] SourceBox { get; set; }                // the spot's box in that photo
         public PlacementQuality Quality { get; set; }       // how trustworthy the current position is
+        public bool IsSighting { get; set; }                // marks the item itself (seen in the open), not a hiding place
         public float CheckedAt { get; set; } = -1f;         // Time.time when it became Checked/Found (session summary)
 
         Camera cam;

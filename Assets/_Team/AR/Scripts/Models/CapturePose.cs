@@ -22,5 +22,6 @@ namespace FindMe
         public byte[] jpg;
         public CapturePose pose;
         public Texture2D texture;      // the UPRIGHT image Gemini saw; owned by whoever keeps the Snapshot, Destroy() it when replaced
+        public SurfaceGrid grid;       // distances ARCore measured at photo time (null if no sampler)
     }
 }

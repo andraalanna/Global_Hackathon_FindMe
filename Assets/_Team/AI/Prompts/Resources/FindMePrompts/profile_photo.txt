@@ -1,0 +1,10 @@
+The first image shows the item the user lost (or one just like it). The user also wrote: "{userText}".
+Return JSON with:
+- objectsSeen: first, the separate objects clearly shown in the image (max 4, 1-3 words each), e.g. ["camo backpack", "pineapple"]. Ignore walls, floors and tables.
+- name: what the item is, short and lowercase, with its main colour (e.g. "black glasses", "pink wallet", "white airpods case").
+- category: the best match from this list, or "other": {categories}.
+- appearance: how to recognise THIS item in a photo of a room, max 15 words: colours, material, shape, distinctive marks (e.g. "teal rectangular plastic frames, thin temples, clear lenses").
+- sizeCm: [width, height] of a typical one in real life, in centimetres.
+- shape: 2-4 words describing its shape.
+- likelyPlaces: up to 5 short phrases where people usually lose or leave it at home, most likely first.
+If the user's words name an object in the image, describe THAT object, even if it is not the biggest.

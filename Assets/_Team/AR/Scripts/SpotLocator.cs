@@ -71,10 +71,14 @@ namespace FindMe
             this.surfaceOffset = surfaceOffset;
         }
 
-        /// <summary>Where a spot's box (from a photo taken at <paramref name="pose"/>) is in the world.</summary>
-        public Placement Locate(string label, int[] box, CapturePose pose)
+        /// <summary>
+        /// Where a spot's box (from a photo taken at <paramref name="pose"/>) is in the world.
+        /// Best source: the photo's own <see cref="SurfaceGrid"/> (measured at photo time). Else rays.
+        /// </summary>
+        public Placement Locate(string label, int[] box, CapturePose pose, SurfaceGrid grid = null)
         {
             label = (label ?? "").ToLowerInvariant();
+            if (grid != null && TryLocateFromGrid(label, box, pose, grid, out var fromGrid)) return fromGrid;
             var points = label.Contains("under") ? UnderPoints : SamplePoints;
             var preference = PreferenceFor(label);
             // Phone still where the photo was taken? Then cast from the live camera through the same pixels:
@@ -101,6 +105,72 @@ namespace FindMe
             // Median by distance: one stray ray that slipped past the object onto the far wall can't drag the cue.
             candidates.Sort((a, b) => a.distance.CompareTo(b.distance));
             return candidates[candidates.Count / 2].placement;
+        }
+
+        readonly List<float> gridDist = new();
+        readonly List<int> gridIdx = new();
+
+        /// <summary>
+        /// Grid cells inside the box (inner 70%, or the bottom 40% for "under …"), measured at photo time.
+        /// Their distances are clustered; the densest cluster is the object the box is around (the wall behind
+        /// and a chair leg in front are smaller clusters). Cue = centre of that cluster's points.
+        /// </summary>
+        bool TryLocateFromGrid(string label, int[] box, CapturePose pose, SurfaceGrid grid, out Placement placement)
+        {
+            placement = default;
+            bool under = label.Contains("under");
+            float w = box[3] - box[1], h = box[2] - box[0];
+            // Inner part of the box in upright 0..1000 coordinates: avoids the background at the box edges.
+            float x0 = box[1] + w * 0.15f, x1 = box[3] - w * 0.15f;
+            float y0 = under ? box[0] + h * 0.6f : box[0] + h * 0.15f, y1 = under ? box[2] : box[2] - h * 0.15f;
+
+            CollectCells(grid, pose, x0, x1, y0, y1);
+            if (gridIdx.Count < 3) CollectCells(grid, pose, box[1], box[3], box[0], box[2]);   // small box: use all of it
+            if (gridIdx.Count < 3) return false;                                                // too small/far: rays decide
+
+            // Sort indices by distance, cluster.
+            gridIdx.Sort((a, b) => Vector3.Distance(pose.position, grid.points[a]).CompareTo(Vector3.Distance(pose.position, grid.points[b])));
+            gridDist.Clear();
+            foreach (int i in gridIdx) gridDist.Add(Vector3.Distance(pose.position, grid.points[i]));
+            var (start, end) = SurfaceGrid.DensestCluster(gridDist);
+
+            Vector3 sum = Vector3.zero;
+            int depthHits = 0, planeHits = 0;
+            for (int k = start; k <= end; k++)
+            {
+                int i = gridIdx[k];
+                sum += grid.points[i];
+                if (grid.kinds[i] == PlacementQuality.Depth) depthHits++;
+                else if (grid.kinds[i] == PlacementQuality.Plane) planeHits++;
+            }
+            int n = end - start + 1;
+            Vector3 centre = sum / n;
+            // Pull slightly toward the camera so the cue floats just in front of the surface.
+            Vector3 toCam = (pose.position - centre).normalized;
+            placement = new Placement
+            {
+                position = centre + toCam * surfaceOffset,
+                quality = depthHits * 2 >= n ? PlacementQuality.Depth
+                        : planeHits * 2 >= n ? PlacementQuality.Plane
+                        : PlacementQuality.FeaturePoint,
+            };
+            return true;
+        }
+
+        /// <summary>Indices of measured grid cells whose centres fall inside an upright-image rectangle (0..1000).</summary>
+        void CollectCells(SurfaceGrid grid, CapturePose pose, float x0, float x1, float y0, float y1)
+        {
+            gridIdx.Clear();
+            for (int r = 0; r < grid.rows; r++)
+            for (int c = 0; c < grid.cols; c++)
+            {
+                int i = r * grid.cols + c;
+                if (grid.kinds[i] == PlacementQuality.Guess) continue;
+                Vector2 vp = grid.CellViewport(c, r);
+                // Viewport (bottom-left) → screen image (top-left) → upright image, where Gemini's box lives.
+                Vector2 u = ImageOrientation.ScreenToUpright(new Vector2(vp.x, 1f - vp.y), pose.up) * 1000f;
+                if (u.x >= x0 && u.x <= x1 && u.y >= y0 && u.y <= y1) gridIdx.Add(i);
+            }
         }
 
         /// <summary>What's in the middle of the screen right now (the user is pointing the phone at it).</summary>

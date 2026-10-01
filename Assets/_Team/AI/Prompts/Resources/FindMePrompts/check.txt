@@ -1,0 +1,13 @@
+You help someone find their lost {itemName} ({itemDescription}). They are pointing the phone at this spot: "{spotLabel}".
+Look at the photo and answer honestly. When unsure, answer false.
+
+- seen: what you see at the spot right now (max 12 words), e.g. "closed black glasses case on a desk".
+- itemEvidence: if you see the {itemName}, its colour and exactly where it is (max 12 words); otherwise "none". Do not repeat the description above.
+- itemVisible: true only if the {itemName} ITSELF is clearly visible: {lookalike}. Its case, its box or a similar-looking object does not count.
+- itemBox: [ymin, xmin, ymax, xmax] 0-1000 around the {itemName} if itemVisible, else null.
+- closed: true if the spot is still closed or covering things: a closed case or box, closed drawer or cabinet, zipped or closed bag or pocket, a pile or blanket that has not been lifted, cushions not moved.
+- insideVisible: true only if you can clearly see INSIDE or UNDER the spot: the case, box, drawer or bag is open and its inside is visible, or the pile, blanket or cushion is lifted so what is under it is visible. A closed container is never insideVisible, no matter how small it is.
+- mightBeHidden: true if, even though you can see in or under, the {itemName} could still be hidden from view: things are piled or stacked on top of each other, it is too dark to see well, or something there has a similar colour or shape to the {itemName}. false only if everything there is clearly visible and clearly nothing like the {itemName}.
+- spotBox: [ymin, xmin, ymax, xmax] 0-1000 around the {spotLabel} in this photo, or null if it is not in view.
+- tip: max 6 words, the next thing to do, e.g. "Open the case", "Unzip the front pocket", "Lift the top shirt", "Move the clothes around", "Turn on a light". If insideVisible is true, mightBeHidden is false and the {itemName} is not there, say "Nothing here".
+{checkKnowledge}{note}

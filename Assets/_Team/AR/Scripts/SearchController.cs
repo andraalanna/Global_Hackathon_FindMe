@@ -79,6 +79,12 @@ namespace FindMe
         /// </summary>
         void UpdateSpotPanel()
         {
+            // Only ONE bright cue while holding/checking: the one being checked. Others fade back, so it's
+            // obvious which spot the automatic check is about.
+            SpotCue target = checker.Busy ? checker.Current : focus.Focused;
+            foreach (var cue in placer.Cues)
+                if (cue != null) cue.SetFade(target == null || cue == target ? 1f : 0.25f);
+
             if (checker.Busy)
             {
                 UI?.ShowSpotPanel(checker.Current.Label, "Looking…", 1f, false);
@@ -99,10 +105,30 @@ namespace FindMe
         // ---------- Called by UI ----------
 
         /// <summary>Idle → Profiling → WaitingForAR. Starting again mid-search resets everything.</summary>
-        public async void StartSearch(string text)
+        public void StartSearch(string text)
         {
             if (string.IsNullOrWhiteSpace(text)) return;
-            text = text.Trim();
+            BeginSearch(text.Trim(), null);
+        }
+
+        /// <summary>
+        /// "Use photo": the user points the camera at the item's twin, or a photo of it on another screen.
+        /// A small photo is taken; Gemini describes the item from it, and it rides along with every scan/check.
+        /// </summary>
+        public void StartSearchWithPhoto(string text)
+        {
+            if (snapshot.IsBusy) return;
+            UI?.ShowStatus("Hold the item (or its photo) in view…");
+            StartCoroutine(snapshot.Capture(384, true, snap =>
+            {
+                if (snap == null) return;
+                Destroy(snap.texture);
+                BeginSearch(string.IsNullOrWhiteSpace(text) ? "" : text.Trim(), snap.jpg);
+            }));
+        }
+
+        async void BeginSearch(string text, byte[] photo)
+        {
             var ct = NewSearchToken();
             ResetSpots();                // a new search starts from an empty room
             RestartAR();
@@ -112,19 +138,29 @@ namespace FindMe
 
             SetState(SearchState.Profiling);
             UI?.SetScanEnabled(false);
-            UI?.ShowStatus($"Getting to know your {text}…");
+            UI?.ShowStatus(photo != null ? "Looking at your photo…" : $"Getting to know your {text}…");
 
             ItemProfile profile = null;
             try
             {
-                profile = await gemini.Service.GetItemProfile(text, ct);
+                profile = photo != null
+                    ? await gemini.Service.GetItemProfileFromPhoto(photo, text, ct)
+                    : await gemini.Service.GetItemProfile(text, ct);
             }
             catch (OperationCanceledException) { return; }       // a newer search replaced this one
             catch (Exception e) { Debug.LogWarning($"[Search] Profile failed, using fallback: {e.Message}"); }
 
             // Plan: if profiling fails, carry on with the typed text as the name and a default size.
             profile ??= new ItemProfile();
-            profile.FillDefaults(text);
+            profile.FillDefaults(string.IsNullOrWhiteSpace(text) ? "item" : text);
+            if (photo != null) profile.referenceJpg ??= photo;   // keep the photo even if profiling failed
+            if (profile.ambiguous)
+            {
+                // A photo of a backpack next to a pineapple, and no words: guessing would search for the wrong thing.
+                SetState(SearchState.Idle);
+                UI?.ShowStatus("I see more than one thing. Type what you lost, or show only that item, then tap Use photo again.");
+                return;
+            }
             Profile = profile;
             UI?.ShowItemCard(profile);
 
@@ -180,18 +216,31 @@ namespace FindMe
                 return;
             }
 
+            // The item itself, out in the open? That's not a hiding place: it's the answer. Handle it separately.
+            HidingSpot sighting = spots?.Find(s => s != null && s.isItem && s.Sanitize());
+            spots?.RemoveAll(s => s == null || s.isItem);
             spots = SortAndCap(spots, maxSpotsPerScan);
-            SetLastScan(snap, spots);   // the pose stays with its spots: it's what the boxes are relative to
+            var shown = new List<HidingSpot>(spots);
+            if (sighting != null) shown.Insert(0, sighting);
+            SetLastScan(snap, shown);   // the pose stays with its spots: it's what the boxes are relative to
 
             SpotPlacer.PlaceResult placed;
             try
             {
                 // Uses snap.pose, NOT the current camera: the boxes describe what the phone saw back then.
-                placed = await placer.PlaceSpots(spots, snap.pose, cts.Token);
+                placed = await placer.PlaceSpots(spots, snap.pose, snap.grid, cts.Token);
             }
             catch (OperationCanceledException) { return; }
             EndScan(placed.added, ScanMessage(placed));
             RefreshCues();
+
+            if (sighting != null && State == SearchState.Searching)
+            {
+                SpotCue cue;
+                try { cue = await placer.PlaceItemSighting(sighting, snap.pose, snap.grid); }
+                catch (OperationCanceledException) { return; }
+                ShowSighting(cue);
+            }
         }
 
         /// <summary>Scanning → Searching if we have spots, else back to where we were.</summary>

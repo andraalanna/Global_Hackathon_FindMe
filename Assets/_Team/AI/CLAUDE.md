@@ -13,8 +13,11 @@ You are helping the **AI lead** of FIND ME. Read `Docs/AI_LEAD_GUIDE.md` first; 
 ## Contract you must keep
 - `IGeminiService` method names and parameters stay the same.
 - Model classes in `Assets/_Team/AR/Scripts/Models/` (ItemProfile, HidingSpot, SpotCheckResult): **don't rename or remove fields**. Adding an optional field is allowed; mention it in your summary.
-- `box_2d` / `itemBox` format: `[ymin, xmin, ymax, xmax]`, integers 0–1000, origin top-left.
-- Calls 1–2 use `gemini-2.5-flash`, Call 3 uses `gemini-2.5-flash-lite`, all with `responseMimeType: application/json`, a response schema, `thinkingBudget: 0`, temperature ~0.2.
+- `box_2d` / `itemBox` / `spotBox` format: `[ymin, xmin, ymax, xmax]`, integers 0–1000, origin top-left.
+- Models live in `Assets/_Team/AR/Settings/GeminiConfig.asset`, not in code. **`gemini-2.5-*` returns 404 for our key**; we use `gemini-3.5-flash-lite` (profile, check, fallback) and `gemini-3.8-flash` (scan). Gemini 3.x rejects `thinkingBudget`: use `thinkingLevel` (`minimal` for lite, `low` for flash). All calls: `responseMimeType: application/json`, a response schema with `propertyOrdering`, temperature ~0.2.
+- Prompts are text files in `Assets/_Team/AI/Prompts/Resources/FindMePrompts/` (+ knowledge base `lost_items.json`). Edit those, not C# strings.
+- Before and after changing a prompt, schema or `GeminiClient` logic: run `python Docs/ai/eval/run_eval.py` (mirror any logic change in that script). Read `Docs/ai/HOW_THE_AI_WORKS.md` first.
+- Optional fields added by the AR lead (Oct 2026): `ItemProfile.category/appearance/ambiguous/referenceJpg`, `HidingSpot.seen/isItem`, `SpotCheckResult.seen/itemEvidence/closed/insideVisible/mightBeHidden/spotBox`, and `IGeminiService.GetItemProfileFromPhoto`.
 - Never block the main thread. One retry max for Calls 1–2, none for Call 3. Timeouts 8 s / 5 s.
 - Key: `Resources.Load<TextAsset>("gemini_key")` from `Assets/_Team/AI/Secrets/Resources/gemini_key.txt`. Missing key → mock.
 

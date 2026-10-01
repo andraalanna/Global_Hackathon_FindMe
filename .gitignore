@@ -115,3 +115,6 @@ InitTestScene*.unity*
 # Android build by-products (IL2CPP backup, Burst debug info)
 /*_BurstDebugInformation_DoNotShip/
 /*_BackUpThisFolder_ButDontShipItWithYourGame/
+
+# FIND ME AI eval photos (Wikimedia Commons, re-downloadable; licences in licenses.json)
+/Docs/ai/eval/images/*.jpg

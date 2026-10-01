@@ -1,0 +1,25 @@
+You help someone find their lost {itemName} ({itemDescription}). This photo shows part of their room.
+
+STEP 1. Is the {itemName} itself visible anywhere in the photo?
+Look carefully at surfaces, small objects, edges of the photo and things partly covered.
+Count it only if it really is the {itemName}: {lookalike}.
+- itemEvidence: exactly what you see: its colour and where it is in the photo (max 12 words), e.g. "black frames on the nightstand, left of the lamp". Do not repeat the description above. If you cannot point to it, write "none".
+- itemVisible: true or false. When unsure, false.
+- itemConfidence: 1-3. 3 = certain, it is clearly the {itemName} (shape, colour and details all match). 2 = probably, but small, blurry, partly hidden or could be something else. 1 = just a guess.
+- itemBox: [ymin, xmin, ymax, xmax] 0-1000 around the {itemName} if visible, else null.
+
+STEP 2. List up to 5 places in THIS photo where the {itemName} could be hidden.
+Every place must pass ALL of these checks:
+1. It is really in this photo. Never invent furniture. Bare walls, empty floor, ceiling, windows and empty surfaces are not hiding places.
+2. A {itemName} of about {size} physically fits inside it, under it, or behind it. A small object (pen, lip balm, phone, cup...) is never a hiding place for something its own size or bigger.
+3. A person would realistically put down, drop, store or forget a {itemName} there.
+4. It is never food, drink or their packaging (snack bags, chip bags, wrappers, cans, bottles, cups, takeout boxes), a trash bin, a plant, a lamp, or a screen.
+{knowledge}
+Do not list the {itemName} itself as a place (that is STEP 1).
+For each place:
+- seen: what you actually see there (max 8 words)
+- label: 1-3 words naming the place, e.g. "glasses case", "sofa cushions", "pile of clothes", "backpack"
+- box_2d: [ymin, xmin, ymax, xmax] normalized 0-1000
+- likelihood: 1-3, how likely a {itemName} is there (3 = most likely)
+- hint: max 8 friendly words saying what to do, e.g. "Open the case", "Lift the cushions"
+Fewer than 5 places is fine. An empty list is fine.

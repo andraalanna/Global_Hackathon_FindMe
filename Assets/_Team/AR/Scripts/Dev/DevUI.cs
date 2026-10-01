@@ -112,9 +112,12 @@ namespace FindMe.Dev
             float bottom = DevGui.SafeBottom - 40 * s;
 
             var findRow = new Rect(x, bottom - rowH, w, rowH);
-            input = GUI.TextField(new Rect(findRow.x, findRow.y, findRow.width * 0.68f, rowH), input, field);
-            if (GUI.Button(new Rect(findRow.x + findRow.width * 0.7f, findRow.y, findRow.width * 0.3f, rowH), "Find", button))
+            input = GUI.TextField(new Rect(findRow.x, findRow.y, findRow.width * 0.5f, rowH), input, field);
+            if (GUI.Button(new Rect(findRow.x + findRow.width * 0.52f, findRow.y, findRow.width * 0.22f, rowH), "Find", button))
                 search.StartSearch(input);
+            // Point the camera at the item's twin (or a photo of it on another screen), then tap.
+            if (GUI.Button(new Rect(findRow.x + findRow.width * 0.76f, findRow.y, findRow.width * 0.24f, rowH), "Use photo", button))
+                search.StartSearchWithPhoto(input);
 
             // "Is this your wallet?" sheet: big Yes / Not it buttons, above everything else.
             if (match != null)

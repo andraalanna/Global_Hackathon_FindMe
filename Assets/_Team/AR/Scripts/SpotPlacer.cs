@@ -62,14 +62,14 @@ namespace FindMe
         /// Places cues for spots from ONE snapshot (already sorted, highest likelihood first), 150 ms apart.
         /// Spots that match an existing cue are merged into it, so that cue keeps its state (e.g. Checked).
         /// </summary>
-        public async Task<PlaceResult> PlaceSpots(IReadOnlyList<HidingSpot> spots, CapturePose pose, CancellationToken ct)
+        public async Task<PlaceResult> PlaceSpots(IReadOnlyList<HidingSpot> spots, CapturePose pose, SurfaceGrid grid, CancellationToken ct)
         {
             cues.RemoveAll(c => c == null);   // ARCore can drop an anchor (and its cue) at any time
             var result = new PlaceResult();
             foreach (var spot in spots)
             {
                 ct.ThrowIfCancellationRequested();
-                Placement placement = Locator.Locate(spot.label, spot.box_2d, pose);
+                Placement placement = Locator.Locate(spot.label, spot.box_2d, pose, grid);
                 Vector3 position = placement.position;
 
                 // Same spot seen again (e.g. a second scan): keep the old cue AND its state...
@@ -142,9 +142,9 @@ namespace FindMe
         /// Small mint marker where Gemini saw the item (centre of itemBox in a check photo).
         /// No plane hit: use the same depth as the spot's cue, since the item is at that spot.
         /// </summary>
-        public GameObject PlaceMarker(int[] itemBox, CapturePose pose, Vector3 spotPosition)
+        public GameObject PlaceMarker(int[] itemBox, CapturePose pose, Vector3 spotPosition, SurfaceGrid grid = null)
         {
-            Placement p = Locator.Locate("item", itemBox, pose);
+            Placement p = Locator.Locate("item", itemBox, pose, grid);
             Vector3 pos = p.position;
             if (p.quality <= PlacementQuality.Support)
             {
@@ -162,6 +162,30 @@ namespace FindMe
             marker.GetComponent<Renderer>().material.color = new Color32(0x4F, 0xE3, 0xA8, 0xFF);   // mint
             SetLayer(marker, LayerMask.NameToLayer("Cues"));
             return marker;
+        }
+
+        /// <summary>
+        /// The item itself was seen in the open: put a cue right on it (no merging, no cap: it's the answer).
+        /// </summary>
+        public async Task<SpotCue> PlaceItemSighting(HidingSpot item, CapturePose pose, SurfaceGrid grid)
+        {
+            Placement p = Locator.Locate(item.label, item.box_2d, pose, grid);
+            Transform parent = await CreateAnchor(p.position, p.plane);
+            var cue = Spawn(item, p.position, parent, cues.Count + 1, 0);
+            Remember(cue, p, pose, item.box_2d);
+            cue.IsSighting = true;
+            cues.Add(cue);
+            return cue;
+        }
+
+        /// <summary>Removes one cue and its anchor (e.g. a sighting the user said was not their item).</summary>
+        public void RemoveCue(SpotCue cue)
+        {
+            if (cue == null) return;
+            cues.Remove(cue);
+            var anchor = cue.GetComponentInParent<ARAnchor>();
+            if (anchor != null && anchorManager != null && anchorManager.enabled) anchorManager.TryRemoveAnchor(anchor);
+            Destroy(anchor != null ? anchor.gameObject : cue.gameObject);
         }
 
         /// <summary>Removes every cue and its anchor.</summary>
@@ -191,7 +215,7 @@ namespace FindMe
             refineIndex = (refineIndex + 1) % cues.Count;
             var cue = cues[refineIndex];
             if (cue == null || cue.SourceBox == null || moving.Contains(cue)) return;
-            if (cue.Quality >= PlacementQuality.Plane) return;                       // already measured well
+            if (cue.Quality > PlacementQuality.Support) return;   // measured at photo time: rays can't beat that
             if (cue.State is SpotState.Checking or SpotState.Candidate or SpotState.Found) return;   // don't jump mid-check
 
             Placement p = Locator.Locate(cue.Label, cue.SourceBox, cue.SourcePose);
@@ -218,6 +242,18 @@ namespace FindMe
             // A small box around the screen centre, so later re-locating re-uses what the user aimed at.
             MoveCue(cue, p, pose, new[] { 450, 450, 550, 550 });
             return true;
+        }
+
+        /// <summary>
+        /// A check photo (taken up close) also boxed the spot: re-measure it from there. Close-up = more accurate,
+        /// so the cue moves if the new measurement is at least as trustworthy as the old one.
+        /// </summary>
+        public void RelocateFromPhoto(SpotCue cue, int[] box, Snapshot photo)
+        {
+            if (cue == null || box == null || moving.Contains(cue)) return;
+            Placement p = Locator.Locate(cue.Label, box, photo.pose, photo.grid);
+            if (p.quality > PlacementQuality.Support && p.quality >= cue.Quality)
+                MoveCue(cue, p, photo.pose, box);
         }
 
         /// <summary>What's in the middle of the screen right now, in the world (for picking the cue the user means).</summary>

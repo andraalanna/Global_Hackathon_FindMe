@@ -1,0 +1,7 @@
+The user lost: "{userText}".
+Return JSON with:
+- name: what the item is, short and lowercase, keeping any colour or brand the user said (e.g. "pink wallet", "car keys", "black airpods case").
+- category: the best match from this list, or "other": {categories}.
+- sizeCm: [width, height] of a typical one in real life, in centimetres.
+- shape: 2-4 words describing its shape (e.g. "flat rectangle", "folded glasses frame").
+- likelyPlaces: up to 5 short phrases where people usually lose or leave it at home, most likely first.

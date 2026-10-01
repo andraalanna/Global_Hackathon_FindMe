@@ -12,6 +12,12 @@ namespace FindMe
         public float[] sizeCm;             // [width, height], e.g. [11, 9]
         public string shape;               // "flat rectangle"
         public List<string> likelyPlaces;
+        public string category;            // knowledge-base id ("glasses", "keys"...) or "other" (optional)
+        public string appearance;          // from a photo: "teal rectangular frames, thin temples" (optional)
+        public bool ambiguous;             // the photo showed several things and the user didn't say which (optional)
+
+        /// <summary>Small JPEG of the item (or one like it) the user showed. Sent with scans/checks. Not JSON.</summary>
+        [JsonIgnore] public byte[] referenceJpg;
 
         [JsonIgnore] public float WidthCm => sizeCm[0];
         [JsonIgnore] public float HeightCm => sizeCm[1];

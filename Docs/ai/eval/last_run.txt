@@ -1,0 +1,128 @@
+PASS P01 pink wallet keeps colour [gemini-3.5-flash-lite, 1.6s]
+PASS P01 pink wallet keeps colour [gemini-3.5-flash-lite, 1.2s]
+PASS P02 airpods -> earbuds [gemini-3.5-flash-lite, 1.2s]
+PASS P02 airpods -> earbuds [gemini-3.5-flash-lite, 1.3s]
+PASS P03 car keys -> car_key [gemini-3.5-flash-lite, 1.5s]
+PASS P03 car keys -> car_key [gemini-3.5-flash-lite, 1.3s]
+PASS P04 reading specs -> glasses [gemini-3.5-flash-lite, 1.8s]
+PASS P04 reading specs -> glasses [gemini-3.5-flash-lite, 1.1s]
+PASS P05 wedding ring [gemini-3.5-flash-lite, 1.3s]
+PASS P05 wedding ring [gemini-3.5-flash-lite, 1.1s]
+PASS P06 pacifier -> toy [gemini-3.5-flash-lite, 1.2s]
+PASS P06 pacifier -> toy [gemini-3.5-flash-lite, 1.2s]
+PASS P07 chapstick -> lip_balm [gemini-3.5-flash-lite, 1.1s]
+PASS P07 chapstick -> lip_balm [gemini-3.5-flash-lite, 1.3s]
+PASS P08 unknown item [gemini-3.5-flash-lite, 1.2s]
+FAIL P08 unknown item [-, 0.0s]
+     - ERROR HTTP Error 429: Too Many Requests
+PASS P09 sunnies [gemini-3.5-flash-lite, 1.1s]
+PASS P09 sunnies [gemini-3.5-flash-lite, 1.3s]
+PASS S01 glasses lying on table -> point at it [gemini-3.5-flash-lite, 1.9s] spots=[]
+PASS S01 glasses lying on table -> point at it [gemini-3.5-flash-lite, 1.4s] spots=[]
+PASS S02 glasses on shelf (level view) -> point at it [gemini-3.5-flash-lite, 2.2s] spots=[]
+PASS S02 glasses on shelf (level view) -> point at it [gemini-3.5-flash-lite, 2.3s] spots=['shelf']
+PASS S03 glasses photo but looking for keys [gemini-3.5-flash-lite, 1.6s] spots=[]
+PASS S03 glasses photo but looking for keys [gemini-3.5-flash-lite, 2.2s] spots=[]
+PASS S04 snack bag is never a place for glasses [gemini-3.5-flash-lite, 2.0s] spots=[]
+PASS S04 snack bag is never a place for glasses [gemini-3.5-flash-lite, 1.8s] spots=[]
+PASS S05 keys on table -> point at them [gemini-3.5-flash-lite, 3.6s] spots=[] dropped=['keys']
+PASS S05 keys on table -> point at them [gemini-3.5-flash-lite, 2.1s] spots=[] dropped=['keys bundle']
+PASS S06 keys photo, looking for wallet [gemini-3.5-flash-lite, 2.0s] spots=[]
+PASS S06 keys photo, looking for wallet [gemini-3.5-flash-lite, 2.0s] spots=[]
+PASS S07 remote on coffee table -> point at it [gemini-3.5-flash-lite, 2.5s] spots=['sofa cushions', 'coffee table', 'sofa blanket']
+PASS S07 remote on coffee table -> point at it [gemini-3.5-flash-lite, 2.2s] spots=['sofa cushions', 'coffee table', 'blanket']
+PASS S08 living room, phone: sofa yes, decor no [gemini-3.5-flash-lite, 2.5s] spots=['sofa cushions', 'throw blanket', 'pillow', 'coffee table']
+PASS S08 living room, phone: sofa yes, decor no [gemini-3.5-flash-lite, 2.2s] spots=['sofa cushions', 'blanket', 'pillow']
+PASS S09 messy bedroom, glasses: no trash/pills/lotion [gemini-3.5-flash-lite, 2.3s] spots=['nightstand', 'bed']
+PASS S09 messy bedroom, glasses: no trash/pills/lotion [gemini-3.5-flash-lite, 2.8s] spots=['nightstand', 'bed blankets', 'papers', 'bag']
+PASS S10 messy bedroom, pills on nightstand -> point at them [gemini-3.5-flash-lite, 2.9s] spots=['nightstand surface', 'bag', 'pile of clothes'] dropped=['trash bin']
+PASS S10 messy bedroom, pills on nightstand -> point at them [gemini-3.5-flash-lite, 3.4s] spots=['nightstand', 'bag', 'blanket', 'bedding', 'dresser']
+PASS S11 messy bedroom, shoe on floor -> point at it [gemini-3.5-flash-lite, 2.6s] spots=['under the bed', 'nightstand', 'area rug'] dropped=['floor near trash bin']
+PASS S11 messy bedroom, shoe on floor -> point at it [gemini-3.5-flash-lite, 4.5s] spots=['chair', 'bed', 'nightstand', 'rug']
+PASS S12 cluttered desk, pen -> point at it [gemini-3.5-flash-lite, 4.1s] spots=['papers', 'notepad', 'paper stack']
+PASS S12 cluttered desk, pen -> point at it [gemini-3.5-flash-lite, 2.9s] spots=['pile of papers', 'desk surface', 'papers on right', 'notes on left'] dropped=['stack of notebooks']
+PASS S13 cluttered desk, glasses: papers yes, gadgets no [gemini-3.5-flash-lite, 4.4s] spots=['pile of papers', 'desk papers'] dropped=['open notebook']
+PASS S13 cluttered desk, glasses: papers yes, gadgets no [gemini-3.5-flash-lite, 1.8s] spots=['pile of papers'] dropped=['notebooks and papers']
+PASS S14 backpack yes, pineapple no [gemini-3.5-flash-lite, 2.2s] spots=['backpack']
+PASS S14 backpack yes, pineapple no [gemini-3.5-flash-lite, 1.8s] spots=['backpack']
+PASS S15 bedroom, keys: no TV/AC/fan/painting [gemini-3.5-flash-lite, 3.0s] spots=['bed', 'pile of clothes', 'dresser', 'bookcase', 'nightstand']
+PASS S15 bedroom, keys: no TV/AC/fan/painting [gemini-3.5-flash-lite, 2.6s] spots=['pile of clothes', 'bedside table', 'dresser', 'shelf']
+PASS S16 empty room: invent nothing [gemini-3.5-flash-lite, 1.4s] spots=[]
+PASS S16 empty room: invent nothing [gemini-3.5-flash-lite, 1.8s] spots=[]
+PASS S17 drinking glass is not 'glasses' [gemini-3.5-flash-lite, 2.7s] spots=['small box'] dropped=['red book']
+PASS S17 drinking glass is not 'glasses' [gemini-3.5-flash-lite, 2.5s] spots=['small box'] dropped=['book']
+FAIL S18 closed glasses case -> list the case [-, 0.0s] spots=[]
+     - ERROR HTTP Error 429: Too Many Requests
+FAIL S18 closed glasses case -> list the case [-, 0.0s] spots=[]
+     - ERROR HTTP Error 429: Too Many Requests
+FAIL S19 glasses lying ON a case -> point at them [-, 0.0s] spots=[]
+     - ERROR HTTP Error 429: Too Many Requests
+FAIL S19 glasses lying ON a case -> point at them [-, 0.0s] spots=[]
+     - ERROR HTTP Error 429: Too Many Requests
+FAIL S20 cluttered desk, headphones -> point at them [-, 0.0s] spots=[]
+     - ERROR HTTP Error 429: Too Many Requests
+FAIL S20 cluttered desk, headphones -> point at them [-, 0.0s] spots=[]
+     - ERROR HTTP Error 429: Too Many Requests
+FAIL S21 cluttered desk, keys: no cups/bottles/lotion [gemini-3.5-flash-lite, 14.0s] spots=['pile of papers', 'file folders', 'tape dispenser', 'radio']
+     - bad spot ['radio'] (word 'radio')
+     - bad spot ['tape dispenser'] (word 'tape')
+FAIL S21 cluttered desk, keys: no cups/bottles/lotion [-, 0.0s] spots=[]
+     - ERROR HTTP Error 429: Too Many Requests
+PASS C01 CLOSED glasses case is NOT checked (user bug) [gemini-3.5-flash-lite, 2.5s] seen='closed patterned glasses case' tip='Open the glasses case'
+FAIL C01 CLOSED glasses case is NOT checked (user bug) [-, 0.0s] seen='None' tip='None'
+     - ERROR HTTP Error 429: Too Many Requests
+FAIL C02 open case with glasses -> found [-, 0.0s] seen='None' tip='None'
+     - ERROR HTTP Error 429: Too Many Requests
+FAIL C02 open case with glasses -> found [-, 0.0s] seen='None' tip='None'
+     - ERROR HTTP Error 429: Too Many Requests
+FAIL C03 closed drawers are not checked [-, 0.0s] seen='None' tip='None'
+     - ERROR HTTP Error 429: Too Many Requests
+FAIL C03 closed drawers are not checked [-, 0.0s] seen='None' tip='None'
+     - ERROR HTTP Error 429: Too Many Requests
+PASS C04 closed backpack is not checked [gemini-3.5-flash-lite, 2.7s] seen='camouflage backpack' tip='Check inside the backpack'
+FAIL C04 closed backpack is not checked [-, 0.0s] seen='None' tip='None'
+     - ERROR HTTP Error 429: Too Many Requests
+FAIL C05 open empty box is checked [-, 0.0s] seen='None' tip='None'
+     - ERROR HTTP Error 429: Too Many Requests
+FAIL C05 open empty box is checked [-, 0.0s] seen='None' tip='None'
+     - ERROR HTTP Error 429: Too Many Requests
+FAIL C06 cushions not lifted are not checked [-, 0.0s] seen='None' tip='None'
+     - ERROR HTTP Error 429: Too Many Requests
+FAIL C06 cushions not lifted are not checked [-, 0.0s] seen='None' tip='None'
+     - ERROR HTTP Error 429: Too Many Requests
+FAIL C07 glasses on top of case -> found [-, 0.0s] seen='None' tip='None'
+     - ERROR HTTP Error 429: Too Many Requests
+FAIL C07 glasses on top of case -> found [-, 0.0s] seen='None' tip='None'
+     - ERROR HTTP Error 429: Too Many Requests
+FAIL C08 drinking glass is not glasses [-, 0.0s] seen='None' tip='None'
+     - ERROR HTTP Error 429: Too Many Requests
+PASS C08 drinking glass is not glasses [gemini-3.5-flash-lite, 3.4s] seen='glasses frame not found on nightstand' tip='Move the book'
+FAIL C09 dark clothes basket: look closer, not 'not here' [-, 0.0s] seen='None' tip='None'
+     - ERROR HTTP Error 429: Too Many Requests
+FAIL C09 dark clothes basket: look closer, not 'not here' [-, 0.0s] seen='None' tip='None'
+     - ERROR HTTP Error 429: Too Many Requests
+FAIL C10 full clothes basket: look closer [-, 0.0s] seen='None' tip='None'
+     - ERROR HTTP Error 429: Too Many Requests
+FAIL C10 full clothes basket: look closer [-, 0.0s] seen='None' tip='None'
+     - ERROR HTTP Error 429: Too Many Requests
+FAIL S22 clothes rack: jackets/pockets, not vents/pillar [-, 0.0s] spots=[]
+     - ERROR HTTP Error 429: Too Many Requests
+FAIL S22 clothes rack: jackets/pockets, not vents/pillar [-, 0.0s] spots=[]
+     - ERROR HTTP Error 429: Too Many Requests
+FAIL PP1 photo of glasses in case -> glasses + colour [-, 0.0s] objects=None name='None' appearance='None'
+     - ERROR HTTP Error 429: Too Many Requests
+FAIL PP1 photo of glasses in case -> glasses + colour [-, 0.0s] objects=None name='None' appearance='None'
+     - ERROR HTTP Error 429: Too Many Requests
+FAIL PP2 photo of keys, text 'my keys' [-, 0.0s] objects=None name='None' appearance='None'
+     - ERROR HTTP Error 429: Too Many Requests
+FAIL PP2 photo of keys, text 'my keys' [-, 0.0s] objects=None name='None' appearance='None'
+     - ERROR HTTP Error 429: Too Many Requests
+FAIL PP3 backpack + pineapple, no text -> ask which [-, 0.0s] objects=None name='None' appearance='None'
+     - ERROR HTTP Error 429: Too Many Requests
+FAIL PP3 backpack + pineapple, no text -> ask which [-, 0.0s] objects=None name='None' appearance='None'
+     - ERROR HTTP Error 429: Too Many Requests
+FAIL PP4 backpack + pineapple, text 'backpack' -> the backpack [-, 0.0s] objects=None name='None' appearance='None'
+     - ERROR HTTP Error 429: Too Many Requests
+PASS PP4 backpack + pineapple, text 'backpack' -> the backpack [gemini-3.5-flash-lite, 2.0s] objects=['camo backpack', 'pineapple'] name='camo backpack' appearance='green brown and black camouflage pattern fabric with a white rectangular logo label on front pocket'
+
+55/90 passed

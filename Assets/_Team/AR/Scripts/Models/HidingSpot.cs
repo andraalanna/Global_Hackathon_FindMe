@@ -12,6 +12,7 @@ namespace FindMe
         public int likelihood;     // 1..3 (3 = most likely)
         public string hint;        // "Wallets slide under clothes"
         public string seen;        // what Gemini says is really there, e.g. "grey backpack on chair" (grounding + debug)
+        public bool isItem;        // true = not a hiding place: the lost item itself, visible in the open (optional)
 
         /// <summary>
         /// Cleans up what the model sent. Returns false if the spot is unusable (no label or no box),

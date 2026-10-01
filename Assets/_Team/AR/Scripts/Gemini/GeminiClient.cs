@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -25,74 +26,188 @@ namespace FindMe
             this.cfg = cfg;
         }
 
+        // Prompts are text files (Assets/_Team/AI/Prompts/Resources/FindMePrompts/*.txt) so they can be tuned
+        // without code, and the eval script (Docs/ai/eval) tests exactly what the app sends.
+        LostItemKnowledge Knowledge => LostItemKnowledge.Load();
+
         // ---------- Call 1: item profile (text only) ----------
         public async Task<ItemProfile> GetItemProfile(string userText, CancellationToken ct)
         {
-            string prompt =
-                $"The user lost: \"{userText}\".\n" +
-                "Return JSON with: name (short, lowercase), sizeCm [width, height] using typical real-world size,\n" +
-                "shape (2-4 words), likelyPlaces (up to 5 short phrases, most likely first).";
-            var schema = Obj(("name", Str()), ("sizeCm", Arr(Num())), ("shape", Str()), ("likelyPlaces", Arr(Str())));
+            string prompt = PromptLibrary.Fill("profile",
+                ("userText", userText),
+                ("categories", Knowledge.CategoryList()));
+            var schema = Obj(("name", Str()), ("category", Str()), ("sizeCm", Arr(Num())), ("shape", Str()), ("likelyPlaces", Arr(Str())));
 
             string json = await Generate("profile", cfg.profile, true, prompt, null, schema, cfg.profileTimeoutSec, ct);
-            return JsonConvert.DeserializeObject<ItemProfile>(json);
+            var profile = JsonConvert.DeserializeObject<ItemProfile>(json);
+            return ApplyKnowledge(profile, userText, Knowledge);
+        }
+
+        /// <summary>
+        /// Known item? Then sizes, shape and typical places come from the knowledge base (reliable), while the
+        /// name keeps the user's words (colour etc.). Unknown items keep Gemini's answer.
+        /// </summary>
+        public static ItemProfile ApplyKnowledge(ItemProfile p, string userText, LostItemKnowledge kb)
+        {
+            p ??= new ItemProfile();
+            var info = kb.Match(userText, p.category) ?? kb.Match(p.name ?? "");
+            if (info == null) { p.category = "other"; return p; }
+            p.category = info.id;
+            p.sizeCm = info.sizeCm;
+            p.shape = info.shape;
+            p.likelyPlaces = new List<string>(info.typical);
+            return p;
+        }
+
+        /// <summary>Call 1 from a photo: same profile, plus "appearance" so later prompts know what THIS item looks like.</summary>
+        public async Task<ItemProfile> GetItemProfileFromPhoto(byte[] jpg, string userText, CancellationToken ct)
+        {
+            string prompt = PromptLibrary.Fill("profile_photo",
+                ("userText", string.IsNullOrWhiteSpace(userText) ? "(nothing)" : userText),
+                ("categories", Knowledge.CategoryList()));
+            var schema = Obj(("objectsSeen", Arr(Str())), ("name", Str()), ("category", Str()), ("appearance", Str()),
+                             ("sizeCm", Arr(Num())), ("shape", Str()), ("likelyPlaces", Arr(Str())));
+
+            string json = await Generate("profile", cfg.spots, true, prompt, jpg, schema, cfg.spotsTimeoutSec, ct);
+            var profile = JsonConvert.DeserializeObject<ItemProfile>(json);
+            // Several objects and no words saying which: don't guess (the model happily picks the biggest one).
+            var seen = JObject.Parse(json)["objectsSeen"]?.ToObject<List<string>>() ?? new List<string>();
+            if (profile != null) profile.ambiguous = CountsAsAmbiguous(seen, userText);
+            profile = ApplyKnowledge(profile, profile?.name ?? userText ?? "", Knowledge);
+            profile.referenceJpg = jpg;
+            return profile;
+        }
+
+        static readonly string[] NotSeparateObjects = { "case", "surface", "table", "desk", "floor", "wall", "shelf", "counter", "background", "hand" };
+
+        /// <summary>
+        /// Two or more real objects and no words → ask which. An item's own case, the table it lies on, or the
+        /// hand holding it are not "another object" (glasses in their case is one thing to look for).
+        /// </summary>
+        public static bool CountsAsAmbiguous(IEnumerable<string> objectsSeen, string userText)
+        {
+            if (!string.IsNullOrWhiteSpace(userText)) return false;
+            int n = 0;
+            foreach (var o in objectsSeen)
+                if (!NotSeparateObjects.Any(w => LostItemKnowledge.ContainsWords(o, w))) n++;
+            return n >= 2;
         }
 
         // ---------- Call 2: find hiding spots (768 px snapshot) ----------
         public async Task<List<HidingSpot>> FindSpots(byte[] jpg, ItemProfile item, CancellationToken ct)
         {
-            // Anti-hallucination (tested on an empty room: the plan's prompt invented a shelf/cabinet/drawer
-            // in 4 of 6 runs on flash-lite, this one in 0 of 5):
-            //  - no fixed menu of furniture to pick from (examples only, "e.g.")
-            //  - an empty list is explicitly a valid answer
-            //  - "seen" comes FIRST in each item, so the model describes what's really there before naming it
-            string prompt =
-                $"We are looking for a lost {Describe(item)}.\n" +
-                "List up to 5 places IN THIS PHOTO where it could be hidden.\n" +
-                "Rules:\n" +
-                "- Only list objects you can actually see in this photo. Never invent furniture that is not there.\n" +
-                "- A bare wall, empty floor, ceiling, window, door or empty flat surface is NOT a hiding place.\n" +
-                "- Fewer than 5 is fine. If you see no real hiding place, return an empty list [].\n" +
-                "- Only include places big enough to hold it. Prefer containers and piles\n" +
-                "  (e.g. drawer, cabinet, bag, pile of clothes, sofa cushions, under the bed, coat) over open surfaces.\n" +
-                "For each place:\n" +
-                "  seen: what you actually see in that part of the photo (max 8 words),\n" +
-                "  label: 1-3 words, box_2d: [ymin, xmin, ymax, xmax] normalized 0-1000,\n" +
-                "  likelihood: 1-3 (3 = most likely), hint: max 8 words, friendly." +
-                // Typical places from Call 1 steer the RANKING only. We don't exclude "unusual" places:
-                // lost things are, almost by definition, somewhere unusual.
-                (item.likelyPlaces is { Count: > 0 }
-                    ? $"\nWhere a {item.name} usually ends up: {string.Join(", ", item.likelyPlaces)}. " +
-                      "If you see such a place, give it a higher likelihood."
-                    : "");
-            var schema = Arr(Obj(("seen", Str()), ("label", Str()), ("box_2d", Arr(Int())), ("likelihood", Int()), ("hint", Str())));
+            var info = Knowledge.Match(item.name ?? "", item.category);
+            string prompt = PromptLibrary.Fill("spots",
+                ("itemName", item.name),
+                ("itemDescription", Describe(item)),
+                ("size", $"{item.WidthCm:0} x {item.HeightCm:0} cm"),
+                ("lookalike", info?.lookalike ?? $"the actual {item.name}, not something that only looks similar"),
+                ("knowledge", LostItemKnowledge.SpotsBlock(item.name, info)));
 
-            string json = await Generate("spots", cfg.spots, true, prompt, jpg, schema, cfg.spotsTimeoutSec, ct);
-            return JsonConvert.DeserializeObject<List<HidingSpot>>(json) ?? new List<HidingSpot>();
+            var itemBox = Arr(Int());
+            itemBox["nullable"] = true;
+            // Order matters: the model writes "itemEvidence" and each spot's "seen" BEFORE deciding (grounding).
+            var schema = Obj(("itemEvidence", Str()), ("itemVisible", Bool()), ("itemConfidence", Int()), ("itemBox", itemBox),
+                ("spots", Arr(Obj(("seen", Str()), ("label", Str()), ("box_2d", Arr(Int())), ("likelihood", Int()), ("hint", Str())))));
+
+            string json = await Generate("spots", cfg.spots, true, prompt, jpg, schema, cfg.spotsTimeoutSec, ct, item.referenceJpg);
+            return ParseSpots(json, item, Knowledge);
+        }
+
+        /// <summary>
+        /// Gemini's answer → spots for the app. The item itself (if visible) comes first, flagged isItem.
+        /// Impossible places (snack bag, chapstick for glasses…) are dropped here even if the model slipped.
+        /// </summary>
+        public static List<HidingSpot> ParseSpots(string json, ItemProfile item, LostItemKnowledge kb)
+        {
+            var root = JObject.Parse(json);
+            var result = new List<HidingSpot>();
+            var info = kb.Match(item.name ?? "", item.category);
+
+            var box = root["itemBox"]?.Type == JTokenType.Array ? root["itemBox"].ToObject<int[]>() : null;
+            int confidence = root["itemConfidence"]?.Type == JTokenType.Integer ? root["itemConfidence"].Value<int>() : 3;
+            if (root["itemVisible"]?.Value<bool>() == true && box is { Length: 4 } && !EvidenceIsWeak((string)root["itemEvidence"], item))
+            {
+                // Certain → "There it is!". Probably → just the top spot to look at (a wrong "found it" is
+                // worse than one extra glance). A guess → ignored.
+                if (confidence >= 3)
+                    result.Add(new HidingSpot { label = item.name, box_2d = box, likelihood = 3, isItem = true,
+                                                hint = "Is this it?", seen = (string)root["itemEvidence"] });
+                else if (confidence == 2)
+                    result.Add(new HidingSpot { label = "maybe " + item.name, box_2d = box, likelihood = 3,
+                                                hint = "Look closely here", seen = (string)root["itemEvidence"] });
+            }
+
+            var spots = root["spots"]?.ToObject<List<HidingSpot>>() ?? new List<HidingSpot>();
+            float size = item.sizeCm is { Length: >= 2 } ? Mathf.Max(item.sizeCm[0], item.sizeCm[1]) : 10f;
+            foreach (var s in spots)
+            {
+                if (s == null) continue;
+                if (kb.IsImpossiblePlace(s.label, info, size) || LostItemKnowledge.IsTheItem(s.label, item.name))
+                {
+                    Debug.Log($"[Gemini] dropped impossible spot \"{s.label}\" for {item.name}");
+                    continue;
+                }
+                result.Add(s);
+            }
+            return result;
         }
 
         // ---------- Call 3: spot check (512 px frame) ----------
         public async Task<SpotCheckResult> CheckSpot(byte[] jpg, ItemProfile item, string spotLabel, string note, CancellationToken ct)
         {
-            string prompt =
-                $"We are looking for a lost {Describe(item)}.\n" +
-                $"The user is checking this spot: \"{spotLabel}\".\n" +
-                $"itemVisible: true only if the {item.name} itself is clearly visible. If true, give itemBox [ymin, xmin, ymax, xmax] 0-1000.\n" +
-                "spotFullyVisible: true only if the inside or underneath of the spot is clearly visible\n" +
-                "(drawer open, blanket lifted, bag open). A closed drawer or covered pile is false.\n" +
-                "tip: max 6 words telling the user what to do next (e.g. \"Open the drawer\", \"Lift the top shirt\")." +
-                (string.IsNullOrWhiteSpace(note) ? "" : $"\nImportant: {note}");
-            var itemBox = Arr(Int());
-            itemBox["nullable"] = true;
-            var schema = Obj(("itemVisible", Bool()), ("itemBox", itemBox), ("spotFullyVisible", Bool()), ("tip", Str()));
+            var info = Knowledge.Match(item.name ?? "", item.category);
+            string prompt = PromptLibrary.Fill("check",
+                ("itemName", item.name),
+                ("itemDescription", Describe(item)),
+                ("spotLabel", spotLabel),
+                ("lookalike", info?.lookalike ?? $"the actual {item.name}"),
+                ("checkKnowledge", LostItemKnowledge.CheckBlock(spotLabel, info)),
+                ("note", string.IsNullOrWhiteSpace(note) ? "" : $"Important: {note}\n"));
+
+            var box = Arr(Int());
+            box["nullable"] = true;
+            var spotBox = Arr(Int());
+            spotBox["nullable"] = true;
+            var schema = Obj(("seen", Str()), ("itemEvidence", Str()), ("itemVisible", Bool()), ("itemBox", box), ("closed", Bool()),
+                             ("insideVisible", Bool()), ("mightBeHidden", Bool()), ("spotBox", spotBox), ("tip", Str()));
 
             // No retry: checks re-trigger naturally from dwell, and a stale answer is worse than none.
-            string json = await Generate("check", cfg.check, false, prompt, jpg, schema, cfg.checkTimeoutSec, ct);
-            return JsonConvert.DeserializeObject<SpotCheckResult>(json);
+            string json = await Generate("check", cfg.check, false, prompt, jpg, schema, cfg.checkTimeoutSec, ct, item.referenceJpg);
+            return ParseCheck(json, item);
         }
 
+        /// <summary>
+        /// A "found it" claim needs evidence that points at something: colour + place, not our own words echoed
+        /// back. In tests the model once "saw" glasses in a bedroom with none, evidence = "folded glasses frame"
+        /// (our description, word for word). Such claims are ignored.
+        /// </summary>
+        public static bool EvidenceIsWeak(string evidence, ItemProfile item)
+        {
+            if (string.IsNullOrWhiteSpace(evidence)) return true;
+            string e = evidence.Trim();
+            if (e.Length < 12 || e.Equals("none", StringComparison.OrdinalIgnoreCase)) return true;
+            return item != null && (LostItemKnowledge.ContainsWords(Describe(item), e) ||
+                                    LostItemKnowledge.ContainsWords(item.shape ?? "~", e));
+        }
+
+        /// <summary>
+        /// "Checked" needs proof: the inside is visible, it isn't closed, AND nothing there could still hide the
+        /// item (no pile, not too dark, nothing of the same colour/shape). A closed glasses case can't pass, and a
+        /// basket of dark clothes asks the user to look closer instead of saying "not here".
+        /// </summary>
+        public static SpotCheckResult ParseCheck(string json, ItemProfile item = null)
+        {
+            var r = JsonConvert.DeserializeObject<SpotCheckResult>(json) ?? new SpotCheckResult();
+            if (r.itemVisible && item != null && EvidenceIsWeak(r.itemEvidence ?? r.seen, item)) r.itemVisible = false;
+            r.spotFullyVisible = r.insideVisible && !r.closed && !r.itemVisible && !r.mightBeHidden;
+            if (!r.itemVisible) r.itemBox = null;
+            return r;
+        }
+
+        /// <summary>Appearance from the user's photo beats the generic shape ("teal frames…" vs "folded glasses frame").</summary>
         static string Describe(ItemProfile item) =>
-            $"{item.name} ({item.shape}, about {item.WidthCm:0} x {item.HeightCm:0} cm)";
+            (string.IsNullOrWhiteSpace(item.appearance) ? item.shape : item.appearance) + $", about {item.WidthCm:0} x {item.HeightCm:0} cm";
 
         // ---------- HTTP ----------
 
@@ -102,11 +217,19 @@ namespace FindMe
         /// <see cref="GeminiConfig.fallback"/>: a different model is usually not the one that's overloaded.
         /// </summary>
         async Task<string> Generate(string call, GeminiConfig.ModelChoice choice, bool allowRetry,
-                                    string prompt, byte[] jpg, JObject schema, int timeoutSec, CancellationToken ct)
+                                    string prompt, byte[] jpg, JObject schema, int timeoutSec, CancellationToken ct,
+                                    byte[] reference = null)
         {
-            var parts = new JArray { new JObject { ["text"] = prompt } };
-            if (jpg != null)
-                parts.Add(new JObject { ["inline_data"] = new JObject { ["mime_type"] = "image/jpeg", ["data"] = Convert.ToBase64String(jpg) } });
+            var parts = new JArray();
+            // Optional reference photo FIRST, captioned, so the model knows which image is the item and which the room.
+            if (reference != null)
+            {
+                parts.Add(new JObject { ["text"] = "Reference photo of the lost item (or one just like it):" });
+                parts.Add(Image(reference));
+                parts.Add(new JObject { ["text"] = "Photo to analyse:" });
+            }
+            if (jpg != null) parts.Add(Image(jpg));
+            parts.Add(new JObject { ["text"] = prompt });
 
             for (int attempt = 1; ; attempt++)
             {
@@ -152,6 +275,9 @@ namespace FindMe
                 choice = cfg.fallback;
             }
         }
+
+        static JObject Image(byte[] jpg) =>
+            new() { ["inline_data"] = new JObject { ["mime_type"] = "image/jpeg", ["data"] = Convert.ToBase64String(jpg) } };
 
         byte[] BuildBody(JArray parts, JObject schema, GeminiConfig.ModelChoice choice)
         {

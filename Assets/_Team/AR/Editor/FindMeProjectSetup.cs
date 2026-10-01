@@ -163,6 +163,9 @@ namespace FindMe.EditorTools
             // Phase 3: snapshot + ghost camera
             var snapshot = GetOrAdd<SnapshotCapture>(systems);
             SetRef(snapshot, "arCamera", origin.Camera);
+            var gridSampler = GetOrAdd<SurfaceGridSampler>(systems);
+            SetRef(gridSampler, "raycastManager", origin.GetComponent<ARRaycastManager>());
+            SetRef(snapshot, "surfaceGrid", gridSampler);
             SetRef(overlay, "snapshot", snapshot);
             SetRef(search, "snapshot", snapshot);
             var ghost = GetOrAdd<GhostCamera>(GameObject.Find("GhostCamera"));
@@ -203,6 +206,9 @@ namespace FindMe.EditorTools
             SetRef(focus, "placer", placer);
             SetRef(focus, "arCamera", origin.Camera);
             SetRef(search, "focus", focus);
+            var focusSo = new SerializedObject(focus);
+            focusSo.FindProperty("dwellSeconds").floatValue = 1.2f;   // faster automatic checks (was 2 s)
+            focusSo.ApplyModifiedPropertiesWithoutUndo();
             SetRef(overlay, "focus", focus);
 
             // Phase 8: automatic check

@@ -32,6 +32,13 @@ namespace FindMe
             finally { GeminiLog.End(t, "profile", Model, 0, ok, ok ? JsonConvert.SerializeObject(p) : "cancelled"); }
         }
 
+        public async Task<ItemProfile> GetItemProfileFromPhoto(byte[] jpg, string userText, CancellationToken ct)
+        {
+            var p = await GetItemProfile(string.IsNullOrWhiteSpace(userText) ? "item" : userText, ct);
+            p.appearance = "MOCK: as in your photo";
+            return p;
+        }
+
         public async Task<List<HidingSpot>> FindSpots(byte[] jpg, ItemProfile item, CancellationToken ct)
         {
             long t = GeminiLog.Begin();
@@ -91,12 +98,8 @@ namespace FindMe
                 name = name,
                 likelyPlaces = new List<string> { "bag", "pile of clothes", "sofa cushions", "drawer", "desk" },
             };
-            // A few common items so the prompts downstream look realistic.
-            if (name.Contains("wallet"))       { p.sizeCm = new[] { 11f, 9f };  p.shape = "flat rectangle"; }
-            else if (name.Contains("key"))     { p.sizeCm = new[] { 8f, 4f };   p.shape = "small metal keys"; }
-            else if (name.Contains("phone"))   { p.sizeCm = new[] { 15f, 7f };  p.shape = "flat rectangle"; }
-            else if (name.Contains("glasses")) { p.sizeCm = new[] { 14f, 5f };  p.shape = "folded glasses"; }
-            else if (name.Contains("remote"))  { p.sizeCm = new[] { 18f, 5f };  p.shape = "long thin bar"; }
+            // Same knowledge base as the real client: sizes, shape and typical places for known items.
+            p = GeminiClient.ApplyKnowledge(p, text, LostItemKnowledge.Load());
             p.FillDefaults(text);
             return p;
         }

@@ -49,6 +49,9 @@ namespace FindMe
             // The search may have moved on (reset, stopped, another cue being confirmed) while we waited.
             if (cue == null || State != SearchState.Searching || cue.State != SpotState.Checking) return;
 
+            // The check photo is a close-up: if it boxed the spot, re-measure where the spot really is.
+            if (r.HasSpotBox) placer.RelocateFromPhoto(cue, r.spotBox, snap);
+
             if (r.itemVisible)
             {
                 ShowCandidate(cue, r, snap.pose);
@@ -99,11 +102,23 @@ namespace FindMe
 
         // ---------- "Is this your wallet?" ----------
 
+        /// <summary>The scan photo already shows the item: point straight at it and ask.</summary>
+        void ShowSighting(SpotCue cue)
+        {
+            if (cue == null || State != SearchState.Searching) return;
+            CancelCheck();
+            candidate = cue;
+            cue.SetState(SpotState.Candidate);
+            SetState(SearchState.FoundConfirm);
+            UI?.ShowStatus("There it is! Is that it?");
+            UI?.ShowMatch(cue.Label);
+        }
+
         void ShowCandidate(SpotCue cue, SpotCheckResult r, CapturePose pose)
         {
             candidate = cue;
             cue.SetState(SpotState.Candidate);
-            if (r.HasItemBox) candidateMarker = placer.PlaceMarker(r.itemBox, pose, cue.transform.position);
+            if (r.HasItemBox) candidateMarker = placer.PlaceMarker(r.itemBox, pose, cue.transform.position, LastCheck?.grid);
             SetState(SearchState.FoundConfirm);
             UI?.ShowMatch(cue.Label);
         }
@@ -119,6 +134,15 @@ namespace FindMe
             if (yes)
             {
                 ConfirmFound(cue);
+                return;
+            }
+            if (cue.IsSighting)
+            {
+                // A sighting is only the item or nothing: remove it rather than turn it into a hiding place.
+                placer.RemoveCue(cue);
+                SetState(SearchState.Searching);
+                UI?.ShowStatus("Okay, let's keep looking!");
+                RefreshCues();
                 return;
             }
             // Next check of this spot tells Gemini about the false match, so it doesn't say "yes" to it again.

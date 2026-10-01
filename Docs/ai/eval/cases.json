@@ -1,0 +1,595 @@
+{
+  "_about": "FIND ME AI test set. Each case runs the app's real prompt (same text files + knowledge base) on a real photo and checks the answer. Photos: Wikimedia Commons (licences in images/licenses.json, downloaded by fetch_images.py; not committed).",
+  "cases": [
+    {
+      "id": "P01 pink wallet keeps colour",
+      "call": "profile",
+      "text": "my pink wallet",
+      "expect": {
+        "category": "wallet",
+        "nameAll": [
+          "pink",
+          "wallet"
+        ]
+      }
+    },
+    {
+      "id": "P02 airpods -> earbuds",
+      "call": "profile",
+      "text": "airpods",
+      "expect": {
+        "category": "earbuds"
+      }
+    },
+    {
+      "id": "P03 car keys -> car_key",
+      "call": "profile",
+      "text": "car keys",
+      "expect": {
+        "category": "car_key"
+      }
+    },
+    {
+      "id": "P04 reading specs -> glasses",
+      "call": "profile",
+      "text": "my reading specs",
+      "expect": {
+        "category": "glasses"
+      }
+    },
+    {
+      "id": "P05 wedding ring",
+      "call": "profile",
+      "text": "grandma's wedding ring",
+      "expect": {
+        "category": "ring"
+      }
+    },
+    {
+      "id": "P06 pacifier -> toy",
+      "call": "profile",
+      "text": "baby's pacifier",
+      "expect": {
+        "category": "toy"
+      }
+    },
+    {
+      "id": "P07 chapstick -> lip_balm",
+      "call": "profile",
+      "text": "chapstick",
+      "expect": {
+        "category": "lip_balm"
+      }
+    },
+    {
+      "id": "P08 unknown item",
+      "call": "profile",
+      "text": "harmonica",
+      "expect": {
+        "category": "other",
+        "maxSizeCm": 25
+      }
+    },
+    {
+      "id": "P09 sunnies",
+      "call": "profile",
+      "text": "my sunnies",
+      "expect": {
+        "category": "sunglasses"
+      }
+    },
+    {
+      "id": "S01 glasses lying on table -> point at it",
+      "call": "spots",
+      "image": "glasses_desk.jpg",
+      "item": "glasses",
+      "expect": {
+        "itemVisible": true
+      }
+    },
+    {
+      "id": "S02 glasses on shelf (level view) -> point at it",
+      "call": "spots",
+      "image": "glasses_desk2.jpg",
+      "item": "glasses",
+      "expect": {
+        "itemVisible": true
+      }
+    },
+    {
+      "id": "S03 glasses photo but looking for keys",
+      "call": "spots",
+      "image": "glasses_desk.jpg",
+      "item": "keys",
+      "expect": {
+        "itemVisible": false
+      }
+    },
+    {
+      "id": "S04 snack bag is never a place for glasses",
+      "call": "spots",
+      "image": "chips_bag.jpg",
+      "item": "glasses",
+      "expect": {
+        "itemVisible": false,
+        "noSpotWords": [
+          "chip",
+          "chips",
+          "snack",
+          "crisp",
+          "food",
+          "packet"
+        ]
+      }
+    },
+    {
+      "id": "S05 keys on table -> point at them",
+      "call": "spots",
+      "image": "keys_table.jpg",
+      "item": "keys",
+      "expect": {
+        "itemVisible": true,
+        "noSpotWords": [
+          "bulb",
+          "light"
+        ]
+      }
+    },
+    {
+      "id": "S06 keys photo, looking for wallet",
+      "call": "spots",
+      "image": "keys_table.jpg",
+      "item": "wallet",
+      "expect": {
+        "itemVisible": false,
+        "noSpotWords": [
+          "bulb",
+          "light",
+          "key"
+        ]
+      }
+    },
+    {
+      "id": "S07 remote on coffee table -> point at it",
+      "call": "spots",
+      "image": "living_room.jpg",
+      "item": "tv remote",
+      "expect": {
+        "itemVisible": true
+      }
+    },
+    {
+      "id": "S08 living room, phone: sofa yes, decor no",
+      "call": "spots",
+      "image": "living_room.jpg",
+      "item": "phone",
+      "expect": {
+        "itemVisible": false,
+        "spotAny": [
+          "sofa",
+          "cushion",
+          "couch",
+          "pillow",
+          "blanket",
+          "throw"
+        ],
+        "noSpotWords": [
+          "candle",
+          "picture",
+          "frame",
+          "plant",
+          "painting",
+          "wall",
+          "remote"
+        ]
+      }
+    },
+    {
+      "id": "S09 messy bedroom, glasses: no trash/pills/lotion",
+      "call": "spots",
+      "image": "bedroom1.jpg",
+      "item": "glasses",
+      "expect": {
+        "itemVisible": false,
+        "spotAny": [
+          "nightstand",
+          "bed",
+          "blanket",
+          "covers",
+          "clothes",
+          "chair",
+          "table"
+        ],
+        "noSpotWords": [
+          "trash",
+          "bin",
+          "garbage",
+          "pill",
+          "bottle",
+          "lotion",
+          "tissue",
+          "rug",
+          "shoe"
+        ]
+      }
+    },
+    {
+      "id": "S10 messy bedroom, pills on nightstand -> point at them",
+      "call": "spots",
+      "image": "bedroom1.jpg",
+      "item": "medication",
+      "expect": {
+        "itemVisible": true
+      }
+    },
+    {
+      "id": "S11 messy bedroom, shoe on floor -> point at it",
+      "call": "spots",
+      "image": "bedroom1.jpg",
+      "item": "black shoe",
+      "expect": {
+        "itemVisible": true
+      }
+    },
+    {
+      "id": "S12 cluttered desk, pen -> point at it",
+      "call": "spots",
+      "image": "messy_desk2.jpg",
+      "item": "pen",
+      "expect": {
+        "itemVisible": true
+      }
+    },
+    {
+      "id": "S13 cluttered desk, glasses: papers yes, gadgets no",
+      "call": "spots",
+      "image": "messy_desk2.jpg",
+      "item": "glasses",
+      "expect": {
+        "itemVisible": false,
+        "spotAny": [
+          "paper",
+          "papers",
+          "notebook",
+          "desk",
+          "pile",
+          "stack",
+          "documents"
+        ],
+        "noSpotWords": [
+          "phone",
+          "microphone",
+          "pen",
+          "vase",
+          "lamp",
+          "cd"
+        ]
+      }
+    },
+    {
+      "id": "S14 backpack yes, pineapple no",
+      "call": "spots",
+      "image": "backpack.jpg",
+      "item": "wallet",
+      "expect": {
+        "itemVisible": false,
+        "spotAny": [
+          "backpack",
+          "bag"
+        ],
+        "noSpotWords": [
+          "pineapple",
+          "fruit",
+          "grass",
+          "wall"
+        ]
+      }
+    },
+    {
+      "id": "S15 bedroom, keys: no TV/AC/fan/painting",
+      "call": "spots",
+      "image": "bedroom2.jpg",
+      "item": "keys",
+      "expect": {
+        "itemVisible": false,
+        "noSpotWords": [
+          "tv",
+          "television",
+          "air conditioner",
+          "fan",
+          "painting",
+          "picture",
+          "light",
+          "ceiling",
+          "mirror"
+        ]
+      }
+    },
+    {
+      "id": "S16 empty room: invent nothing",
+      "call": "spots",
+      "image": "empty_room.jpg",
+      "item": "glasses",
+      "expect": {
+        "itemVisible": false,
+        "maxSpots": 0
+      }
+    },
+    {
+      "id": "S17 drinking glass is not 'glasses'",
+      "call": "spots",
+      "image": "nightstand2.jpg",
+      "item": "glasses",
+      "expect": {
+        "itemVisible": false,
+        "noSpotWords": [
+          "drinking glass",
+          "glass of water",
+          "water glass",
+          "tumbler",
+          "lamp",
+          "airplane",
+          "plane"
+        ]
+      }
+    },
+    {
+      "id": "S18 closed glasses case -> list the case",
+      "call": "spots",
+      "image": "burberry_case.jpg",
+      "item": "glasses",
+      "expect": {
+        "itemVisible": false,
+        "spotAny": [
+          "case"
+        ]
+      }
+    },
+    {
+      "id": "S19 glasses lying ON a case -> point at them",
+      "call": "spots",
+      "image": "case_closed2.jpg",
+      "item": "glasses",
+      "expect": {
+        "itemVisible": true
+      }
+    },
+    {
+      "id": "S20 cluttered desk, headphones -> point at them",
+      "call": "spots",
+      "image": "messy_desk.jpg",
+      "item": "headphones",
+      "expect": {
+        "itemVisible": true
+      }
+    },
+    {
+      "id": "S21 cluttered desk, keys: no cups/bottles/lotion",
+      "call": "spots",
+      "image": "messy_desk.jpg",
+      "item": "keys",
+      "expect": {
+        "itemVisible": false,
+        "noSpotWords": [
+          "cup",
+          "bottle",
+          "lotion",
+          "monitor",
+          "radio",
+          "tape",
+          "stapler"
+        ]
+      }
+    },
+    {
+      "id": "C01 CLOSED glasses case is NOT checked (user bug)",
+      "call": "check",
+      "image": "burberry_case.jpg",
+      "item": "glasses",
+      "spot": "glasses case",
+      "expect": {
+        "fullyVisible": false,
+        "itemVisible": false,
+        "tipAny": [
+          "open"
+        ]
+      }
+    },
+    {
+      "id": "C02 open case with glasses -> found",
+      "call": "check",
+      "image": "glasses_in_case.jpg",
+      "item": "glasses",
+      "spot": "glasses case",
+      "expect": {
+        "itemVisible": true
+      }
+    },
+    {
+      "id": "C03 closed drawers are not checked",
+      "call": "check",
+      "image": "drawers_closed.jpg",
+      "item": "keys",
+      "spot": "drawer",
+      "expect": {
+        "fullyVisible": false,
+        "itemVisible": false
+      }
+    },
+    {
+      "id": "C04 closed backpack is not checked",
+      "call": "check",
+      "image": "backpack.jpg",
+      "item": "wallet",
+      "spot": "backpack",
+      "expect": {
+        "fullyVisible": false,
+        "itemVisible": false,
+        "tipAny": [
+          "open",
+          "unzip",
+          "pocket",
+          "inside",
+          "look"
+        ]
+      }
+    },
+    {
+      "id": "C05 open empty box is checked",
+      "call": "check",
+      "image": "nightstand2.jpg",
+      "item": "ring",
+      "spot": "small white box",
+      "expect": {
+        "fullyVisible": true,
+        "itemVisible": false
+      }
+    },
+    {
+      "id": "C06 cushions not lifted are not checked",
+      "call": "check",
+      "image": "living_room.jpg",
+      "item": "phone",
+      "spot": "sofa cushions",
+      "expect": {
+        "fullyVisible": false,
+        "itemVisible": false
+      }
+    },
+    {
+      "id": "C07 glasses on top of case -> found",
+      "call": "check",
+      "image": "case_closed2.jpg",
+      "item": "glasses",
+      "spot": "glasses case",
+      "expect": {
+        "itemVisible": true
+      }
+    },
+    {
+      "id": "C08 drinking glass is not glasses",
+      "call": "check",
+      "image": "nightstand2.jpg",
+      "item": "glasses",
+      "spot": "nightstand",
+      "expect": {
+        "itemVisible": false
+      }
+    },
+    {
+      "id": "C09 dark clothes basket: look closer, not 'not here'",
+      "call": "check",
+      "image": "laundry_basket.jpg",
+      "item": "black wallet",
+      "spot": "laundry basket",
+      "expect": {
+        "fullyVisible": false,
+        "itemVisible": false,
+        "tipAny": [
+          "move",
+          "lift",
+          "dig",
+          "look",
+          "check",
+          "search",
+          "take",
+          "through",
+          "under",
+          "clothes"
+        ]
+      }
+    },
+    {
+      "id": "C10 full clothes basket: look closer",
+      "call": "check",
+      "image": "laundry_basket2.jpg",
+      "item": "phone",
+      "spot": "laundry basket",
+      "expect": {
+        "fullyVisible": false,
+        "itemVisible": false
+      }
+    },
+    {
+      "id": "S22 clothes rack: jackets/pockets, not vents/pillar",
+      "call": "spots",
+      "image": "clothes_armchair.jpg",
+      "item": "wallet",
+      "expect": {
+        "itemVisible": false,
+        "spotAny": [
+          "jacket",
+          "coat",
+          "clothes",
+          "pocket",
+          "rack",
+          "blazer"
+        ],
+        "noSpotWords": [
+          "vent",
+          "pillar",
+          "column",
+          "carpet",
+          "ceiling",
+          "mirror"
+        ]
+      }
+    },
+    {
+      "id": "PP1 photo of glasses in case -> glasses + colour",
+      "call": "profile_photo",
+      "image": "glasses_in_case.jpg",
+      "text": "",
+      "expect": {
+        "category": "glasses",
+        "appearanceAny": [
+          "blue",
+          "teal",
+          "green",
+          "dark",
+          "grey",
+          "gray",
+          "transparent"
+        ],
+        "ambiguous": false
+      }
+    },
+    {
+      "id": "PP2 photo of keys, text 'my keys'",
+      "call": "profile_photo",
+      "image": "keys_table.jpg",
+      "text": "my keys",
+      "expect": {
+        "category": "keys"
+      }
+    },
+    {
+      "id": "PP3 backpack + pineapple, no text -> ask which",
+      "call": "profile_photo",
+      "image": "backpack.jpg",
+      "text": "",
+      "expect": {
+        "ambiguous": true
+      }
+    },
+    {
+      "id": "PP4 backpack + pineapple, text 'backpack' -> the backpack",
+      "call": "profile_photo",
+      "image": "backpack.jpg",
+      "text": "my backpack",
+      "expect": {
+        "ambiguous": false,
+        "nameAny": [
+          "backpack",
+          "bag"
+        ],
+        "appearanceAny": [
+          "camo",
+          "camouflage",
+          "green",
+          "brown"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,1182 @@
+{
+  "_about": "FIND ME knowledge base: commonly lost items. Used to (1) fill item profiles, (2) tell Gemini where each item realistically ends up and what makes no sense, (3) filter impossible spots on the device. Sizes are typical width x height in cm. Keep phrases short. 'inCase' = the item is often stored in its own case, which must be OPENED to count as checked.",
+  "neverPlaces": [
+    "snack bag",
+    "chip bag",
+    "chips bag",
+    "crisp packet",
+    "candy wrapper",
+    "food",
+    "fruit",
+    "bread",
+    "plate",
+    "cup",
+    "mug",
+    "bottle",
+    "can",
+    "carton",
+    "takeout box",
+    "pizza box",
+    "cereal box",
+    "trash",
+    "rubbish",
+    "garbage",
+    "bin liner",
+    "plant",
+    "flower",
+    "pot plant",
+    "candle",
+    "lamp",
+    "screen",
+    "monitor",
+    "tv",
+    "television",
+    "picture",
+    "poster",
+    "painting",
+    "mirror",
+    "door handle",
+    "outlet",
+    "socket",
+    "switch",
+    "cable",
+    "chips",
+    "snack",
+    "crisps",
+    "candy",
+    "wrapper",
+    "packaging",
+    "radio",
+    "tape dispenser",
+    "stapler",
+    "speaker",
+    "microphone",
+    "lotion",
+    "keyboard"
+  ],
+  "items": [
+    {
+      "id": "glasses",
+      "names": [
+        "glasses",
+        "eyeglasses",
+        "spectacles",
+        "reading glasses",
+        "specs"
+      ],
+      "sizeCm": [
+        14,
+        5
+      ],
+      "shape": "folded glasses frame",
+      "typical": [
+        "glasses case",
+        "nightstand",
+        "desk",
+        "next to the sink",
+        "sofa cushions",
+        "on top of the head of a jacket hood",
+        "bag front pocket"
+      ],
+      "fitsIn": [
+        "glasses case",
+        "bag",
+        "drawer",
+        "jacket pocket",
+        "between sofa cushions",
+        "under papers",
+        "under a blanket"
+      ],
+      "never": [
+        "snack bag",
+        "chapstick",
+        "pen",
+        "phone",
+        "remote",
+        "small jewelry box",
+        "coin purse"
+      ],
+      "lookalike": "eyeglasses with frames and lenses; sunglasses only if the user said sunglasses; an empty case or a phone does not count",
+      "inCase": "glasses case"
+    },
+    {
+      "id": "sunglasses",
+      "names": [
+        "sunglasses",
+        "shades",
+        "sunnies"
+      ],
+      "sizeCm": [
+        15,
+        5
+      ],
+      "shape": "folded tinted glasses",
+      "typical": [
+        "sunglasses case",
+        "bag",
+        "car keys tray",
+        "entry table",
+        "jacket pocket",
+        "hat"
+      ],
+      "fitsIn": [
+        "sunglasses case",
+        "bag",
+        "drawer",
+        "jacket pocket",
+        "between sofa cushions"
+      ],
+      "never": [
+        "snack bag",
+        "chapstick",
+        "pen"
+      ],
+      "lookalike": "tinted glasses; clear reading glasses do not count",
+      "inCase": "sunglasses case"
+    },
+    {
+      "id": "keys",
+      "names": [
+        "keys",
+        "key",
+        "house keys",
+        "keyring",
+        "key ring",
+        "keychain"
+      ],
+      "sizeCm": [
+        8,
+        4
+      ],
+      "shape": "metal keys on a ring",
+      "typical": [
+        "key bowl or hook",
+        "jacket pocket",
+        "jeans pocket",
+        "bag",
+        "entry table",
+        "kitchen counter",
+        "door lock"
+      ],
+      "fitsIn": [
+        "pocket",
+        "bag",
+        "drawer",
+        "between sofa cushions",
+        "under papers",
+        "under clothes",
+        "bowl or tray"
+      ],
+      "never": [
+        "snack bag",
+        "chapstick",
+        "pen",
+        "phone case"
+      ],
+      "lookalike": "metal keys or a keyring with keys; a single small metal object is not enough"
+    },
+    {
+      "id": "car_key",
+      "names": [
+        "car key",
+        "car keys",
+        "key fob",
+        "fob",
+        "smart key"
+      ],
+      "sizeCm": [
+        7,
+        4
+      ],
+      "shape": "plastic key fob",
+      "typical": [
+        "jacket pocket",
+        "bag",
+        "key bowl or hook",
+        "entry table",
+        "jeans pocket"
+      ],
+      "fitsIn": [
+        "pocket",
+        "bag",
+        "drawer",
+        "between sofa cushions",
+        "under papers"
+      ],
+      "never": [
+        "snack bag",
+        "chapstick"
+      ],
+      "lookalike": "a car key fob with buttons, usually black"
+    },
+    {
+      "id": "wallet",
+      "names": [
+        "wallet",
+        "billfold",
+        "purse wallet"
+      ],
+      "sizeCm": [
+        11,
+        9
+      ],
+      "shape": "flat rectangle",
+      "typical": [
+        "bag",
+        "jacket pocket",
+        "jeans pocket",
+        "desk",
+        "nightstand",
+        "entry table",
+        "car"
+      ],
+      "fitsIn": [
+        "bag",
+        "pocket",
+        "drawer",
+        "between sofa cushions",
+        "under clothes",
+        "under papers",
+        "under a pillow"
+      ],
+      "never": [
+        "snack bag",
+        "chapstick",
+        "glasses case",
+        "pen",
+        "phone case",
+        "small pouch smaller than a hand"
+      ],
+      "lookalike": "a wallet (folded leather or fabric rectangle); a phone or a notebook does not count"
+    },
+    {
+      "id": "card",
+      "names": [
+        "credit card",
+        "bank card",
+        "id card",
+        "card",
+        "student card",
+        "transit card",
+        "access card"
+      ],
+      "sizeCm": [
+        8.5,
+        5.4
+      ],
+      "shape": "thin plastic card",
+      "typical": [
+        "wallet",
+        "phone case",
+        "jacket pocket",
+        "desk",
+        "next to laptop",
+        "bag"
+      ],
+      "fitsIn": [
+        "wallet",
+        "phone case",
+        "pocket",
+        "bag",
+        "drawer",
+        "under papers",
+        "between books",
+        "under a keyboard"
+      ],
+      "never": [
+        "snack bag",
+        "chapstick"
+      ],
+      "lookalike": "a thin plastic card; a receipt or paper does not count"
+    },
+    {
+      "id": "passport",
+      "names": [
+        "passport"
+      ],
+      "sizeCm": [
+        12.5,
+        8.8
+      ],
+      "shape": "small booklet",
+      "typical": [
+        "travel bag",
+        "document folder",
+        "drawer",
+        "desk",
+        "backpack"
+      ],
+      "fitsIn": [
+        "bag",
+        "drawer",
+        "folder",
+        "between books",
+        "under papers"
+      ],
+      "never": [
+        "snack bag",
+        "chapstick",
+        "pocket smaller than a hand"
+      ],
+      "lookalike": "a passport booklet; another notebook does not count"
+    },
+    {
+      "id": "phone",
+      "names": [
+        "phone",
+        "cellphone",
+        "cell phone",
+        "mobile",
+        "smartphone",
+        "iphone"
+      ],
+      "sizeCm": [
+        15,
+        7
+      ],
+      "shape": "flat rectangle",
+      "typical": [
+        "sofa cushions",
+        "bed covers",
+        "desk",
+        "kitchen counter",
+        "bag",
+        "jacket pocket",
+        "bathroom"
+      ],
+      "fitsIn": [
+        "between sofa cushions",
+        "under a blanket",
+        "under a pillow",
+        "bag",
+        "pocket",
+        "under papers",
+        "drawer"
+      ],
+      "never": [
+        "snack bag",
+        "chapstick",
+        "glasses case",
+        "wallet"
+      ],
+      "lookalike": "a smartphone; a tablet, remote or wallet does not count"
+    },
+    {
+      "id": "earbuds",
+      "names": [
+        "airpods",
+        "earbuds",
+        "earphones",
+        "buds",
+        "galaxy buds",
+        "earpods"
+      ],
+      "sizeCm": [
+        5,
+        5
+      ],
+      "shape": "small rounded case",
+      "typical": [
+        "jacket pocket",
+        "jeans pocket",
+        "bag",
+        "desk",
+        "nightstand",
+        "sofa cushions"
+      ],
+      "fitsIn": [
+        "pocket",
+        "bag",
+        "drawer",
+        "between sofa cushions",
+        "under a blanket",
+        "under papers"
+      ],
+      "never": [
+        "snack bag",
+        "chapstick"
+      ],
+      "lookalike": "the earbuds charging case (small, rounded, usually white or black) or loose earbuds; the case counts as the item"
+    },
+    {
+      "id": "headphones",
+      "names": [
+        "headphones",
+        "headset",
+        "over-ear headphones"
+      ],
+      "sizeCm": [
+        18,
+        20
+      ],
+      "shape": "headband with ear cups",
+      "typical": [
+        "desk",
+        "bag",
+        "bed",
+        "hook",
+        "sofa"
+      ],
+      "fitsIn": [
+        "bag",
+        "under a blanket",
+        "under clothes",
+        "drawer"
+      ],
+      "never": [
+        "snack bag",
+        "pocket",
+        "glasses case"
+      ],
+      "lookalike": "over-ear headphones with a headband"
+    },
+    {
+      "id": "remote",
+      "names": [
+        "remote",
+        "tv remote",
+        "remote control",
+        "controller remote"
+      ],
+      "sizeCm": [
+        18,
+        5
+      ],
+      "shape": "long thin bar",
+      "typical": [
+        "sofa cushions",
+        "coffee table",
+        "under the sofa",
+        "bed covers",
+        "armchair"
+      ],
+      "fitsIn": [
+        "between sofa cushions",
+        "under a blanket",
+        "under a pillow",
+        "under magazines",
+        "under the sofa",
+        "drawer"
+      ],
+      "never": [
+        "snack bag",
+        "pocket",
+        "glasses case"
+      ],
+      "lookalike": "a TV remote with buttons; a phone does not count"
+    },
+    {
+      "id": "game_controller",
+      "names": [
+        "controller",
+        "game controller",
+        "gamepad",
+        "joystick"
+      ],
+      "sizeCm": [
+        16,
+        10
+      ],
+      "shape": "handheld gamepad",
+      "typical": [
+        "sofa",
+        "coffee table",
+        "tv stand",
+        "bed",
+        "under the sofa"
+      ],
+      "fitsIn": [
+        "between sofa cushions",
+        "under a blanket",
+        "under the sofa",
+        "drawer",
+        "bag"
+      ],
+      "never": [
+        "snack bag",
+        "pocket",
+        "glasses case"
+      ],
+      "lookalike": "a game controller with sticks and buttons"
+    },
+    {
+      "id": "charger",
+      "names": [
+        "charger",
+        "charging cable",
+        "cable",
+        "usb cable",
+        "power adapter",
+        "adapter",
+        "phone charger"
+      ],
+      "sizeCm": [
+        6,
+        6
+      ],
+      "shape": "plug with cable",
+      "typical": [
+        "wall socket near bed",
+        "desk",
+        "bag",
+        "drawer",
+        "nightstand"
+      ],
+      "fitsIn": [
+        "bag",
+        "drawer",
+        "under the bed",
+        "behind the nightstand",
+        "under papers"
+      ],
+      "never": [
+        "snack bag",
+        "chapstick"
+      ],
+      "lookalike": "a charging plug or a coiled cable"
+    },
+    {
+      "id": "power_bank",
+      "names": [
+        "power bank",
+        "battery pack",
+        "portable charger"
+      ],
+      "sizeCm": [
+        14,
+        7
+      ],
+      "shape": "flat brick",
+      "typical": [
+        "bag",
+        "desk",
+        "nightstand",
+        "jacket pocket"
+      ],
+      "fitsIn": [
+        "bag",
+        "drawer",
+        "pocket",
+        "under papers",
+        "between sofa cushions"
+      ],
+      "never": [
+        "snack bag",
+        "chapstick",
+        "glasses case"
+      ],
+      "lookalike": "a battery brick, often with a cable"
+    },
+    {
+      "id": "watch",
+      "names": [
+        "watch",
+        "wristwatch",
+        "smartwatch",
+        "apple watch",
+        "fitbit"
+      ],
+      "sizeCm": [
+        4,
+        22
+      ],
+      "shape": "watch with strap",
+      "typical": [
+        "nightstand",
+        "next to the sink",
+        "desk",
+        "jewelry box",
+        "bag"
+      ],
+      "fitsIn": [
+        "jewelry box",
+        "drawer",
+        "bag",
+        "pocket",
+        "between sofa cushions",
+        "under clothes"
+      ],
+      "never": [
+        "snack bag"
+      ],
+      "lookalike": "a wristwatch or smartwatch with a strap"
+    },
+    {
+      "id": "ring",
+      "names": [
+        "ring",
+        "wedding ring",
+        "engagement ring"
+      ],
+      "sizeCm": [
+        2,
+        2
+      ],
+      "shape": "tiny metal ring",
+      "typical": [
+        "next to the sink",
+        "soap dish",
+        "nightstand",
+        "jewelry box",
+        "kitchen counter",
+        "pocket"
+      ],
+      "fitsIn": [
+        "jewelry box",
+        "small dish",
+        "pocket",
+        "drawer",
+        "between sofa cushions",
+        "under the bed"
+      ],
+      "never": [
+        "snack bag"
+      ],
+      "lookalike": "a small finger ring"
+    },
+    {
+      "id": "jewelry",
+      "names": [
+        "earring",
+        "earrings",
+        "necklace",
+        "bracelet",
+        "jewelry",
+        "jewellery",
+        "pendant"
+      ],
+      "sizeCm": [
+        3,
+        3
+      ],
+      "shape": "small jewelry",
+      "typical": [
+        "jewelry box",
+        "nightstand",
+        "bathroom counter",
+        "dresser top",
+        "small dish"
+      ],
+      "fitsIn": [
+        "jewelry box",
+        "small dish",
+        "drawer",
+        "pocket",
+        "under the bed",
+        "between sofa cushions"
+      ],
+      "never": [
+        "snack bag"
+      ],
+      "lookalike": "the described piece of jewelry"
+    },
+    {
+      "id": "lip_balm",
+      "names": [
+        "chapstick",
+        "lip balm",
+        "lipstick",
+        "lip gloss"
+      ],
+      "sizeCm": [
+        2,
+        7
+      ],
+      "shape": "small tube",
+      "typical": [
+        "bag",
+        "jacket pocket",
+        "jeans pocket",
+        "nightstand",
+        "bathroom counter",
+        "desk"
+      ],
+      "fitsIn": [
+        "bag",
+        "pocket",
+        "makeup bag",
+        "drawer",
+        "between sofa cushions",
+        "under the bed"
+      ],
+      "never": [
+        "snack bag"
+      ],
+      "lookalike": "a small lip balm or lipstick tube"
+    },
+    {
+      "id": "hair_tie",
+      "names": [
+        "hair tie",
+        "scrunchie",
+        "hair clip",
+        "hair elastic",
+        "bobby pin",
+        "claw clip"
+      ],
+      "sizeCm": [
+        4,
+        4
+      ],
+      "shape": "small elastic loop",
+      "typical": [
+        "wrist",
+        "bathroom counter",
+        "nightstand",
+        "bag",
+        "under the bed",
+        "sofa cushions"
+      ],
+      "fitsIn": [
+        "bag",
+        "pocket",
+        "drawer",
+        "between sofa cushions",
+        "under the bed"
+      ],
+      "never": [
+        "snack bag"
+      ],
+      "lookalike": "a hair tie, scrunchie or clip"
+    },
+    {
+      "id": "pen",
+      "names": [
+        "pen",
+        "pencil",
+        "marker",
+        "stylus",
+        "apple pencil"
+      ],
+      "sizeCm": [
+        1,
+        14
+      ],
+      "shape": "thin stick",
+      "typical": [
+        "desk",
+        "pencil case",
+        "bag",
+        "behind the desk",
+        "between notebooks"
+      ],
+      "fitsIn": [
+        "pencil case",
+        "bag",
+        "drawer",
+        "pocket",
+        "between books",
+        "under papers",
+        "between sofa cushions"
+      ],
+      "never": [
+        "snack bag"
+      ],
+      "lookalike": "a pen or pencil"
+    },
+    {
+      "id": "usb_stick",
+      "names": [
+        "usb",
+        "usb stick",
+        "flash drive",
+        "thumb drive",
+        "memory stick",
+        "sd card"
+      ],
+      "sizeCm": [
+        5,
+        2
+      ],
+      "shape": "tiny stick",
+      "typical": [
+        "laptop side",
+        "desk",
+        "bag",
+        "pencil case",
+        "drawer"
+      ],
+      "fitsIn": [
+        "pencil case",
+        "bag",
+        "drawer",
+        "pocket",
+        "under papers"
+      ],
+      "never": [
+        "snack bag"
+      ],
+      "lookalike": "a small USB stick"
+    },
+    {
+      "id": "laptop",
+      "names": [
+        "laptop",
+        "notebook computer",
+        "macbook"
+      ],
+      "sizeCm": [
+        32,
+        22
+      ],
+      "shape": "thin flat slab",
+      "typical": [
+        "desk",
+        "bed",
+        "sofa",
+        "backpack",
+        "under papers"
+      ],
+      "fitsIn": [
+        "backpack",
+        "laptop bag",
+        "under a blanket",
+        "under the bed",
+        "large drawer"
+      ],
+      "never": [
+        "snack bag",
+        "pocket",
+        "small drawer",
+        "glasses case",
+        "handbag smaller than the laptop"
+      ],
+      "lookalike": "a laptop computer"
+    },
+    {
+      "id": "tablet",
+      "names": [
+        "tablet",
+        "ipad",
+        "e-reader",
+        "kindle"
+      ],
+      "sizeCm": [
+        24,
+        17
+      ],
+      "shape": "flat slab",
+      "typical": [
+        "bed covers",
+        "sofa",
+        "nightstand",
+        "bag",
+        "desk"
+      ],
+      "fitsIn": [
+        "bag",
+        "under a blanket",
+        "under a pillow",
+        "between sofa cushions",
+        "drawer"
+      ],
+      "never": [
+        "snack bag",
+        "pocket",
+        "glasses case"
+      ],
+      "lookalike": "a tablet or e-reader"
+    },
+    {
+      "id": "book",
+      "names": [
+        "book",
+        "notebook",
+        "journal",
+        "diary",
+        "planner"
+      ],
+      "sizeCm": [
+        15,
+        21
+      ],
+      "shape": "book",
+      "typical": [
+        "nightstand",
+        "bag",
+        "desk",
+        "bookshelf",
+        "sofa"
+      ],
+      "fitsIn": [
+        "bag",
+        "drawer",
+        "bookshelf",
+        "under papers",
+        "under a blanket"
+      ],
+      "never": [
+        "snack bag",
+        "pocket",
+        "glasses case"
+      ],
+      "lookalike": "the book or notebook described"
+    },
+    {
+      "id": "medication",
+      "names": [
+        "pills",
+        "medicine",
+        "medication",
+        "pill bottle",
+        "inhaler",
+        "pill box"
+      ],
+      "sizeCm": [
+        4,
+        8
+      ],
+      "shape": "small bottle or box",
+      "typical": [
+        "nightstand",
+        "bathroom cabinet",
+        "kitchen counter",
+        "bag",
+        "drawer"
+      ],
+      "fitsIn": [
+        "bag",
+        "drawer",
+        "cabinet",
+        "pocket",
+        "makeup bag"
+      ],
+      "never": [
+        "snack bag"
+      ],
+      "lookalike": "a pill bottle, blister pack or inhaler"
+    },
+    {
+      "id": "makeup",
+      "names": [
+        "makeup",
+        "makeup bag",
+        "compact",
+        "mascara",
+        "eyeliner",
+        "foundation"
+      ],
+      "sizeCm": [
+        4,
+        12
+      ],
+      "shape": "small cosmetic",
+      "typical": [
+        "makeup bag",
+        "bathroom counter",
+        "dresser",
+        "bag"
+      ],
+      "fitsIn": [
+        "makeup bag",
+        "bag",
+        "drawer",
+        "bathroom cabinet"
+      ],
+      "never": [
+        "snack bag"
+      ],
+      "lookalike": "the described cosmetic"
+    },
+    {
+      "id": "sock",
+      "names": [
+        "sock",
+        "socks"
+      ],
+      "sizeCm": [
+        10,
+        25
+      ],
+      "shape": "soft fabric",
+      "typical": [
+        "under the bed",
+        "laundry basket",
+        "inside a shoe",
+        "between bed sheets",
+        "behind the washing machine"
+      ],
+      "fitsIn": [
+        "laundry basket",
+        "under the bed",
+        "inside a shoe",
+        "pile of clothes",
+        "drawer",
+        "bed covers"
+      ],
+      "never": [
+        "snack bag",
+        "glasses case"
+      ],
+      "lookalike": "a sock"
+    },
+    {
+      "id": "shoe",
+      "names": [
+        "shoe",
+        "shoes",
+        "sneaker",
+        "slipper",
+        "sandal",
+        "boot"
+      ],
+      "sizeCm": [
+        30,
+        12
+      ],
+      "shape": "shoe",
+      "typical": [
+        "entryway",
+        "under the bed",
+        "closet floor",
+        "behind the door"
+      ],
+      "fitsIn": [
+        "under the bed",
+        "closet",
+        "shoe rack",
+        "under a desk",
+        "behind the door"
+      ],
+      "never": [
+        "snack bag",
+        "drawer",
+        "pocket",
+        "bag smaller than a shoe"
+      ],
+      "lookalike": "the described shoe"
+    },
+    {
+      "id": "hat",
+      "names": [
+        "hat",
+        "cap",
+        "beanie",
+        "scarf",
+        "gloves",
+        "glove"
+      ],
+      "sizeCm": [
+        25,
+        15
+      ],
+      "shape": "soft clothing",
+      "typical": [
+        "coat hook",
+        "pile of clothes",
+        "bag",
+        "closet shelf",
+        "chair back"
+      ],
+      "fitsIn": [
+        "pile of clothes",
+        "bag",
+        "drawer",
+        "closet",
+        "coat sleeve",
+        "under the bed"
+      ],
+      "never": [
+        "snack bag",
+        "glasses case"
+      ],
+      "lookalike": "the described clothing item"
+    },
+    {
+      "id": "toy",
+      "names": [
+        "toy",
+        "lego",
+        "figure",
+        "doll",
+        "stuffed animal",
+        "plush",
+        "pacifier",
+        "dummy"
+      ],
+      "sizeCm": [
+        8,
+        8
+      ],
+      "shape": "small toy",
+      "typical": [
+        "under the sofa",
+        "toy box",
+        "under the bed",
+        "between sofa cushions",
+        "bag"
+      ],
+      "fitsIn": [
+        "toy box",
+        "under the sofa",
+        "under the bed",
+        "between sofa cushions",
+        "bag",
+        "basket"
+      ],
+      "never": [
+        "snack bag"
+      ],
+      "lookalike": "the described toy"
+    },
+    {
+      "id": "umbrella",
+      "names": [
+        "umbrella"
+      ],
+      "sizeCm": [
+        6,
+        30
+      ],
+      "shape": "folded umbrella",
+      "typical": [
+        "entryway",
+        "bag",
+        "behind the door",
+        "car",
+        "coat hook"
+      ],
+      "fitsIn": [
+        "bag",
+        "umbrella stand",
+        "closet",
+        "behind the door"
+      ],
+      "never": [
+        "snack bag",
+        "pocket",
+        "drawer"
+      ],
+      "lookalike": "a folded or long umbrella"
+    },
+    {
+      "id": "mouse",
+      "names": [
+        "mouse",
+        "computer mouse",
+        "trackpad"
+      ],
+      "sizeCm": [
+        6,
+        11
+      ],
+      "shape": "small rounded device",
+      "typical": [
+        "desk",
+        "laptop bag",
+        "drawer",
+        "behind the monitor"
+      ],
+      "fitsIn": [
+        "bag",
+        "drawer",
+        "under papers"
+      ],
+      "never": [
+        "snack bag",
+        "pocket"
+      ],
+      "lookalike": "a computer mouse"
+    }
+  ]
+}

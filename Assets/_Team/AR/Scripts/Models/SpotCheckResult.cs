@@ -11,10 +11,21 @@ namespace FindMe
         public bool spotFullyVisible;
         public string tip;              // "Open the drawer"
 
+        // Optional extras (added for the smarter check; older code ignores them)
+        public string seen;             // what Gemini sees at the spot, e.g. "closed glasses case on desk"
+        public string itemEvidence;     // where/what the item is, if Gemini claims to see it
+        public bool closed;             // the spot is still closed/covered
+        public bool insideVisible;      // the inside/underneath is clearly visible
+        public bool mightBeHidden;      // visible, but piled/dark/similar-looking things: could still be there
+        public int[] spotBox;           // where the spot is in THIS photo (used to re-measure the cue up close)
+
+        public bool HasSpotBox => IsValidBox(spotBox);
+
         /// <summary>itemBox is only usable if it's a proper [ymin, xmin, ymax, xmax] inside 0..1000.</summary>
-        public bool HasItemBox =>
-            itemBox is { Length: 4 } && itemBox[0] < itemBox[2] && itemBox[1] < itemBox[3] &&
-            itemBox[0] >= 0 && itemBox[1] >= 0 && itemBox[2] <= 1000 && itemBox[3] <= 1000;
+        public bool HasItemBox => IsValidBox(itemBox);
+
+        static bool IsValidBox(int[] b) =>
+            b is { Length: 4 } && b[0] < b[2] && b[1] < b[3] && b[0] >= 0 && b[1] >= 0 && b[2] <= 1000 && b[3] <= 1000;
     }
 
     public enum SpotState { ToCheck, Focused, Checking, NeedsOpen, Checked, Candidate, Found }
