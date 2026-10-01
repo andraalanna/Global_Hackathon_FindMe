@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Splash</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;family=Nunito:wght@400;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Nunito',system-ui,sans-serif;color:#3A2E6B}
+a{color:#3A2E6B}a:hover{color:#2B2250}
+.h{font-family:'Fredoka','Nunito',system-ui,sans-serif;margin:0}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;height:56px;border-radius:18px;font-family:'Fredoka','Nunito',sans-serif;font-weight:600;font-size:18px;text-decoration:none;border:none;cursor:pointer;width:100%;box-sizing:border-box;color:#3A2E6B}
+.bp{background:#FF7EB6;box-shadow:0 5px 0 #D9559A}
+.bm{background:#4FE3A8;box-shadow:0 5px 0 #26B07B}
+.bl{background:#C3B1FF;box-shadow:0 5px 0 #9A84EA}
+.bw{background:#FFFFFF;box-shadow:0 5px 0 #D8D2EE;border:2px solid #E4E0F7}
+.bd{background:#3A2E6B;color:#FFFFFF;box-shadow:0 5px 0 #1E1740}
+.chip{display:inline-flex;align-items:center;gap:6px;height:40px;padding:0 16px;border-radius:999px;border:2px solid #E4E0F7;background:#FFFFFF;font-family:'Nunito',sans-serif;font-weight:700;font-size:15px;color:#3A2E6B;cursor:pointer}
+.chip.on{background:#3A2E6B;border-color:#3A2E6B;color:#FFFFFF}
+.sw{width:52px;height:32px;border-radius:999px;border:none;background:#4FE3A8;position:relative;cursor:pointer;flex-shrink:0}
+.sw span{position:absolute;top:4px;right:4px;width:24px;height:24px;border-radius:50%;background:#FFFFFF}
+.sw.off{background:#E4E0F7}.sw.off span{right:auto;left:4px}
+.inp{width:100%;box-sizing:border-box;height:52px;border-radius:16px;border:2px solid #E4E0F7;background:#FFFFFF;padding:0 16px;font-family:'Nunito',sans-serif;font-size:16px;color:#3A2E6B}
+.lbl{display:block;font-weight:700;font-size:14px;margin-bottom:6px}
+.ib{width:56px;height:56px;border-radius:50%;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#3A2E6B;flex-shrink:0}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; box-sizing: border-box; background: #3A2E6B; font-family: 'Nunito', system-ui, sans-serif; color: #3A2E6B">
+
+<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px">
+<img src="/_blob/b6375369d90dbbd8961fbb477bb41714" alt="FIND ME logo" style="width:148px;height:148px;border-radius:36px">
+<h1 class="h" style="font-size:48px;font-weight:600;color:#FFFFFF;letter-spacing:-0.5px">FIND ME!</h1>
+<p style="margin:0;font-size:18px;font-weight:700;color:#C3B1FF">Lost it? Let's look together.</p>
+</div>
+<a href="Welcome.dc.html" class="btn bp" style="position:absolute;left:24px;right:24px;bottom:48px;width:auto">Get started</a>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

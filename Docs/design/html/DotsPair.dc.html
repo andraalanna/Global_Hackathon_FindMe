@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Pair a dot</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;family=Nunito:wght@400;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Nunito',system-ui,sans-serif;color:#3A2E6B}
+a{color:#3A2E6B}a:hover{color:#2B2250}
+.h{font-family:'Fredoka','Nunito',system-ui,sans-serif;margin:0}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;height:56px;border-radius:18px;font-family:'Fredoka','Nunito',sans-serif;font-weight:600;font-size:18px;text-decoration:none;border:none;cursor:pointer;width:100%;box-sizing:border-box;color:#3A2E6B}
+.bp{background:#FF7EB6;box-shadow:0 5px 0 #D9559A}
+.bm{background:#4FE3A8;box-shadow:0 5px 0 #26B07B}
+.bl{background:#C3B1FF;box-shadow:0 5px 0 #9A84EA}
+.bw{background:#FFFFFF;box-shadow:0 5px 0 #D8D2EE;border:2px solid #E4E0F7}
+.bd{background:#3A2E6B;color:#FFFFFF;box-shadow:0 5px 0 #1E1740}
+.chip{display:inline-flex;align-items:center;gap:6px;height:40px;padding:0 16px;border-radius:999px;border:2px solid #E4E0F7;background:#FFFFFF;font-family:'Nunito',sans-serif;font-weight:700;font-size:15px;color:#3A2E6B;cursor:pointer}
+.chip.on{background:#3A2E6B;border-color:#3A2E6B;color:#FFFFFF}
+.sw{width:52px;height:32px;border-radius:999px;border:none;background:#4FE3A8;position:relative;cursor:pointer;flex-shrink:0}
+.sw span{position:absolute;top:4px;right:4px;width:24px;height:24px;border-radius:50%;background:#FFFFFF}
+.sw.off{background:#E4E0F7}.sw.off span{right:auto;left:4px}
+.inp{width:100%;box-sizing:border-box;height:52px;border-radius:16px;border:2px solid #E4E0F7;background:#FFFFFF;padding:0 16px;font-family:'Nunito',sans-serif;font-size:16px;color:#3A2E6B}
+.lbl{display:block;font-weight:700;font-size:14px;margin-bottom:6px}
+.ib{width:56px;height:56px;border-radius:50%;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#3A2E6B;flex-shrink:0}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; box-sizing: border-box; background: #6F6883; font-family: 'Nunito', system-ui, sans-serif; color: #3A2E6B">
+
+<div aria-hidden="true" style="position:absolute;inset:0">
+<div style="position:absolute;left:0;top:0;width:390px;height:470px;background:#8E889E"></div>
+<div style="position:absolute;left:0;top:470px;width:390px;height:374px;background:#6F6883"></div>
+<div style="position:absolute;left:0;top:560px;width:390px;height:2px;background:#7B7490"></div>
+<div style="position:absolute;left:0;top:670px;width:390px;height:2px;background:#7B7490"></div>
+<div style="position:absolute;left:0;top:790px;width:390px;height:2px;background:#7B7490"></div>
+<div style="position:absolute;left:40px;top:110px;width:110px;height:140px;border-radius:10px;background:#A7B8CC;border:8px solid #B3ADC2"></div>
+<div style="position:absolute;left:0;top:290px;width:190px;height:140px;border-radius:0 24px 0 0;background:#7A7390"></div>
+<div style="position:absolute;left:0;top:398px;width:222px;height:130px;border-radius:0 26px 18px 0;background:#BDB7CB"></div>
+<div style="position:absolute;left:0;top:448px;width:222px;height:96px;border-radius:0 30px 18px 0;background:#9C8FB8"></div>
+<div style="position:absolute;left:18px;top:374px;width:96px;height:44px;border-radius:22px;background:#D9D4E4"></div>
+<div style="position:absolute;left:66px;top:410px;width:96px;height:52px;border-radius:48% 52% 40% 44%;background:#5E5873"></div>
+<div style="position:absolute;left:120px;top:400px;width:82px;height:50px;border-radius:50% 44% 46% 52%;background:#8A6F8F"></div>
+<div style="position:absolute;left:92px;top:436px;width:112px;height:48px;border-radius:46% 54% 50% 44%;background:#4E4A63"></div>
+<div style="position:absolute;left:236px;top:420px;width:160px;height:18px;border-radius:6px;background:#5B546E"></div>
+<div style="position:absolute;left:252px;top:438px;width:12px;height:190px;background:#4E4862"></div>
+<div style="position:absolute;left:300px;top:438px;width:90px;height:190px;background:#6A6380"></div>
+<div style="position:absolute;left:300px;top:500px;width:90px;height:3px;background:#5B546E"></div>
+<div style="position:absolute;left:300px;top:564px;width:90px;height:3px;background:#5B546E"></div>
+<div style="position:absolute;left:338px;top:466px;width:16px;height:6px;border-radius:3px;background:#9D96B0"></div>
+<div style="position:absolute;left:338px;top:530px;width:16px;height:6px;border-radius:3px;background:#9D96B0"></div>
+<div style="position:absolute;left:262px;top:388px;width:78px;height:32px;border-radius:6px 6px 2px 2px;background:#3F3A52"></div>
+<div style="position:absolute;left:352px;top:396px;width:22px;height:24px;border-radius:4px 4px 8px 8px;background:#C9A3B8"></div>
+<div style="position:absolute;left:150px;top:640px;width:90px;height:84px;border-radius:18px;background:#4C4560"></div>
+<div style="position:absolute;left:170px;top:616px;width:50px;height:36px;border-radius:25px 25px 0 0;border:7px solid #4C4560;border-bottom:none;box-sizing:border-box"></div>
+</div><div aria-hidden="true" style="position:absolute;inset:0;background:rgba(43,34,80,0.2)"></div>
+<div aria-hidden="true" style="position:absolute;left:250px;top:398px;width:40px;height:22px;border-radius:11px;border:5px solid #D9D4E4;box-sizing:border-box;transform:rotate(-10deg)"></div>
+<div style="position:absolute;left:280px;top:388px"><span aria-hidden="true" style="display:inline-flex;width:26px;height:26px;border-radius:50%;background:#FFFFFF;align-items:center;justify-content:center;box-shadow:0 0 0 6px rgba(255,255,255,.55),0 0 0 14px rgba(255,255,255,.25);flex-shrink:0"><span style="width:13px;height:13px;display:grid;grid-template-columns:repeat(4, minmax(0, 1fr));gap:1px;background:#2B2250;border:2px solid #2B2250;box-sizing:border-box"><span style="background:#2B2250"></span><span style="background:#F4F4F8"></span><span style="background:#2B2250"></span><span style="background:#2B2250"></span><span style="background:#F4F4F8"></span><span style="background:#2B2250"></span><span style="background:#F4F4F8"></span><span style="background:#F4F4F8"></span><span style="background:#2B2250"></span><span style="background:#2B2250"></span><span style="background:#2B2250"></span><span style="background:#F4F4F8"></span><span style="background:#F4F4F8"></span><span style="background:#2B2250"></span><span style="background:#F4F4F8"></span><span style="background:#2B2250"></span></span></span></div>
+<svg aria-hidden="true" style="position:absolute;left:244px;top:350px" width="100" height="90" viewBox="0 0 100 90"><path d="M4 22V12q0-8 8-8h12M76 4h12q8 0 8 8v10M96 68v10q0 8-8 8H76M24 86H12q-8 0-8-8V68" stroke="#4FE3A8" stroke-width="6" fill="none" stroke-linecap="round"></path></svg>
+<div style="position:absolute;left:16px;right:16px;top:18px;padding:12px 14px;border-radius:20px;background:#FFFFFF;display:flex;align-items:center;gap:10px">
+<span style="width:40px;height:40px;border-radius:12px;background:#FFE45C;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"></path></svg></span>
+<div><div class="h" style="font-size:16px;font-weight:600">Flash on</div><div style="font-size:13px;color:#655A8A">Point at the dot on your item</div></div></div>
+<div style="position:absolute;left:0;right:0;bottom:0;padding:22px 24px 34px;border-radius:32px 32px 0 0;background:#FFFFFF">
+<div style="width:44px;height:5px;border-radius:3px;background:#E4E0F7;margin:0 auto 16px"></div>
+<div style="display:flex;gap:14px;align-items:center"><span aria-hidden="true" style="display:inline-flex;width:56px;height:56px;border-radius:50%;background:#C9CCD6;align-items:center;justify-content:center;flex-shrink:0"><span style="width:29px;height:29px;display:grid;grid-template-columns:repeat(4, minmax(0, 1fr));gap:1px;background:#2B2250;border:2px solid #2B2250;box-sizing:border-box"><span style="background:#2B2250"></span><span style="background:#F4F4F8"></span><span style="background:#2B2250"></span><span style="background:#2B2250"></span><span style="background:#F4F4F8"></span><span style="background:#2B2250"></span><span style="background:#F4F4F8"></span><span style="background:#F4F4F8"></span><span style="background:#2B2250"></span><span style="background:#2B2250"></span><span style="background:#2B2250"></span><span style="background:#F4F4F8"></span><span style="background:#F4F4F8"></span><span style="background:#2B2250"></span><span style="background:#F4F4F8"></span><span style="background:#2B2250"></span></span></span><div><div style="font-size:13px;font-weight:800;color:#1E7A55">Dot #A7 found</div><h2 class="h" style="font-size:22px;font-weight:600;line-height:1.1">What is it stuck on?</h2></div></div>
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px"><button class="chip on"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="12" r="4"></circle><path d="M12 12h9M18 12v3M21 12v2"></path></svg>House keys</button><button class="chip"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="3"></rect><path d="M15 12.5h6"></path></svg>Wallet</button><button class="chip"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="7" cy="14" r="3.5"></circle><circle cx="17" cy="14" r="3.5"></circle><path d="M10.5 14h3M3.5 13L5 7M20.5 13L19 7"></path></svg>Glasses case</button><button class="chip"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Something else</button></div>
+<a href="DotsScan.dc.html" class="btn bp" style="margin-top:20px">Save dot</a></div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

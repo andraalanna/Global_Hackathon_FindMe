@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Replace a lost item</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;family=Nunito:wght@400;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Nunito',system-ui,sans-serif;color:#3A2E6B}
+a{color:#3A2E6B}a:hover{color:#2B2250}
+.h{font-family:'Fredoka','Nunito',system-ui,sans-serif;margin:0}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;height:56px;border-radius:18px;font-family:'Fredoka','Nunito',sans-serif;font-weight:600;font-size:18px;text-decoration:none;border:none;cursor:pointer;width:100%;box-sizing:border-box;color:#3A2E6B}
+.bp{background:#FF7EB6;box-shadow:0 5px 0 #D9559A}
+.bm{background:#4FE3A8;box-shadow:0 5px 0 #26B07B}
+.bl{background:#C3B1FF;box-shadow:0 5px 0 #9A84EA}
+.bw{background:#FFFFFF;box-shadow:0 5px 0 #D8D2EE;border:2px solid #E4E0F7}
+.bd{background:#3A2E6B;color:#FFFFFF;box-shadow:0 5px 0 #1E1740}
+.chip{display:inline-flex;align-items:center;gap:6px;height:40px;padding:0 16px;border-radius:999px;border:2px solid #E4E0F7;background:#FFFFFF;font-family:'Nunito',sans-serif;font-weight:700;font-size:15px;color:#3A2E6B;cursor:pointer}
+.chip.on{background:#3A2E6B;border-color:#3A2E6B;color:#FFFFFF}
+.sw{width:52px;height:32px;border-radius:999px;border:none;background:#4FE3A8;position:relative;cursor:pointer;flex-shrink:0}
+.sw span{position:absolute;top:4px;right:4px;width:24px;height:24px;border-radius:50%;background:#FFFFFF}
+.sw.off{background:#E4E0F7}.sw.off span{right:auto;left:4px}
+.inp{width:100%;box-sizing:border-box;height:52px;border-radius:16px;border:2px solid #E4E0F7;background:#FFFFFF;padding:0 16px;font-family:'Nunito',sans-serif;font-size:16px;color:#3A2E6B}
+.lbl{display:block;font-weight:700;font-size:14px;margin-bottom:6px}
+.ib{width:56px;height:56px;border-radius:50%;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#3A2E6B;flex-shrink:0}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; box-sizing: border-box; background: #FFF7FB; font-family: 'Nunito', system-ui, sans-serif; color: #3A2E6B">
+
+<div style="position:absolute;top:20px;left:20px;right:20px;height:44px;display:flex;align-items:center;justify-content:space-between"><a href="NotFound.dc.html" aria-label="Go back" style="width:44px;height:44px;border-radius:14px;background:#FFFFFF;border:2px solid #E4E0F7;display:flex;align-items:center;justify-content:center;color:#3A2E6B;box-sizing:border-box"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg></a><span class="h" style="font-size:17px;font-weight:600"></span><span style="min-width:44px;display:flex;justify-content:flex-end"></span></div>
+<div style="position:absolute;left:24px;right:24px;top:78px">
+<h1 class="h" style="font-size:28px;font-weight:600">Let's sort it out</h1>
+<div style="margin-top:4px"><button aria-pressed="true" style="display:flex;gap:12px;align-items:center;padding:9px 0;border:none;border-bottom:2px solid #E4E0F7;background:none;text-align:left;cursor:pointer;color:#3A2E6B;font-family:Nunito,sans-serif;width:100%"><span style="width:26px;height:26px;border-radius:8px;background:#4FE3A8;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#3A2E6B" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"></path></svg></span><span><span style="display:block;font-weight:800;font-size:15px">Freeze your cards</span><span style="font-size:13px;color:#655A8A">Most bank apps do it in one tap</span></span></button><button aria-pressed="false" style="display:flex;gap:12px;align-items:center;padding:9px 0;border:none;border-bottom:2px solid #E4E0F7;background:none;text-align:left;cursor:pointer;color:#3A2E6B;font-family:Nunito,sans-serif;width:100%"><span style="width:26px;height:26px;border-radius:8px;border:3px solid #E4E0F7;box-sizing:border-box;flex-shrink:0"></span><span><span style="display:block;font-weight:800;font-size:15px">Report your lost ID</span><span style="font-size:13px;color:#655A8A">Your local community center can help</span></span></button></div>
+<div style="margin-top:18px;padding:14px;border-radius:22px;background:#C3B1FF;display:flex;gap:12px;align-items:center">
+<span style="flex-shrink:0"><svg width="46" height="57" viewBox="0 0 120 150" aria-hidden="true"><g transform="rotate(-6 60 75)"><rect x="49" y="78" width="24" height="80" rx="7" fill="#FF7EB6"></rect><rect x="68" y="112" width="16" height="11" rx="4" fill="#FF7EB6"></rect><rect x="68" y="130" width="12" height="11" rx="4" fill="#FF7EB6"></rect><rect x="55" y="96" width="6" height="50" rx="3" fill="#E8619F"></rect><circle cx="61" cy="55" r="44" fill="#FF7EB6"></circle><rect x="41" y="36" width="12" height="22" rx="6" fill="#FFFFFF" transform="rotate(16 47 47)"></rect><rect x="66" y="42" width="12" height="22" rx="6" fill="#FFFFFF" transform="rotate(16 72 53)"></rect></g></svg></span>
+<div style="flex-grow:1"><div class="h" style="font-size:17px;font-weight:600;line-height:1.15">Never lose the new one</div><div style="font-size:13px;font-weight:700">A tracker tag fits inside any wallet</div></div>
+<a href="#" style="height:40px;padding:0 14px;border-radius:12px;background:#FFFFFF;color:#3A2E6B;display:flex;align-items:center;font-weight:800;font-size:14px;text-decoration:none">View</a></div>
+<h2 class="h" style="font-size:19px;font-weight:600;margin-top:18px">Similar to your wallet</h2>
+<div style="display:flex;flex-direction:column;gap:10px;margin-top:10px">
+<div style="display:flex;gap:12px;align-items:center;padding:10px;border-radius:20px;background:#FFFFFF;border:2px solid #E4E0F7">
+<span style="width:60px;height:60px;border-radius:14px;background:#FFE45C;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="3"></rect><path d="M15 12.5h6"></path></svg></span>
+<div style="flex-grow:1"><div class="h" style="font-size:16px;font-weight:600;line-height:1.15">Slim black leather wallet</div><div style="font-size:12px;color:#655A8A">Same size and color as yours</div><div style="font-size:14px;font-weight:800;margin-top:2px">[PRICE] <span style="font-size:11px;font-weight:700;color:#655A8A">· Coupang</span></div></div>
+<a href="#" style="height:40px;padding:0 14px;border-radius:12px;background:#3A2E6B;color:#FFFFFF;display:flex;align-items:center;font-weight:800;font-size:14px;text-decoration:none">View</a></div>
+<div style="display:flex;gap:12px;align-items:center;padding:10px;border-radius:20px;background:#FFFFFF;border:2px solid #E4E0F7">
+<span style="width:60px;height:60px;border-radius:14px;background:#C3B1FF;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="3"></rect><path d="M15 12.5h6"></path></svg></span>
+<div style="flex-grow:1"><div class="h" style="font-size:16px;font-weight:600;line-height:1.15">Wallet with tracker pocket</div><div style="font-size:12px;color:#655A8A">Two-in-one, fits a tag</div><div style="font-size:14px;font-weight:800;margin-top:2px">[PRICE] <span style="font-size:11px;font-weight:700;color:#655A8A">· Coupang</span></div></div>
+<a href="#" style="height:40px;padding:0 14px;border-radius:12px;background:#3A2E6B;color:#FFFFFF;display:flex;align-items:center;font-weight:800;font-size:14px;text-decoration:none">View</a></div>
+</div></div>
+<p style="position:absolute;left:24px;right:24px;bottom:104px;margin:0;font-size:12px;color:#655A8A;line-height:1.4">We may earn a small fee if you buy. Your price stays the same, and we never mark something lost for you.</p>
+<a href="Home.dc.html" class="btn bw" style="position:absolute;left:24px;right:24px;bottom:36px;width:auto">Back home</a>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Mapping your room</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;family=Nunito:wght@400;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Nunito',system-ui,sans-serif;color:#3A2E6B}
+a{color:#3A2E6B}a:hover{color:#2B2250}
+.h{font-family:'Fredoka','Nunito',system-ui,sans-serif;margin:0}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;height:56px;border-radius:18px;font-family:'Fredoka','Nunito',sans-serif;font-weight:600;font-size:18px;text-decoration:none;border:none;cursor:pointer;width:100%;box-sizing:border-box;color:#3A2E6B}
+.bp{background:#FF7EB6;box-shadow:0 5px 0 #D9559A}
+.bm{background:#4FE3A8;box-shadow:0 5px 0 #26B07B}
+.bl{background:#C3B1FF;box-shadow:0 5px 0 #9A84EA}
+.bw{background:#FFFFFF;box-shadow:0 5px 0 #D8D2EE;border:2px solid #E4E0F7}
+.bd{background:#3A2E6B;color:#FFFFFF;box-shadow:0 5px 0 #1E1740}
+.chip{display:inline-flex;align-items:center;gap:6px;height:40px;padding:0 16px;border-radius:999px;border:2px solid #E4E0F7;background:#FFFFFF;font-family:'Nunito',sans-serif;font-weight:700;font-size:15px;color:#3A2E6B;cursor:pointer}
+.chip.on{background:#3A2E6B;border-color:#3A2E6B;color:#FFFFFF}
+.sw{width:52px;height:32px;border-radius:999px;border:none;background:#4FE3A8;position:relative;cursor:pointer;flex-shrink:0}
+.sw span{position:absolute;top:4px;right:4px;width:24px;height:24px;border-radius:50%;background:#FFFFFF}
+.sw.off{background:#E4E0F7}.sw.off span{right:auto;left:4px}
+.inp{width:100%;box-sizing:border-box;height:52px;border-radius:16px;border:2px solid #E4E0F7;background:#FFFFFF;padding:0 16px;font-family:'Nunito',sans-serif;font-size:16px;color:#3A2E6B}
+.lbl{display:block;font-weight:700;font-size:14px;margin-bottom:6px}
+.ib{width:56px;height:56px;border-radius:50%;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#3A2E6B;flex-shrink:0}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; box-sizing: border-box; background: #6F6883; font-family: 'Nunito', system-ui, sans-serif; color: #3A2E6B">
+
+<div aria-hidden="true" style="position:absolute;inset:0">
+<div style="position:absolute;left:0;top:0;width:390px;height:470px;background:#8E889E"></div>
+<div style="position:absolute;left:0;top:470px;width:390px;height:374px;background:#6F6883"></div>
+<div style="position:absolute;left:0;top:560px;width:390px;height:2px;background:#7B7490"></div>
+<div style="position:absolute;left:0;top:670px;width:390px;height:2px;background:#7B7490"></div>
+<div style="position:absolute;left:0;top:790px;width:390px;height:2px;background:#7B7490"></div>
+<div style="position:absolute;left:40px;top:110px;width:110px;height:140px;border-radius:10px;background:#A7B8CC;border:8px solid #B3ADC2"></div>
+<div style="position:absolute;left:0;top:290px;width:190px;height:140px;border-radius:0 24px 0 0;background:#7A7390"></div>
+<div style="position:absolute;left:0;top:398px;width:222px;height:130px;border-radius:0 26px 18px 0;background:#BDB7CB"></div>
+<div style="position:absolute;left:0;top:448px;width:222px;height:96px;border-radius:0 30px 18px 0;background:#9C8FB8"></div>
+<div style="position:absolute;left:18px;top:374px;width:96px;height:44px;border-radius:22px;background:#D9D4E4"></div>
+<div style="position:absolute;left:66px;top:410px;width:96px;height:52px;border-radius:48% 52% 40% 44%;background:#5E5873"></div>
+<div style="position:absolute;left:120px;top:400px;width:82px;height:50px;border-radius:50% 44% 46% 52%;background:#8A6F8F"></div>
+<div style="position:absolute;left:92px;top:436px;width:112px;height:48px;border-radius:46% 54% 50% 44%;background:#4E4A63"></div>
+<div style="position:absolute;left:236px;top:420px;width:160px;height:18px;border-radius:6px;background:#5B546E"></div>
+<div style="position:absolute;left:252px;top:438px;width:12px;height:190px;background:#4E4862"></div>
+<div style="position:absolute;left:300px;top:438px;width:90px;height:190px;background:#6A6380"></div>
+<div style="position:absolute;left:300px;top:500px;width:90px;height:3px;background:#5B546E"></div>
+<div style="position:absolute;left:300px;top:564px;width:90px;height:3px;background:#5B546E"></div>
+<div style="position:absolute;left:338px;top:466px;width:16px;height:6px;border-radius:3px;background:#9D96B0"></div>
+<div style="position:absolute;left:338px;top:530px;width:16px;height:6px;border-radius:3px;background:#9D96B0"></div>
+<div style="position:absolute;left:262px;top:388px;width:78px;height:32px;border-radius:6px 6px 2px 2px;background:#3F3A52"></div>
+<div style="position:absolute;left:352px;top:396px;width:22px;height:24px;border-radius:4px 4px 8px 8px;background:#C9A3B8"></div>
+<div style="position:absolute;left:150px;top:640px;width:90px;height:84px;border-radius:18px;background:#4C4560"></div>
+<div style="position:absolute;left:170px;top:616px;width:50px;height:36px;border-radius:25px 25px 0 0;border:7px solid #4C4560;border-bottom:none;box-sizing:border-box"></div>
+</div><div aria-hidden="true" style="position:absolute;inset:0;background:rgba(43,34,80,0.25)"></div><span aria-hidden="true" style="position:absolute;left:40px;top:600px;width:7px;height:7px;border-radius:50%;background:#FFFFFF;opacity:.8"></span><span aria-hidden="true" style="position:absolute;left:90px;top:640px;width:7px;height:7px;border-radius:50%;background:#FFFFFF;opacity:.8"></span><span aria-hidden="true" style="position:absolute;left:150px;top:610px;width:7px;height:7px;border-radius:50%;background:#FFFFFF;opacity:.8"></span><span aria-hidden="true" style="position:absolute;left:210px;top:660px;width:7px;height:7px;border-radius:50%;background:#FFFFFF;opacity:.8"></span><span aria-hidden="true" style="position:absolute;left:270px;top:620px;width:7px;height:7px;border-radius:50%;background:#FFFFFF;opacity:.8"></span><span aria-hidden="true" style="position:absolute;left:330px;top:650px;width:7px;height:7px;border-radius:50%;background:#FFFFFF;opacity:.8"></span><span aria-hidden="true" style="position:absolute;left:60px;top:720px;width:7px;height:7px;border-radius:50%;background:#FFFFFF;opacity:.8"></span><span aria-hidden="true" style="position:absolute;left:130px;top:760px;width:7px;height:7px;border-radius:50%;background:#FFFFFF;opacity:.8"></span><span aria-hidden="true" style="position:absolute;left:230px;top:740px;width:7px;height:7px;border-radius:50%;background:#FFFFFF;opacity:.8"></span><span aria-hidden="true" style="position:absolute;left:310px;top:770px;width:7px;height:7px;border-radius:50%;background:#FFFFFF;opacity:.8"></span><span aria-hidden="true" style="position:absolute;left:250px;top:428px;width:7px;height:7px;border-radius:50%;background:#FFFFFF;opacity:.8"></span><span aria-hidden="true" style="position:absolute;left:290px;top:428px;width:7px;height:7px;border-radius:50%;background:#FFFFFF;opacity:.8"></span><span aria-hidden="true" style="position:absolute;left:330px;top:428px;width:7px;height:7px;border-radius:50%;background:#FFFFFF;opacity:.8"></span><span aria-hidden="true" style="position:absolute;left:370px;top:428px;width:7px;height:7px;border-radius:50%;background:#FFFFFF;opacity:.8"></span><span aria-hidden="true" style="position:absolute;left:40px;top:470px;width:7px;height:7px;border-radius:50%;background:#FFFFFF;opacity:.8"></span><span aria-hidden="true" style="position:absolute;left:100px;top:480px;width:7px;height:7px;border-radius:50%;background:#FFFFFF;opacity:.8"></span><span aria-hidden="true" style="position:absolute;left:160px;top:470px;width:7px;height:7px;border-radius:50%;background:#FFFFFF;opacity:.8"></span>
+<div style="position:absolute;left:32px;right:32px;top:190px;padding:22px;border-radius:26px;background:#FFFFFF;text-align:center">
+<span style="width:64px;height:64px;border-radius:20px;background:#C3B1FF;display:inline-flex;align-items:center;justify-content:center"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="4" width="8" height="16" rx="2"></rect><path d="M4 9l-1.5 3L4 15M20 9l1.5 3L20 15"></path></svg></span>
+<h1 class="h" style="font-size:24px;font-weight:600;margin-top:12px">Move your phone slowly</h1>
+<p style="margin:8px 0 0;font-size:15px;color:#655A8A;line-height:1.45">Point at the floor and furniture so we can map the room.</p>
+<div style="height:10px;border-radius:5px;background:#E4E0F7;margin-top:16px;overflow:hidden"><div style="width:60%;height:10px;border-radius:5px;background:#4FE3A8"></div></div>
+</div>
+<a href="ScanHUD.dc.html" class="btn bm" style="position:absolute;left:24px;right:24px;bottom:40px;width:auto">Start scanning</a>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

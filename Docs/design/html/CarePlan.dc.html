@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Care plan</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;family=Nunito:wght@400;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Nunito',system-ui,sans-serif;color:#3A2E6B}
+a{color:#3A2E6B}a:hover{color:#2B2250}
+.h{font-family:'Fredoka','Nunito',system-ui,sans-serif;margin:0}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;height:56px;border-radius:18px;font-family:'Fredoka','Nunito',sans-serif;font-weight:600;font-size:18px;text-decoration:none;border:none;cursor:pointer;width:100%;box-sizing:border-box;color:#3A2E6B}
+.bp{background:#FF7EB6;box-shadow:0 5px 0 #D9559A}
+.bm{background:#4FE3A8;box-shadow:0 5px 0 #26B07B}
+.bl{background:#C3B1FF;box-shadow:0 5px 0 #9A84EA}
+.bw{background:#FFFFFF;box-shadow:0 5px 0 #D8D2EE;border:2px solid #E4E0F7}
+.bd{background:#3A2E6B;color:#FFFFFF;box-shadow:0 5px 0 #1E1740}
+.chip{display:inline-flex;align-items:center;gap:6px;height:40px;padding:0 16px;border-radius:999px;border:2px solid #E4E0F7;background:#FFFFFF;font-family:'Nunito',sans-serif;font-weight:700;font-size:15px;color:#3A2E6B;cursor:pointer}
+.chip.on{background:#3A2E6B;border-color:#3A2E6B;color:#FFFFFF}
+.sw{width:52px;height:32px;border-radius:999px;border:none;background:#4FE3A8;position:relative;cursor:pointer;flex-shrink:0}
+.sw span{position:absolute;top:4px;right:4px;width:24px;height:24px;border-radius:50%;background:#FFFFFF}
+.sw.off{background:#E4E0F7}.sw.off span{right:auto;left:4px}
+.inp{width:100%;box-sizing:border-box;height:52px;border-radius:16px;border:2px solid #E4E0F7;background:#FFFFFF;padding:0 16px;font-family:'Nunito',sans-serif;font-size:16px;color:#3A2E6B}
+.lbl{display:block;font-weight:700;font-size:14px;margin-bottom:6px}
+.ib{width:56px;height:56px;border-radius:50%;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#3A2E6B;flex-shrink:0}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; box-sizing: border-box; background: #FFF7FB; font-family: 'Nunito', system-ui, sans-serif; color: #3A2E6B">
+
+<div style="position:absolute;top:20px;left:20px;right:20px;height:44px;display:flex;align-items:center;justify-content:space-between"><a href="Settings.dc.html" aria-label="Go back" style="width:44px;height:44px;border-radius:14px;background:#FFFFFF;border:2px solid #E4E0F7;display:flex;align-items:center;justify-content:center;color:#3A2E6B;box-sizing:border-box"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg></a><span class="h" style="font-size:17px;font-weight:600"></span><span style="min-width:44px;display:flex;justify-content:flex-end"></span></div>
+<div style="position:absolute;left:20px;right:20px;top:78px;height:176px;border-radius:30px;background:#C3B1FF;overflow:hidden">
+<div style="position:absolute;left:22px;top:24px;right:150px"><h1 class="h" style="font-size:30px;font-weight:600;line-height:1.05">Care plan</h1><p style="margin:8px 0 0;font-size:15px;line-height:1.4">For families helping someone who loses things often.</p></div>
+<div style="position:absolute;right:14px;bottom:-34px"><svg width="120" height="150" viewBox="0 0 120 150" aria-hidden="true"><g transform="rotate(-16 60 75)"><rect x="49" y="78" width="24" height="80" rx="7" fill="#FF7EB6"></rect><rect x="68" y="112" width="16" height="11" rx="4" fill="#FF7EB6"></rect><rect x="68" y="130" width="12" height="11" rx="4" fill="#FF7EB6"></rect><rect x="55" y="96" width="6" height="50" rx="3" fill="#E8619F"></rect><circle cx="61" cy="55" r="44" fill="#FF7EB6"></circle><path d="M39 50q8-11 16 0M64 55q8-11 16 0" stroke="#FFFFFF" stroke-width="6" fill="none" stroke-linecap="round"></path></g><path d="M104 30q10-6 8-18" stroke="#FF7EB6" stroke-width="9" fill="none" stroke-linecap="round"></path></svg></div></div>
+<div style="position:absolute;left:24px;right:24px;top:278px">
+<div style="display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) minmax(0,1fr);gap:8px;font-size:13px;font-weight:800;color:#655A8A"><span></span><span style="text-align:center">Free</span><span style="text-align:center;color:#3A2E6B">Care</span></div>
+<div style="display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) minmax(0,1fr);gap:8px;padding:11px 0;border-bottom:2px solid #E4E0F7;font-size:15px;align-items:center"><span style="font-weight:700">Coverage map</span><span style="text-align:center;color:#655A8A"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3A2E6B" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"></path></svg></span><span style="text-align:center;font-weight:800"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3A2E6B" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"></path></svg></span></div><div style="display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) minmax(0,1fr);gap:8px;padding:11px 0;border-bottom:2px solid #E4E0F7;font-size:15px;align-items:center"><span style="font-weight:700">AI searches</span><span style="text-align:center;color:#655A8A">3 a month</span><span style="text-align:center;font-weight:800">Unlimited</span></div><div style="display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) minmax(0,1fr);gap:8px;padding:11px 0;border-bottom:2px solid #E4E0F7;font-size:15px;align-items:center"><span style="font-weight:700">Saved things</span><span style="text-align:center;color:#655A8A">3</span><span style="text-align:center;font-weight:800">Unlimited</span></div><div style="display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) minmax(0,1fr);gap:8px;padding:11px 0;border-bottom:2px solid #E4E0F7;font-size:15px;align-items:center"><span style="font-weight:700">Family helpers</span><span style="text-align:center;color:#655A8A">No</span><span style="text-align:center;font-weight:800">Up to 5</span></div><div style="display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) minmax(0,1fr);gap:8px;padding:11px 0;border-bottom:2px solid #E4E0F7;font-size:15px;align-items:center"><span style="font-weight:700">Remote help</span><span style="text-align:center;color:#655A8A">No</span><span style="text-align:center;font-weight:800"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3A2E6B" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"></path></svg></span></div><div style="display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) minmax(0,1fr);gap:8px;padding:11px 0;border-bottom:2px solid #E4E0F7;font-size:15px;align-items:center"><span style="font-weight:700">FIND ME Dots</span><span style="text-align:center;color:#655A8A">$4 pack</span><span style="text-align:center;font-weight:800">Free, yearly</span></div>
+</div>
+<div style="position:absolute;left:24px;right:24px;bottom:120px;text-align:center"><span class="h" style="font-size:26px;font-weight:600">$80</span><span style="font-size:15px;color:#655A8A"> / year · or $8 a month</span></div>
+<a href="Home.dc.html" class="btn bp" style="position:absolute;left:24px;right:24px;bottom:40px;width:auto">Start Care plan</a>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

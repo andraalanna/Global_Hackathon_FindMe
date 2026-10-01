@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Lock screen widgets</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;family=Nunito:wght@400;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Nunito',system-ui,sans-serif;color:#3A2E6B}
+a{color:#3A2E6B}a:hover{color:#2B2250}
+.h{font-family:'Fredoka','Nunito',system-ui,sans-serif;margin:0}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;height:56px;border-radius:18px;font-family:'Fredoka','Nunito',sans-serif;font-weight:600;font-size:18px;text-decoration:none;border:none;cursor:pointer;width:100%;box-sizing:border-box;color:#3A2E6B}
+.bp{background:#FF7EB6;box-shadow:0 5px 0 #D9559A}
+.bm{background:#4FE3A8;box-shadow:0 5px 0 #26B07B}
+.bl{background:#C3B1FF;box-shadow:0 5px 0 #9A84EA}
+.bw{background:#FFFFFF;box-shadow:0 5px 0 #D8D2EE;border:2px solid #E4E0F7}
+.bd{background:#3A2E6B;color:#FFFFFF;box-shadow:0 5px 0 #1E1740}
+.chip{display:inline-flex;align-items:center;gap:6px;height:40px;padding:0 16px;border-radius:999px;border:2px solid #E4E0F7;background:#FFFFFF;font-family:'Nunito',sans-serif;font-weight:700;font-size:15px;color:#3A2E6B;cursor:pointer}
+.chip.on{background:#3A2E6B;border-color:#3A2E6B;color:#FFFFFF}
+.sw{width:52px;height:32px;border-radius:999px;border:none;background:#4FE3A8;position:relative;cursor:pointer;flex-shrink:0}
+.sw span{position:absolute;top:4px;right:4px;width:24px;height:24px;border-radius:50%;background:#FFFFFF}
+.sw.off{background:#E4E0F7}.sw.off span{right:auto;left:4px}
+.inp{width:100%;box-sizing:border-box;height:52px;border-radius:16px;border:2px solid #E4E0F7;background:#FFFFFF;padding:0 16px;font-family:'Nunito',sans-serif;font-size:16px;color:#3A2E6B}
+.lbl{display:block;font-weight:700;font-size:14px;margin-bottom:6px}
+.ib{width:56px;height:56px;border-radius:50%;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#3A2E6B;flex-shrink:0}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; box-sizing: border-box; background: #3A2E6B; font-family: 'Nunito', system-ui, sans-serif; color: #3A2E6B">
+
+<div aria-hidden="true" style="position:absolute;left:-120px;top:420px;width:420px;height:420px;border-radius:50%;background:#4A3D80"></div>
+<div aria-hidden="true" style="position:absolute;right:-140px;top:560px;width:380px;height:380px;border-radius:50%;background:#54448F"></div>
+<div aria-hidden="true" style="position:absolute;right:26px;top:470px;opacity:.95"><svg width="120" height="150" viewBox="0 0 120 150" aria-hidden="true"><g transform="rotate(-14 60 75)"><rect x="49" y="78" width="24" height="80" rx="7" fill="#FF7EB6"></rect><rect x="68" y="112" width="16" height="11" rx="4" fill="#FF7EB6"></rect><rect x="68" y="130" width="12" height="11" rx="4" fill="#FF7EB6"></rect><rect x="55" y="96" width="6" height="50" rx="3" fill="#E8619F"></rect><circle cx="61" cy="55" r="44" fill="#FF7EB6"></circle><rect x="41" y="36" width="12" height="22" rx="6" fill="#FFFFFF" transform="rotate(16 47 47)"></rect><rect x="66" y="42" width="12" height="22" rx="6" fill="#FFFFFF" transform="rotate(16 72 53)"></rect></g><path d="M104 30q10-6 8-18" stroke="#FF7EB6" stroke-width="9" fill="none" stroke-linecap="round"></path></svg></div>
+<div style="position:absolute;left:0;right:0;top:70px;text-align:center;color:#FFFFFF">
+<div style="font-size:18px;font-weight:700;color:#E4E0F7">Wednesday, 30 September</div>
+<div class="h" style="font-size:92px;font-weight:500;line-height:1">07:42</div></div>
+<div style="position:absolute;left:24px;right:24px;top:210px;display:flex;gap:12px;justify-content:center">
+<a href="WhatLooking.dc.html" aria-label="Find something" style="background:rgba(255,255,255,.16);color:#FFFFFF;text-decoration:none;width:76px;height:76px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"></path><circle cx="12" cy="12" r="3"></circle></svg><span style="font-size:12px;font-weight:800">Find</span></a>
+<a href="ItemDetail.dc.html" style="background:rgba(255,255,255,.16);color:#FFFFFF;text-decoration:none;width:166px;height:76px;border-radius:22px;padding:10px 14px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:center">
+<span style="display:flex;align-items:center;gap:6px;font-weight:800;font-size:15px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="12" r="4"></circle><path d="M12 12h9M18 12v3M21 12v2"></path></svg>Keys</span>
+<span style="font-size:13px;font-weight:700">Desk, left corner</span><span style="font-size:12px;color:#E4E0F7">Last seen 23:10</span></a>
+<a href="History.dc.html" aria-label="All 3 items checked in" style="background:rgba(255,255,255,.16);color:#FFFFFF;text-decoration:none;width:76px;height:76px;border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative"><svg width="44" height="44" viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="18" fill="none" stroke="rgba(255,255,255,.25)" stroke-width="5"></circle><circle cx="22" cy="22" r="18" fill="none" stroke="#4FE3A8" stroke-width="5" stroke-linecap="round" stroke-dasharray="113.1" stroke-dashoffset="0" transform="rotate(-90 22 22)"></circle></svg><span class="h" style="position:absolute;font-size:15px;font-weight:600">3/3</span></a>
+</div>
+<a href="EveningCheck.dc.html" style="position:absolute;left:14px;right:14px;top:548px;padding:14px 16px;border-radius:26px;background:#FFFFFF;color:#3A2E6B;text-decoration:none">
+<div style="display:flex;align-items:center;gap:10px"><img src="/_blob/b6375369d90dbbd8961fbb477bb41714" alt="" style="width:36px;height:36px;border-radius:10px"><div style="flex-grow:1"><div class="h" style="font-size:17px;font-weight:600">Leaving at 07:45?</div><div style="font-size:13px;color:#655A8A">Everything you need was checked in last night</div></div></div>
+<div style="display:flex;gap:8px;margin-top:12px"><span style="display:flex;align-items:center;gap:6px;height:32px;padding:0 12px;border-radius:999px;background:#E4E0F7;font-weight:800;font-size:14px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3A2E6B" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"></path></svg>Keys</span><span style="display:flex;align-items:center;gap:6px;height:32px;padding:0 12px;border-radius:999px;background:#E4E0F7;font-weight:800;font-size:14px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3A2E6B" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"></path></svg>Wallet</span><span style="display:flex;align-items:center;gap:6px;height:32px;padding:0 12px;border-radius:999px;background:#E4E0F7;font-weight:800;font-size:14px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3A2E6B" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"></path></svg>Bag</span></div></a>
+<div style="position:absolute;left:36px;right:36px;bottom:40px;display:flex;justify-content:space-between">
+<button aria-label="Flashlight" style="width:52px;height:52px;border-radius:50%;border:none;background:rgba(255,255,255,.16);display:flex;align-items:center;justify-content:center;color:#FFFFFF;cursor:pointer"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"></path></svg></button>
+<button aria-label="Camera" style="width:52px;height:52px;border-radius:50%;border:none;background:rgba(255,255,255,.16);display:flex;align-items:center;justify-content:center;color:#FFFFFF;cursor:pointer"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"></path><circle cx="12" cy="13" r="3.5"></circle></svg></button>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Not checked thoroughly</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;family=Nunito:wght@400;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Nunito',system-ui,sans-serif;color:#3A2E6B}
+a{color:#3A2E6B}a:hover{color:#2B2250}
+.h{font-family:'Fredoka','Nunito',system-ui,sans-serif;margin:0}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;height:56px;border-radius:18px;font-family:'Fredoka','Nunito',sans-serif;font-weight:600;font-size:18px;text-decoration:none;border:none;cursor:pointer;width:100%;box-sizing:border-box;color:#3A2E6B}
+.bp{background:#FF7EB6;box-shadow:0 5px 0 #D9559A}
+.bm{background:#4FE3A8;box-shadow:0 5px 0 #26B07B}
+.bl{background:#C3B1FF;box-shadow:0 5px 0 #9A84EA}
+.bw{background:#FFFFFF;box-shadow:0 5px 0 #D8D2EE;border:2px solid #E4E0F7}
+.bd{background:#3A2E6B;color:#FFFFFF;box-shadow:0 5px 0 #1E1740}
+.chip{display:inline-flex;align-items:center;gap:6px;height:40px;padding:0 16px;border-radius:999px;border:2px solid #E4E0F7;background:#FFFFFF;font-family:'Nunito',sans-serif;font-weight:700;font-size:15px;color:#3A2E6B;cursor:pointer}
+.chip.on{background:#3A2E6B;border-color:#3A2E6B;color:#FFFFFF}
+.sw{width:52px;height:32px;border-radius:999px;border:none;background:#4FE3A8;position:relative;cursor:pointer;flex-shrink:0}
+.sw span{position:absolute;top:4px;right:4px;width:24px;height:24px;border-radius:50%;background:#FFFFFF}
+.sw.off{background:#E4E0F7}.sw.off span{right:auto;left:4px}
+.inp{width:100%;box-sizing:border-box;height:52px;border-radius:16px;border:2px solid #E4E0F7;background:#FFFFFF;padding:0 16px;font-family:'Nunito',sans-serif;font-size:16px;color:#3A2E6B}
+.lbl{display:block;font-weight:700;font-size:14px;margin-bottom:6px}
+.ib{width:56px;height:56px;border-radius:50%;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#3A2E6B;flex-shrink:0}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; box-sizing: border-box; background: #6F6883; font-family: 'Nunito', system-ui, sans-serif; color: #3A2E6B">
+
+<div aria-hidden="true" style="position:absolute;inset:0">
+<div style="position:absolute;left:0;top:0;width:390px;height:470px;background:#8E889E"></div>
+<div style="position:absolute;left:0;top:470px;width:390px;height:374px;background:#6F6883"></div>
+<div style="position:absolute;left:0;top:560px;width:390px;height:2px;background:#7B7490"></div>
+<div style="position:absolute;left:0;top:670px;width:390px;height:2px;background:#7B7490"></div>
+<div style="position:absolute;left:0;top:790px;width:390px;height:2px;background:#7B7490"></div>
+<div style="position:absolute;left:40px;top:110px;width:110px;height:140px;border-radius:10px;background:#A7B8CC;border:8px solid #B3ADC2"></div>
+<div style="position:absolute;left:0;top:290px;width:190px;height:140px;border-radius:0 24px 0 0;background:#7A7390"></div>
+<div style="position:absolute;left:0;top:398px;width:222px;height:130px;border-radius:0 26px 18px 0;background:#BDB7CB"></div>
+<div style="position:absolute;left:0;top:448px;width:222px;height:96px;border-radius:0 30px 18px 0;background:#9C8FB8"></div>
+<div style="position:absolute;left:18px;top:374px;width:96px;height:44px;border-radius:22px;background:#D9D4E4"></div>
+<div style="position:absolute;left:66px;top:410px;width:96px;height:52px;border-radius:48% 52% 40% 44%;background:#5E5873"></div>
+<div style="position:absolute;left:120px;top:400px;width:82px;height:50px;border-radius:50% 44% 46% 52%;background:#8A6F8F"></div>
+<div style="position:absolute;left:92px;top:436px;width:112px;height:48px;border-radius:46% 54% 50% 44%;background:#4E4A63"></div>
+<div style="position:absolute;left:236px;top:420px;width:160px;height:18px;border-radius:6px;background:#5B546E"></div>
+<div style="position:absolute;left:252px;top:438px;width:12px;height:190px;background:#4E4862"></div>
+<div style="position:absolute;left:300px;top:438px;width:90px;height:190px;background:#6A6380"></div>
+<div style="position:absolute;left:300px;top:500px;width:90px;height:3px;background:#5B546E"></div>
+<div style="position:absolute;left:300px;top:564px;width:90px;height:3px;background:#5B546E"></div>
+<div style="position:absolute;left:338px;top:466px;width:16px;height:6px;border-radius:3px;background:#9D96B0"></div>
+<div style="position:absolute;left:338px;top:530px;width:16px;height:6px;border-radius:3px;background:#9D96B0"></div>
+<div style="position:absolute;left:262px;top:388px;width:78px;height:32px;border-radius:6px 6px 2px 2px;background:#3F3A52"></div>
+<div style="position:absolute;left:352px;top:396px;width:22px;height:24px;border-radius:4px 4px 8px 8px;background:#C9A3B8"></div>
+<div style="position:absolute;left:150px;top:640px;width:90px;height:84px;border-radius:18px;background:#4C4560"></div>
+<div style="position:absolute;left:170px;top:616px;width:50px;height:36px;border-radius:25px 25px 0 0;border:7px solid #4C4560;border-bottom:none;box-sizing:border-box"></div>
+</div><div aria-hidden="true" style="position:absolute;left:-30px;top:560px;width:450px;height:300px;transform:perspective(520px) rotateX(52deg);transform-origin:50% 100%;display:grid;grid-template-columns:repeat(6, minmax(0, 1fr));grid-template-rows:repeat(4, minmax(0, 1fr));gap:8px"><span style="border-radius:8px;background:rgba(108,196,255,.6)"></span><span style="border-radius:8px;background:rgba(108,196,255,.6)"></span><span style="border-radius:8px;background:rgba(255,228,92,.55)"></span><span style="border-radius:8px;background:rgba(228,224,247,.18)"></span><span style="border-radius:8px;background:rgba(228,224,247,.18)"></span><span style="border-radius:8px;background:rgba(228,224,247,.18)"></span><span style="border-radius:8px;background:rgba(108,196,255,.6)"></span><span style="border-radius:8px;background:rgba(108,196,255,.6)"></span><span style="border-radius:8px;background:rgba(255,228,92,.55)"></span><span style="border-radius:8px;background:rgba(255,228,92,.55)"></span><span style="border-radius:8px;background:rgba(228,224,247,.18)"></span><span style="border-radius:8px;background:rgba(228,224,247,.18)"></span><span style="border-radius:8px;background:rgba(108,196,255,.6)"></span><span style="border-radius:8px;background:rgba(108,196,255,.6)"></span><span style="border-radius:8px;background:rgba(108,196,255,.6)"></span><span style="border-radius:8px;background:rgba(255,228,92,.55)"></span><span style="border-radius:8px;background:rgba(228,224,247,.18)"></span><span style="border-radius:8px;background:rgba(228,224,247,.18)"></span><span style="border-radius:8px;background:rgba(108,196,255,.6)"></span><span style="border-radius:8px;background:rgba(108,196,255,.6)"></span><span style="border-radius:8px;background:rgba(108,196,255,.6)"></span><span style="border-radius:8px;background:rgba(108,196,255,.6)"></span><span style="border-radius:8px;background:rgba(255,228,92,.55)"></span><span style="border-radius:8px;background:rgba(228,224,247,.18)"></span></div>
+<div aria-hidden="true" style="position:absolute;left:232px;top:408px;width:168px;height:40px;border-radius:10px;box-sizing:border-box;background:rgba(108,196,255,.5);border:3px solid #6CC4FF"><span style="position:absolute;right:-10px;top:-10px;width:26px;height:26px;border-radius:50%;background:#6CC4FF;display:flex;align-items:center;justify-content:center;color:#3A2E6B"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3A2E6B" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"></path></svg></span></div><div aria-hidden="true" style="position:absolute;left:52px;top:390px;width:168px;height:108px;border-radius:30px;box-sizing:border-box;background:rgba(255,228,92,.45);border:3px dashed #FFE45C"></div>
+<div style="position:absolute;top:18px;left:16px;right:16px;background:#FFFFFF;border-radius:20px;padding:12px 14px;display:flex;align-items:center;gap:12px;box-shadow:0 4px 0 rgba(43,34,80,.35)">
+<span style="width:44px;height:44px;border-radius:14px;background:#FF7EB6;display:flex;align-items:center;justify-content:center;color:#3A2E6B"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="3"></rect><path d="M15 12.5h6"></path></svg></span>
+<div style="flex-grow:1"><div style="font-size:12px;font-weight:700;color:#655A8A">Looking for</div><div class="h" style="font-size:17px;font-weight:600">Black wallet</div>
+<div style="height:8px;border-radius:4px;background:#E4E0F7;margin-top:6px;overflow:hidden"><div style="width:46%;height:8px;border-radius:4px;background:#6CC4FF"></div></div></div>
+<div class="h" style="font-size:22px;font-weight:600;text-align:right">46%<div style="font-family:Nunito,sans-serif;font-size:11px;font-weight:700;color:#655A8A">checked</div></div>
+</div>
+<div style="position:absolute;top:108px;left:16px;display:flex;gap:6px">
+<span style="display:flex;align-items:center;gap:6px;height:28px;padding:0 10px;border-radius:999px;background:#2B2250;color:#FFFFFF;font-size:12px;font-weight:700"><span style="width:10px;height:10px;border-radius:3px;background:#E4E0F7"></span>Not seen</span>
+<span style="display:flex;align-items:center;gap:6px;height:28px;padding:0 10px;border-radius:999px;background:#2B2250;color:#FFFFFF;font-size:12px;font-weight:700"><span style="width:10px;height:10px;border-radius:3px;background:#FFE45C"></span>Glanced</span>
+<span style="display:flex;align-items:center;gap:6px;height:28px;padding:0 10px;border-radius:999px;background:#2B2250;color:#FFFFFF;font-size:12px;font-weight:700"><span style="width:10px;height:10px;border-radius:3px;background:#6CC4FF"></span>Checked</span>
+</div>
+<div aria-hidden="true" style="position:absolute;inset:0;background:rgba(43,34,80,0.35)"></div>
+<div style="position:absolute;left:0;right:0;bottom:0;padding:24px 24px 36px;border-radius:32px 32px 0 0;background:#FFFFFF">
+<div style="width:44px;height:5px;border-radius:3px;background:#E4E0F7;margin:0 auto 18px"></div>
+<div style="display:flex;gap:14px;align-items:center"><svg width="64" height="80" viewBox="0 0 120 150" aria-hidden="true"><g transform="rotate(-6 60 75)"><rect x="49" y="78" width="24" height="80" rx="7" fill="#FF7EB6"></rect><rect x="68" y="112" width="16" height="11" rx="4" fill="#FF7EB6"></rect><rect x="68" y="130" width="12" height="11" rx="4" fill="#FF7EB6"></rect><rect x="55" y="96" width="6" height="50" rx="3" fill="#E8619F"></rect><circle cx="61" cy="55" r="44" fill="#FF7EB6"></circle><rect x="50" y="34" width="12" height="22" rx="6" fill="#FFFFFF" transform="rotate(16 56 45)"></rect><rect x="75" y="40" width="12" height="22" rx="6" fill="#FFFFFF" transform="rotate(16 81 51)"></rect></g></svg>
+<div><div style="display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:800;padding:4px 10px;border-radius:999px;background:#FFF6C7"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>Only glanced</div>
+<h2 class="h" style="font-size:22px;font-weight:600;margin-top:6px;line-height:1.15">You only peeked at the clothes</h2></div></div>
+<p style="margin:12px 0 0;font-size:16px;line-height:1.5;color:#655A8A">Wallets love to slide under fabric. Lift the top layer, then point your camera underneath.</p>
+<div style="display:flex;flex-direction:column;gap:14px;margin-top:20px">
+<a href="AlreadyChecked.dc.html" class="btn bp">I'll lift them</a>
+<a href="AlreadyChecked.dc.html" class="btn bw">I checked it properly</a>
+</div></div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

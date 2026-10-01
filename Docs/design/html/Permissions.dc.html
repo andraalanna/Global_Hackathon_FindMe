@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Permissions</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;family=Nunito:wght@400;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Nunito',system-ui,sans-serif;color:#3A2E6B}
+a{color:#3A2E6B}a:hover{color:#2B2250}
+.h{font-family:'Fredoka','Nunito',system-ui,sans-serif;margin:0}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;height:56px;border-radius:18px;font-family:'Fredoka','Nunito',sans-serif;font-weight:600;font-size:18px;text-decoration:none;border:none;cursor:pointer;width:100%;box-sizing:border-box;color:#3A2E6B}
+.bp{background:#FF7EB6;box-shadow:0 5px 0 #D9559A}
+.bm{background:#4FE3A8;box-shadow:0 5px 0 #26B07B}
+.bl{background:#C3B1FF;box-shadow:0 5px 0 #9A84EA}
+.bw{background:#FFFFFF;box-shadow:0 5px 0 #D8D2EE;border:2px solid #E4E0F7}
+.bd{background:#3A2E6B;color:#FFFFFF;box-shadow:0 5px 0 #1E1740}
+.chip{display:inline-flex;align-items:center;gap:6px;height:40px;padding:0 16px;border-radius:999px;border:2px solid #E4E0F7;background:#FFFFFF;font-family:'Nunito',sans-serif;font-weight:700;font-size:15px;color:#3A2E6B;cursor:pointer}
+.chip.on{background:#3A2E6B;border-color:#3A2E6B;color:#FFFFFF}
+.sw{width:52px;height:32px;border-radius:999px;border:none;background:#4FE3A8;position:relative;cursor:pointer;flex-shrink:0}
+.sw span{position:absolute;top:4px;right:4px;width:24px;height:24px;border-radius:50%;background:#FFFFFF}
+.sw.off{background:#E4E0F7}.sw.off span{right:auto;left:4px}
+.inp{width:100%;box-sizing:border-box;height:52px;border-radius:16px;border:2px solid #E4E0F7;background:#FFFFFF;padding:0 16px;font-family:'Nunito',sans-serif;font-size:16px;color:#3A2E6B}
+.lbl{display:block;font-weight:700;font-size:14px;margin-bottom:6px}
+.ib{width:56px;height:56px;border-radius:50%;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#3A2E6B;flex-shrink:0}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; box-sizing: border-box; background: #FFF7FB; font-family: 'Nunito', system-ui, sans-serif; color: #3A2E6B">
+
+<div style="position:absolute;top:20px;left:20px;right:20px;height:44px;display:flex;align-items:center;justify-content:space-between"><a href="ProfileSetup.dc.html" aria-label="Go back" style="width:44px;height:44px;border-radius:14px;background:#FFFFFF;border:2px solid #E4E0F7;display:flex;align-items:center;justify-content:center;color:#3A2E6B;box-sizing:border-box"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg></a><span class="h" style="font-size:17px;font-weight:600"></span><span style="min-width:44px;display:flex;justify-content:flex-end"></span></div>
+<div style="position:absolute;left:84px;right:84px;top:38px;height:10px;border-radius:5px;background:#E4E0F7"><div style="width:100%;height:10px;border-radius:5px;background:#4FE3A8"></div></div>
+<div style="position:absolute;left:24px;right:24px;top:100px">
+<h1 class="h" style="font-size:30px;font-weight:600">A few quick things</h1>
+<div style="margin-top:12px">
+<div style="display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:2px solid #E4E0F7">
+<span style="width:48px;height:48px;border-radius:16px;background:#FF7EB6;display:flex;align-items:center;justify-content:center;color:#3A2E6B;flex-shrink:0"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"></path><circle cx="12" cy="13" r="3.5"></circle></svg></span>
+<div style="flex-grow:1"><div class="h" style="font-size:17px;font-weight:600">Camera</div><div style="font-size:14px;color:#655A8A;line-height:1.35">Needed to look around your room with you</div></div>
+<button class="sw" aria-label="Camera" aria-pressed="true"><span></span></button></div>
+<div style="display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:2px solid #E4E0F7">
+<span style="width:48px;height:48px;border-radius:16px;background:#FFE45C;display:flex;align-items:center;justify-content:center;color:#3A2E6B;flex-shrink:0"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 16v-5a6 6 0 0112 0v5l2 2H4z"></path><path d="M10 20a2 2 0 004 0"></path></svg></span>
+<div style="flex-grow:1"><div class="h" style="font-size:17px;font-weight:600">Notifications</div><div style="font-size:14px;color:#655A8A;line-height:1.35">For your evening check, so mornings are easy</div></div>
+<button class="sw" aria-label="Notifications" aria-pressed="true"><span></span></button></div>
+<div style="display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:2px solid #E4E0F7">
+<span style="width:48px;height:48px;border-radius:16px;background:#C3B1FF;display:flex;align-items:center;justify-content:center;color:#3A2E6B;flex-shrink:0"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"></rect><path d="M5 11a7 7 0 0014 0M12 18v3"></path></svg></span>
+<div style="flex-grow:1"><div class="h" style="font-size:17px;font-weight:600">Microphone</div><div style="font-size:14px;color:#655A8A;line-height:1.35">Say what you lost instead of typing</div></div>
+<button class="sw off" aria-label="Microphone" aria-pressed="false"><span></span></button></div>
+</div>
+<div style="margin-top:24px;padding:18px;border-radius:22px;background:#3A2E6B;color:#FFFFFF;display:flex;gap:14px">
+<span style="width:44px;height:44px;border-radius:14px;background:#4FE3A8;display:flex;align-items:center;justify-content:center;color:#3A2E6B;flex-shrink:0"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 018 0v3"></path></svg></span>
+<div><div class="h" style="font-size:18px;font-weight:600">Your room stays on your phone</div><p style="margin:6px 0 0;font-size:14px;line-height:1.45;color:#E4E0F7">We only send small snapshots to recognize your item, and we don't keep them. No ads, ever.</p></div>
+</div></div>
+<a href="Home.dc.html" class="btn bp" style="position:absolute;left:24px;right:24px;bottom:48px;width:auto">Let's go</a>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

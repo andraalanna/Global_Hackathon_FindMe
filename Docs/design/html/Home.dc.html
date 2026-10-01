@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Home</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;family=Nunito:wght@400;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Nunito',system-ui,sans-serif;color:#3A2E6B}
+a{color:#3A2E6B}a:hover{color:#2B2250}
+.h{font-family:'Fredoka','Nunito',system-ui,sans-serif;margin:0}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;height:56px;border-radius:18px;font-family:'Fredoka','Nunito',sans-serif;font-weight:600;font-size:18px;text-decoration:none;border:none;cursor:pointer;width:100%;box-sizing:border-box;color:#3A2E6B}
+.bp{background:#FF7EB6;box-shadow:0 5px 0 #D9559A}
+.bm{background:#4FE3A8;box-shadow:0 5px 0 #26B07B}
+.bl{background:#C3B1FF;box-shadow:0 5px 0 #9A84EA}
+.bw{background:#FFFFFF;box-shadow:0 5px 0 #D8D2EE;border:2px solid #E4E0F7}
+.bd{background:#3A2E6B;color:#FFFFFF;box-shadow:0 5px 0 #1E1740}
+.chip{display:inline-flex;align-items:center;gap:6px;height:40px;padding:0 16px;border-radius:999px;border:2px solid #E4E0F7;background:#FFFFFF;font-family:'Nunito',sans-serif;font-weight:700;font-size:15px;color:#3A2E6B;cursor:pointer}
+.chip.on{background:#3A2E6B;border-color:#3A2E6B;color:#FFFFFF}
+.sw{width:52px;height:32px;border-radius:999px;border:none;background:#4FE3A8;position:relative;cursor:pointer;flex-shrink:0}
+.sw span{position:absolute;top:4px;right:4px;width:24px;height:24px;border-radius:50%;background:#FFFFFF}
+.sw.off{background:#E4E0F7}.sw.off span{right:auto;left:4px}
+.inp{width:100%;box-sizing:border-box;height:52px;border-radius:16px;border:2px solid #E4E0F7;background:#FFFFFF;padding:0 16px;font-family:'Nunito',sans-serif;font-size:16px;color:#3A2E6B}
+.lbl{display:block;font-weight:700;font-size:14px;margin-bottom:6px}
+.ib{width:56px;height:56px;border-radius:50%;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#3A2E6B;flex-shrink:0}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; box-sizing: border-box; background: #FFF7FB; font-family: 'Nunito', system-ui, sans-serif; color: #3A2E6B">
+
+<div style="position:absolute;top:24px;left:24px;right:24px;display:flex;align-items:center;justify-content:space-between">
+<div><div style="font-size:15px;font-weight:700;color:#655A8A">Good evening</div><h1 class="h" style="font-size:30px;font-weight:600">Hi, Andra</h1></div>
+<a href="Settings.dc.html" aria-label="Profile and settings" style="width:48px;height:48px;border-radius:50%;background:#C3B1FF;display:flex;align-items:center;justify-content:center;text-decoration:none" class="h"><span style="font-size:20px;font-weight:600">A</span></a>
+</div>
+<div style="position:absolute;left:20px;right:20px;top:108px;height:300px;border-radius:32px;background:#3A2E6B;overflow:hidden">
+<div style="position:absolute;left:24px;top:28px;right:24px">
+<h2 class="h" style="font-size:34px;font-weight:600;color:#FFFFFF;line-height:1.05">Lost<br>something?</h2>
+<p style="margin:10px 0 0;font-size:16px;color:#E4E0F7;max-width:190px">Take a breath. We'll search it together.</p></div>
+<div style="position:absolute;right:6px;bottom:-40px"><svg width="140" height="175" viewBox="0 0 120 150" aria-hidden="true"><g transform="rotate(-16 60 75)"><rect x="49" y="78" width="24" height="80" rx="7" fill="#FF7EB6"></rect><rect x="68" y="112" width="16" height="11" rx="4" fill="#FF7EB6"></rect><rect x="68" y="130" width="12" height="11" rx="4" fill="#FF7EB6"></rect><rect x="55" y="96" width="6" height="50" rx="3" fill="#E8619F"></rect><circle cx="61" cy="55" r="44" fill="#FF7EB6"></circle><rect x="41" y="36" width="12" height="22" rx="6" fill="#FFFFFF" transform="rotate(16 47 47)"></rect><rect x="66" y="42" width="12" height="22" rx="6" fill="#FFFFFF" transform="rotate(16 72 53)"></rect></g><path d="M104 30q10-6 8-18" stroke="#FF7EB6" stroke-width="9" fill="none" stroke-linecap="round"></path></svg></div>
+<a href="WhatLooking.dc.html" class="btn bm" style="position:absolute;left:24px;bottom:26px;width:190px">Find something</a>
+</div>
+<div style="position:absolute;left:24px;right:24px;top:436px;display:flex;justify-content:space-between;align-items:baseline"><h2 class="h" style="font-size:21px;font-weight:600">Your things</h2><a href="MyItems.dc.html" style="font-weight:800;font-size:15px">See all</a></div>
+<div style="position:absolute;left:24px;top:474px;display:flex;gap:12px;width:420px">
+<a href="ItemDetail.dc.html" style="flex-shrink:0;width:132px;padding:14px;border-radius:22px;background:#FFFFFF;border:2px solid #E4E0F7;text-decoration:none;color:#3A2E6B;box-sizing:border-box">
+<span style="width:44px;height:44px;border-radius:14px;background:#FF7EB6;display:flex;align-items:center;justify-content:center"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="12" r="4"></circle><path d="M12 12h9M18 12v3M21 12v2"></path></svg></span>
+<div class="h" style="font-size:17px;font-weight:600;margin-top:10px">Keys</div><div style="font-size:13px;color:#655A8A;margin-top:2px">Desk, 23:10</div></a><a href="ItemDetail.dc.html" style="flex-shrink:0;width:132px;padding:14px;border-radius:22px;background:#FFFFFF;border:2px solid #E4E0F7;text-decoration:none;color:#3A2E6B;box-sizing:border-box">
+<span style="width:44px;height:44px;border-radius:14px;background:#FFE45C;display:flex;align-items:center;justify-content:center"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="3"></rect><path d="M15 12.5h6"></path></svg></span>
+<div class="h" style="font-size:17px;font-weight:600;margin-top:10px">Wallet</div><div style="font-size:13px;color:#655A8A;margin-top:2px">Bag, today</div></a><a href="ItemDetail.dc.html" style="flex-shrink:0;width:132px;padding:14px;border-radius:22px;background:#FFFFFF;border:2px solid #E4E0F7;text-decoration:none;color:#3A2E6B;box-sizing:border-box">
+<span style="width:44px;height:44px;border-radius:14px;background:#6CC4FF;display:flex;align-items:center;justify-content:center"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="7" cy="14" r="3.5"></circle><circle cx="17" cy="14" r="3.5"></circle><path d="M10.5 14h3M3.5 13L5 7M20.5 13L19 7"></path></svg></span>
+<div class="h" style="font-size:17px;font-weight:600;margin-top:10px">Glasses</div><div style="font-size:13px;color:#655A8A;margin-top:2px">Bedside, 08:40</div></a>
+</div>
+<a href="ReminderSettings.dc.html" style="position:absolute;left:20px;right:20px;top:640px;display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:22px;background:#C3B1FF;text-decoration:none;color:#3A2E6B">
+<span style="width:44px;height:44px;border-radius:14px;background:#3A2E6B;display:flex;align-items:center;justify-content:center;color:#FFE45C"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 14.5A7.5 7.5 0 019.5 5a7.5 7.5 0 109.5 9.5z"></path></svg></span>
+<div style="flex-grow:1"><div class="h" style="font-size:17px;font-weight:600">Evening check at 21:30</div><div style="font-size:14px">Keys, wallet, glasses</div></div><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg></a>
+<nav style="position:absolute;left:0;right:0;bottom:0;height:84px;background:#FFFFFF;border-top:2px solid #E4E0F7;display:flex;justify-content:space-around;align-items:flex-start;padding-top:10px;box-sizing:border-box"><a href="Home.dc.html" style="display:flex;flex-direction:column;align-items:center;gap:2px;text-decoration:none;color:#3A2E6B;font-weight:800;font-size:12px;width:76px"><span style="background:#E4E0F7;width:56px;height:32px;border-radius:999px;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"></path></svg></span>Home</a><a href="MyItems.dc.html" style="display:flex;flex-direction:column;align-items:center;gap:2px;text-decoration:none;color:#8A80AE;font-weight:700;font-size:12px;width:76px"><span style="width:56px;height:32px;border-radius:999px;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="2"></rect><rect x="13" y="4" width="7" height="7" rx="2"></rect><rect x="4" y="13" width="7" height="7" rx="2"></rect><rect x="13" y="13" width="7" height="7" rx="2"></rect></svg></span>Things</a><a href="History.dc.html" style="display:flex;flex-direction:column;align-items:center;gap:2px;text-decoration:none;color:#8A80AE;font-weight:700;font-size:12px;width:76px"><span style="width:56px;height:32px;border-radius:999px;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"></circle><path d="M12 8v4l3 2"></path></svg></span>History</a><a href="Settings.dc.html" style="display:flex;flex-direction:column;align-items:center;gap:2px;text-decoration:none;color:#8A80AE;font-weight:700;font-size:12px;width:76px"><span style="width:56px;height:32px;border-radius:999px;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"></path><circle cx="16" cy="7" r="2"></circle><circle cx="10" cy="17" r="2"></circle></svg></span>Settings</a></nav>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

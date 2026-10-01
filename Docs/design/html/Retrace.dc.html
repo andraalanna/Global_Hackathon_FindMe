@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Retrace your steps</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;family=Nunito:wght@400;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Nunito',system-ui,sans-serif;color:#3A2E6B}
+a{color:#3A2E6B}a:hover{color:#2B2250}
+.h{font-family:'Fredoka','Nunito',system-ui,sans-serif;margin:0}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;height:56px;border-radius:18px;font-family:'Fredoka','Nunito',sans-serif;font-weight:600;font-size:18px;text-decoration:none;border:none;cursor:pointer;width:100%;box-sizing:border-box;color:#3A2E6B}
+.bp{background:#FF7EB6;box-shadow:0 5px 0 #D9559A}
+.bm{background:#4FE3A8;box-shadow:0 5px 0 #26B07B}
+.bl{background:#C3B1FF;box-shadow:0 5px 0 #9A84EA}
+.bw{background:#FFFFFF;box-shadow:0 5px 0 #D8D2EE;border:2px solid #E4E0F7}
+.bd{background:#3A2E6B;color:#FFFFFF;box-shadow:0 5px 0 #1E1740}
+.chip{display:inline-flex;align-items:center;gap:6px;height:40px;padding:0 16px;border-radius:999px;border:2px solid #E4E0F7;background:#FFFFFF;font-family:'Nunito',sans-serif;font-weight:700;font-size:15px;color:#3A2E6B;cursor:pointer}
+.chip.on{background:#3A2E6B;border-color:#3A2E6B;color:#FFFFFF}
+.sw{width:52px;height:32px;border-radius:999px;border:none;background:#4FE3A8;position:relative;cursor:pointer;flex-shrink:0}
+.sw span{position:absolute;top:4px;right:4px;width:24px;height:24px;border-radius:50%;background:#FFFFFF}
+.sw.off{background:#E4E0F7}.sw.off span{right:auto;left:4px}
+.inp{width:100%;box-sizing:border-box;height:52px;border-radius:16px;border:2px solid #E4E0F7;background:#FFFFFF;padding:0 16px;font-family:'Nunito',sans-serif;font-size:16px;color:#3A2E6B}
+.lbl{display:block;font-weight:700;font-size:14px;margin-bottom:6px}
+.ib{width:56px;height:56px;border-radius:50%;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#3A2E6B;flex-shrink:0}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; box-sizing: border-box; background: #FFF7FB; font-family: 'Nunito', system-ui, sans-serif; color: #3A2E6B">
+
+<div style="position:absolute;top:20px;left:20px;right:20px;height:44px;display:flex;align-items:center;justify-content:space-between"><a href="Breathing.dc.html" aria-label="Go back" style="width:44px;height:44px;border-radius:14px;background:#FFFFFF;border:2px solid #E4E0F7;display:flex;align-items:center;justify-content:center;color:#3A2E6B;box-sizing:border-box"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg></a><span class="h" style="font-size:17px;font-weight:600">Retrace</span><span style="min-width:44px;display:flex;justify-content:flex-end"></span></div>
+<div style="position:absolute;left:24px;right:24px;top:82px">
+<h2 class="h" style="font-size:20px;font-weight:600">When did you last have it?</h2>
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button class="chip on">This morning</button><button class="chip">Last night</button><button class="chip">Yesterday</button><button class="chip">Not sure</button></div>
+<h2 class="h" style="font-size:20px;font-weight:600;margin-top:22px">What did you do right after?</h2>
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button class="chip on">Changed clothes</button><button class="chip">Went out</button><button class="chip">Cooked</button><button class="chip"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"></rect><path d="M5 11a7 7 0 0014 0M12 18v3"></path></svg>Say it</button></div>
+<h2 class="h" style="font-size:20px;font-weight:600;margin-top:22px">Could someone else have moved it?</h2>
+<div style="display:flex;gap:8px;margin-top:10px"><button class="chip">Yes</button><button class="chip on">No</button><button class="chip">Maybe</button></div>
+<div style="margin-top:24px;padding:16px;border-radius:24px;background:#3A2E6B;color:#FFFFFF">
+<div class="h" style="font-size:18px;font-weight:600">Your search plan</div>
+<div style="display:flex;flex-direction:column;gap:10px;margin-top:12px;font-size:16px;font-weight:700">
+<div style="display:flex;gap:10px;align-items:center"><span class="h" style="width:26px;height:26px;border-radius:8px;background:#FF7EB6;color:#3A2E6B;display:flex;align-items:center;justify-content:center;font-size:14px">1</span>Clothes on the bed</div>
+<div style="display:flex;gap:10px;align-items:center"><span class="h" style="width:26px;height:26px;border-radius:8px;background:#C3B1FF;color:#3A2E6B;display:flex;align-items:center;justify-content:center;font-size:14px">2</span>Laundry basket</div>
+<div style="display:flex;gap:10px;align-items:center"><span class="h" style="width:26px;height:26px;border-radius:8px;background:#C3B1FF;color:#3A2E6B;display:flex;align-items:center;justify-content:center;font-size:14px">3</span>Your bag</div>
+</div></div></div>
+<a href="ScanStart.dc.html" class="btn bp" style="position:absolute;left:24px;right:24px;bottom:40px;width:auto">Start searching</a>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>
