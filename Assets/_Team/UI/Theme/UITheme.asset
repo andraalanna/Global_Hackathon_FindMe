@@ -1,0 +1,62 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b501190e139e8474c8b1138fd2c89cc7, type: 3}
+  m_Name: UITheme
+  m_EditorClassIdentifier: Assembly-CSharp::FindMe.UI.UITheme
+  grape: {r: 0.22745098, g: 0.18039216, b: 0.41960785, a: 1}
+  grapeDark: {r: 0.16862746, g: 0.13333334, b: 0.3137255, a: 1}
+  bubblegum: {r: 1, g: 0.49411765, b: 0.7137255, a: 1}
+  bubblegumEdge: {r: 0.8509804, g: 0.33333334, b: 0.6039216, a: 1}
+  mint: {r: 0.30980393, g: 0.8901961, b: 0.65882355, a: 1}
+  mintEdge: {r: 0.14901961, g: 0.6901961, b: 0.48235294, a: 1}
+  lavender: {r: 0.7647059, g: 0.69411767, b: 1, a: 1}
+  lavenderEdge: {r: 0.6039216, g: 0.5176471, b: 0.91764706, a: 1}
+  lemon: {r: 1, g: 0.89411765, b: 0.36078432, a: 1}
+  soda: {r: 0.42352942, g: 0.76862746, b: 1, a: 1}
+  tangerine: {r: 1, g: 0.654902, b: 0.47843137, a: 1}
+  marshmallow: {r: 1, g: 0.96862745, b: 0.9843137, a: 1}
+  cloud: {r: 0.89411765, g: 0.8784314, b: 0.96862745, a: 1}
+  cloudEdge: {r: 0.84705883, g: 0.8235294, b: 0.93333334, a: 1}
+  muted: {r: 0.39607844, g: 0.3529412, b: 0.5411765, a: 1}
+  white: {r: 1, g: 1, b: 1, a: 1}
+  heading: {fileID: 11400000, guid: a13b185c0a2fe6a41aa5a833663e51f8, type: 2}
+  bodyRegular: {fileID: 11400000, guid: e0885d6da6346bd478ed36ce7e6994c5, type: 2}
+  bodyBold: {fileID: 11400000, guid: 103fb6b479d578e4bb6b2f0d1f82d353, type: 2}
+  bodyExtraBold: {fileID: 11400000, guid: 6d5c8a8d914d6bc429ff66290b9243d1, type: 2}
+  rounded18: {fileID: 21300000, guid: 56113021a580c8144b79da267d54dcd4, type: 3}
+  rounded28: {fileID: 21300000, guid: 7941a448007ecd74fb48a9228e6f0c7c, type: 3}
+  pill: {fileID: 21300000, guid: 2c9212af1f58e07428d7ab4ffb955311, type: 3}
+  circle: {fileID: 21300000, guid: df23f301844362f44bdf2d722aff4120, type: 3}
+  itemIcons:
+  - keyword: wallet
+    icon: {fileID: 21300000, guid: 623beff067242584a98f96a5f04e9994, type: 3}
+  - keyword: key
+    icon: {fileID: 21300000, guid: 9746fb08f4ef91449af068823d980f78, type: 3}
+  - keyword: glasses
+    icon: {fileID: 21300000, guid: c8f5ff52a17c4894f9f1ec8b8cb04fd3, type: 3}
+  - keyword: id
+    icon: {fileID: 21300000, guid: 33f2cbf55333cb94a82c8658317487c1, type: 3}
+  - keyword: card
+    icon: {fileID: 21300000, guid: 33f2cbf55333cb94a82c8658317487c1, type: 3}
+  - keyword: bag
+    icon: {fileID: 21300000, guid: c86ac56f83e35f84e82dea16ae96838a, type: 3}
+  - keyword: backpack
+    icon: {fileID: 21300000, guid: c86ac56f83e35f84e82dea16ae96838a, type: 3}
+  - keyword: phone
+    icon: {fileID: 21300000, guid: 1f3ea02d8431e88428197f9143102a48, type: 3}
+  - keyword: earbud
+    icon: {fileID: 21300000, guid: 53691188ca2781848b8a0c6076192357, type: 3}
+  - keyword: airpod
+    icon: {fileID: 21300000, guid: 53691188ca2781848b8a0c6076192357, type: 3}
+  - keyword: pill
+    icon: {fileID: 21300000, guid: 9e8cdb91b0c4c9a48a5b4808a42f24f6, type: 3}
+  fallbackItemIcon: {fileID: 21300000, guid: 4b32de528a699174a963e6a270e85410, type: 3}
